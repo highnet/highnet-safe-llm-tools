@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScopeStageBody, type ScopeRunContext } from '@/components/scope/ScopeStageBody';
 import { ScopeStepList } from '@/components/scope/ScopeStepList';
 import { ScopeMap } from '@/components/scope/ScopeMap';
-import { SCOPE } from '@/content/scope';
+import { FORMAL } from '@/content/formal';
+import { SCOPE, SCOPE_KEY } from '@/content/scope';
+import { SCOPE_STAGE_ORDER } from '@/content/scope-stages';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { clearDatasetCache } from '@/lib/scope/api';
 
@@ -353,6 +355,16 @@ describe('scope step list', () => {
     render(<ScopeStepList events={events} runStatus="finished" context={context} />);
     expect(screen.getAllByRole('listitem').length).toBeGreaterThanOrEqual(12);
     expect(screen.getByText('no review needed')).toBeInTheDocument();
+  });
+
+  it('writes every step as a formula whose symbols explain themselves', () => {
+    globalThis.__wide = true;
+    const { events } = recording('decide');
+    render(<ScopeStepList events={events} runStatus="finished" context={context} />);
+    expect(screen.getAllByText(FORMAL.label)).toHaveLength(SCOPE_STAGE_ORDER.length);
+    const [message] = screen.getAllByRole('button', { name: `m: ${SCOPE_KEY.m.name}` });
+    fireEvent.click(message);
+    expect(screen.getAllByText(SCOPE_KEY.m.meaning, { exact: false }).length).toBeGreaterThan(0);
   });
 
   it('hands the LLM judge’s label to the second judge’s step', () => {

@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/Collapsible';
 import { Formula } from '@/components/formal/Formula';
 import { Typography } from '@/components/ui/Typography';
-import { FORMAL } from '@/content/formal';
+import { FORMAL, type KeyEntry } from '@/content/formal';
 import type { StageCopy } from '@/content/stages';
 import { pad2 } from '@/lib/format';
 import type { Snippet } from '@/lib/snippets';
@@ -25,6 +25,8 @@ type StepSheetProps = {
   anchor: string;
   // The step as a formula, its symbols explained on tap (see content/formal.ts).
   formula?: string;
+  // The symbols the formula explains; the RAG pipeline's by default (Scope passes its own).
+  formulaKey?: Record<string, KeyEntry>;
   number: number;
   copy: StageCopy;
   status: StepStatus;
@@ -39,6 +41,7 @@ type StepSheetProps = {
 const StepSheet = ({
   anchor,
   formula,
+  formulaKey,
   number,
   copy,
   status,
@@ -61,7 +64,7 @@ const StepSheet = ({
       <Typography variant="label" color="muted" as="p">
         {FORMAL.label}
       </Typography>
-      <Formula source={formula} id={`${anchor}-formula`} className="mt-1" />
+      <Formula source={formula} id={`${anchor}-formula`} entries={formulaKey} className="mt-1" />
     </div>
   );
   const details = (

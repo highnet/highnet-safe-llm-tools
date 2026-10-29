@@ -1,5 +1,6 @@
 import { StepSheet } from '@/components/pipeline/StepSheet';
 import { SCOPE_STAGE_ORDER, SCOPE_STAGES } from '@/content/scope-stages';
+import { SCOPE_KEY, SCOPE_STEP_FORMULAS } from '@/content/scope';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { scopeSnippets, scopeStatuses } from '@/lib/scope/steps';
 import { scopeSummary } from '@/lib/scope/summary';
@@ -33,6 +34,8 @@ const ScopeStepList = ({ events, runStatus, context }: ScopeStepListProps) => {
           <StepSheet
             key={stage}
             anchor={`step-${stage}`}
+            formula={SCOPE_STEP_FORMULAS[stage]}
+            formulaKey={SCOPE_KEY}
             number={index + 1}
             copy={SCOPE_STAGES[stage]}
             status={statusOf(stage)}

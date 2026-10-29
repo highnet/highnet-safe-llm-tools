@@ -1,4 +1,5 @@
 import type { KeyEntry } from '@/content/formal';
+import type { Stage as ScopeStage } from '@/lib/generated/scope-trace';
 
 // English copy for the Scope pages (/scope/, /scope/dataset/, /scope/evals/, /scope/coverage/).
 // Voice: the same precise lab partner as the RAG pipeline. Plain, exact, first-person plural,
@@ -673,6 +674,17 @@ export const SCOPE = {
 
 // The symbols of Scope's formulas, explained on tap (components/formal/Formula).
 export const SCOPE_KEY: Record<string, KeyEntry> = {
+  m: { group: 'value', name: 'message', meaning: 'the message as sent' },
+  r: {
+    group: 'value',
+    name: 'reading',
+    meaning: 'the message with up to 4 earlier turns before it, or the message alone',
+  },
+  p: {
+    group: 'function',
+    name: 'decision probability',
+    meaning: 'the decision model’s probability for a class, as returned',
+  },
   q: { group: 'value', name: 'message vector', meaning: 'embed(message), a unit vector' },
   x: { group: 'value', name: 'labeled prompt', meaning: 'one of the preset’s 300 prompt vectors' },
   cos: {
@@ -709,4 +721,23 @@ export const SCOPE_KEY: Record<string, KeyEntry> = {
     name: 'scope score',
     meaning: '0 = off scope, 1 = in scope; adjacent counts half',
   },
+};
+
+// One formula per step, shown on each step sheet under "As a formula" (the RAG pipeline's own
+// box). They match scope/src/highnet_scope/{pipeline,rules,knn,judge,decider,fusion}.py.
+export const SCOPE_STEP_FORMULAS: Record<ScopeStage, string> = {
+  request: 'm ↦ m  if  |m| ≤ max_{chars} ∧ runs_{minute} < limit,  otherwise ⊥',
+  context: 'r = turns_{last 4} + m   (context off or no turns: r = m)',
+  rules:
+    'P_{inj} = 1 − ∏ (1 − w_{h}) over the rule hits h in the raw, normalized, decoded and hidden views of r',
+  embed: 'q = embed(r)',
+  map: '(u, v) = (q − μ) W^{T},  W: the preset’s first two principal components',
+  knn: 'P_{knn}(c) = Σ_{x ∈ N_{k}, ℓ(x) = c} max(cos(q, x), 0) / Σ_{x ∈ N_{k}} max(cos(q, x), 0)',
+  judge: 'P_{judge}(c) = conf  if c = label,  otherwise (1 − conf) / 3',
+  decide: 'P_{decide}(c) = p(c) / Σ_{c′} p(c′)',
+  fuse: 'P(c) = Σ_{s ∈ S} w_{s} P_{s}(c) / Σ_{s ∈ S} w_{s}',
+  thresholds: 'score = (P(in) + ½ P(adj)) / (P(in) + P(adj) + P(out))',
+  respond:
+    'action = block if P(inj) ≥ t_{block}; answer if score ≥ t_{answer}; brief if score ≥ t_{brief}; otherwise redirect',
+  audit: 'review = max_{c} P(c) < 0.6 ∨ the signals’ top classes differ ∨ action = block',
 };
