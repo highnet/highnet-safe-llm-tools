@@ -71,7 +71,7 @@ class VoyageEmbedder:
         self.model = model
         self.dims = dims
 
-    # snippet: embed_query | Voyage embeddings request
+    # snippet: embed_query,scope/embed | Voyage embeddings request
     async def embed(self, texts: list[str], input_type: InputType) -> Embeddings:
         body, retries = await self._client.post(
             "/embeddings",

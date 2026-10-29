@@ -15,7 +15,7 @@ class Projection:
     components: np.ndarray
     explained_variance: tuple[float, float]
 
-    # snippet: map_project | Project a vector to 2D
+    # snippet: map_project,scope/map | Project a vector to 2D
     def project(self, vector: np.ndarray) -> tuple[float, float]:
         x, y = (vector - self.mean) @ self.components.T
         return float(x), float(y)

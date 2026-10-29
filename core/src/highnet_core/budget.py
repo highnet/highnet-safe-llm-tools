@@ -56,7 +56,7 @@ def hash_ip(ip: str, settings: CoreSettings) -> str:
     return hashlib.sha256(salted.encode()).hexdigest()[:16]
 
 
-# snippet: request | Budget tiers
+# snippet: request,scope/request | Budget tiers
 def budget_state(state: StateStore, settings: CoreSettings) -> BudgetState:
     spent = state.month_spend()
     cap = settings.budget_monthly_usd

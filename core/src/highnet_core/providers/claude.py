@@ -65,7 +65,7 @@ class ClaudeTextModel(_ClaudeClient):
     """Scope's judge and answers: one plain call. A final assistant message in
     `messages` is a prefill the reply continues (the judge starts its reply with "{")."""
 
-    # snippet: judge | The judge call: one plain completion
+    # snippet: scope/judge | The judge call: one plain completion
     async def complete(
         self, system: str, messages: list[dict[str, Any]], max_tokens: int
     ) -> Completion:
