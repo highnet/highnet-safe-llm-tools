@@ -153,7 +153,7 @@ const Landing = () => {
       </section>
 
       <section aria-labelledby="products-title" className="space-y-8 md:space-y-12">
-        <Typography variant="label" color="muted" as="h2" id="products-title">
+        <Typography variant="label" as="h2" id="products-title" className="sr-only">
           {LANDING.productsTitle}
         </Typography>
         <ProductSheet
