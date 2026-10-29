@@ -3,6 +3,7 @@ import { SCOPE_STAGE_ORDER, SCOPE_STAGES } from '@/content/scope-stages';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { scopeSnippets, scopeStatuses } from '@/lib/scope/steps';
 import { scopeSummary } from '@/lib/scope/summary';
+import type { JudgeData } from '@/lib/scope/types';
 import type { RunStatus } from '@/lib/use-trace-stream';
 
 import { type ScopeRunContext, ScopeStageBody } from './ScopeStageBody';
@@ -13,11 +14,14 @@ type ScopeStepListProps = {
   context: ScopeRunContext;
 };
 
-// The eleven steps, drawn before the first run and filled in as trace events arrive. Each step
+// The twelve steps, drawn before the first run and filled in as trace events arrive. Each step
 // is the RAG pipeline's own StepSheet: number in the margin, note beside, code underneath.
 const ScopeStepList = ({ events, runStatus, context }: ScopeStepListProps) => {
   const byStage = new Map(events.map((e) => [e.stage, e]));
   const statusOf = scopeStatuses(SCOPE_STAGE_ORDER, events, runStatus);
+  // The second judge's step compares itself with the first judge's validated label.
+  const judge = (byStage.get('judge')?.data as JudgeData | undefined)?.verdict?.label;
+  const bodyContext = { ...context, judge };
   return (
     <ol
       aria-labelledby="working-title"
@@ -38,7 +42,7 @@ const ScopeStepList = ({ events, runStatus, context }: ScopeStepListProps) => {
               event ? { ms: event.ms, tokens: event.tokens, costUsd: event.cost_usd } : undefined
             }
           >
-            {event && <ScopeStageBody event={event} context={context} />}
+            {event && <ScopeStageBody event={event} context={bodyContext} />}
           </StepSheet>
         );
       })}

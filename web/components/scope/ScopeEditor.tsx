@@ -22,7 +22,7 @@ type ScopeEditorProps = {
 };
 
 // The preset's scope definition, one topic per row with a three-way switch. Moving a topic
-// relabels its prompts for the vote and the keyword rules; the recorded judge then steps aside.
+// relabels its prompts for the vote and the keyword rules; the two recorded judges then step aside.
 const ScopeEditor = ({ preset, edit, disabled, onChange }: ScopeEditorProps) => {
   const classOf = (topic: Preset['topics'][number]) => edit[topic.id] ?? topic.class;
   const editable = preset.topics.filter((t) => t.class !== 'injection');

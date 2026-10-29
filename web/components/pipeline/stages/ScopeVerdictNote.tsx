@@ -47,6 +47,14 @@ const ScopeVerdictNote = ({ questionId }: ScopeVerdictNoteProps) => {
             ? `${verdict.judge.label} (${formatNumber(verdict.judge.confidence, 2)})`
             : SCOPE_VERDICT.judgeFailed}
         </dd>
+        {verdict.decide && (
+          <>
+            <dt className="text-muted-foreground">{SCOPE_VERDICT.decide}</dt>
+            <dd className="voice-data">
+              {`${verdict.decide.label} (${formatNumber(verdict.decide.confidence, 2)})`}
+            </dd>
+          </>
+        )}
       </dl>
       {verdict.action !== 'redirect' && verdict.action !== 'block' && (
         <Typography variant="small" color="muted">

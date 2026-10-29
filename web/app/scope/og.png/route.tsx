@@ -5,7 +5,7 @@ import { shareCard } from '@/lib/share-card';
 
 export const dynamic = 'force-static';
 
-// Scope's share card (/scope/og.png): its tagline and its eleven steps, ending in the four actions.
+// Scope's share card (/scope/og.png): its tagline and its twelve steps, ending in the four actions.
 export const GET = () =>
   shareCard({
     name: `${SITE.name} · ${SITE.products.scope.name}`,

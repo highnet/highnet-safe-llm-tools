@@ -17,6 +17,7 @@ export const SCOPE_VERDICT = {
   confidence: 'Fused confidence',
   judge: 'LLM judge',
   judgeFailed: 'reply failed validation',
+  decide: 'Decision model',
   link: 'See the full Scope breakdown',
   inScopeNotInCorpus:
     'Getting past Scope does not mean answerable: Scope only decides whether the question is the kind this assistant serves. Whether the 35 articles hold the answer is retrieval’s job, below.',

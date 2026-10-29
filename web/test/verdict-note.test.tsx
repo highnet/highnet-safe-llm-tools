@@ -37,6 +37,21 @@ describe('the Scope verdict in RAG’s first step', () => {
     expect(screen.getByText(SCOPE_VERDICT.missing)).toBeInTheDocument();
   });
 
+  it('adds the second judge when the export has its verdict', () => {
+    const base = verdicts.verdictForQuestion('normandy')!;
+    const spy = vi
+      .spyOn(verdicts, 'verdictForQuestion')
+      .mockReturnValue({ ...base, decide: { label: 'in', confidence: 0.875 } });
+    const { unmount } = render(<RequestView data={request} questionId="normandy" />);
+    expect(screen.getByText(SCOPE_VERDICT.decide)).toBeInTheDocument();
+    expect(screen.getByText('in (0.88)')).toBeInTheDocument();
+    unmount();
+    spy.mockReturnValue({ ...base, decide: null });
+    render(<RequestView data={request} questionId="normandy" />);
+    expect(screen.queryByText(SCOPE_VERDICT.decide)).toBeNull();
+    spy.mockRestore();
+  });
+
   it('leaves out the in-scope note when Scope redirected or blocked', () => {
     const base = verdicts.verdictForQuestion('normandy')!;
     const spy = vi.spyOn(verdicts, 'verdictForQuestion');

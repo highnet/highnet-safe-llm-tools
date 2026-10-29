@@ -35,7 +35,7 @@ export const defaultScopeSettings = (
   preset,
   example: null,
   context: true,
-  signals: { rules: true, knn: true, judge: true },
+  signals: { rules: true, knn: true, judge: true, decide: true },
   weights: { ...config.defaults.weights },
   thresholds: { ...config.defaults.thresholds },
   k: config.defaults.k,

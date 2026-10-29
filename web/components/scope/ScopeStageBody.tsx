@@ -3,6 +3,7 @@ import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import type {
   AuditData,
   ContextData,
+  DecideData,
   EmbedData,
   FuseData,
   JudgeData,
@@ -18,6 +19,7 @@ import type {
 
 import { AuditView } from './steps/AuditView';
 import { ContextView } from './steps/ContextView';
+import { DecideView } from './steps/DecideView';
 import { EmbedView } from './steps/EmbedView';
 import { FuseView } from './steps/FuseView';
 import { JudgeView } from './steps/JudgeView';
@@ -33,6 +35,8 @@ export type ScopeRunContext = {
   message: string;
   block: number;
   edit: Record<string, Label>;
+  // The LLM judge's validated label in this run, for the second judge to compare with.
+  judge?: Label;
 };
 
 type ScopeStageBodyProps = {
@@ -44,8 +48,8 @@ type ScopeStageBodyProps = {
 const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
   const data = event.data;
   const { stage, status } = event;
-  // Context and the judge explain their own skips (the turns not read, the rubric changed).
-  if (status === 'skipped' && stage !== 'context' && stage !== 'judge') {
+  // Context and both judges explain their own skips (the turns not read, the rubric changed).
+  if (status === 'skipped' && stage !== 'context' && stage !== 'judge' && stage !== 'decide') {
     return (
       <Typography variant="small" color="muted">
         {(data as SkippedData).reason}
@@ -59,6 +63,15 @@ const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
       return <ContextView data={data as ContextData} skipped={status === 'skipped'} />;
     case 'judge':
       return <JudgeView data={data as JudgeData} status={status} />;
+    case 'decide':
+      return (
+        <DecideView
+          data={data as DecideData}
+          status={status}
+          costUsd={event.cost_usd}
+          judge={context.judge}
+        />
+      );
     default:
       break;
   }

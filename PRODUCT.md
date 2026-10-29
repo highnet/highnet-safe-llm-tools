@@ -29,7 +29,7 @@ The one idea a visitor should leave with: **the answer is only as good as what w
 
 Success means a developer can explain, after about five minutes, why a given answer was right or wrong by pointing at the retrieval stage. A recruiter can also see that the author understands the trade-offs.
 
-**Scope** shows a product agent guarding its scope. A message runs through eleven steps (request check, conversation context, a rule prefilter, an embedding on a map, a nearest-neighbour vote, an LLM judge with validated JSON, fusion, thresholds) and ends in answer, answer briefly, redirect or block, under four presets with editable scope definitions. The idea a visitor should leave with: **off scope and prompt injection are different problems, and refusing a good message is a failure too.** Filters alone fail against adaptive attackers; real safety comes from architecture. Success means a developer can say which signal decided a message and what a threshold change would cost in false refusals.
+**Scope** shows a product agent guarding its scope. A message runs through twelve steps (request check, conversation context, a rule prefilter, an embedding on a map, a nearest-neighbour vote, an LLM judge with validated JSON, a decision model as a second judge, fusion, thresholds) and ends in answer, answer briefly, redirect or block, under four presets with editable scope definitions. The idea a visitor should leave with: **off scope and prompt injection are different problems, and refusing a good message is a failure too.** Filters alone fail against adaptive attackers; real safety comes from architecture. Success means a developer can say which signal decided a message and what a threshold change would cost in false refusals.
 
 ## Positioning
 

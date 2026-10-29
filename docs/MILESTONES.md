@@ -123,7 +123,7 @@ Acceptance criteria:
 
 ## S3 · Scope: the four pages
 
-**Demo:** `/scope/` replays the eleven steps with a figure each; `/scope/dataset/` filters the 1,200 prompts; `/scope/evals/` compares the four methods; `/scope/coverage/` shows where the dataset is thin and where the pipeline was wrong.
+**Demo:** `/scope/` replays the eleven steps (twelve since S5) with a figure each; `/scope/dataset/` filters the 1,200 prompts; `/scope/evals/` compares the four methods; `/scope/coverage/` shows where the dataset is thin and where the pipeline was wrong.
 
 Acceptance criteria:
 

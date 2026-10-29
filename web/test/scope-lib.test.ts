@@ -48,20 +48,20 @@ describe('scope url state', () => {
 
   it('reads every setting from a shared link and writes back only the changes', () => {
     const search =
-      '?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&t_brief=0.3&k=5&edit=coding_practice:in,cv:in,injection:in';
+      '?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&decide=0&w_decide=0.2&t_brief=0.3&k=5&edit=coding_practice:in,cv:in,injection:in';
     const settings = parseScopeUrl(search, config);
     expect(settings).toMatchObject({
       preset: 'career',
       example: 'career-fibonacci',
       context: false,
-      signals: { rules: true, knn: false, judge: true },
-      weights: { rules: 0.25, knn: 0.35, judge: 0.6 },
+      signals: { rules: true, knn: false, judge: true, decide: false },
+      weights: { rules: 0.25, knn: 0.35, judge: 0.6, decide: 0.2 },
       thresholds: { block: 0.5, answer: 0.7, brief: 0.3 },
       k: 5,
       edit: { coding_practice: 'in' },
     });
     expect(scopeSearch(settings, config)).toBe(
-      '?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&t_brief=0.3&k=5&edit=coding_practice%3Ain',
+      '?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&decide=0&w_decide=0.2&t_brief=0.3&k=5&edit=coding_practice%3Ain',
     );
     expect(scopeSearch(defaultScopeSettings(config, 'rag'), config)).toBe('?preset=rag');
     // An example from another preset is dropped.
@@ -85,6 +85,8 @@ describe('scope url state', () => {
     expect(query).toContain('w_knn=0.35');
     expect(query).toContain('t_block=0.5');
     expect(query).toContain('judge=true');
+    expect(query).toContain('decide=true');
+    expect(query).toContain('w_decide=0.4');
     expect(query).toContain('edit=cv%3Aout');
     expect(runQuery({ ...defaultScopeSettings(config), example: 'x' })).not.toContain('edit');
     expect(ragHref('Who won the 2018 FIFA World Cup?')).toBe(
@@ -196,6 +198,15 @@ describe('scope steps', () => {
     expect(lines('fibonacci-context')[1]).toBe('2 turns');
     expect(lines('invalid-verdict')[6]).toBe(SCOPE.summary.judgeError);
     expect(lines('invalid-verdict')[10]).toBe('no review needed');
+    const decide = stage(recording('decide'), 'decide');
+    expect(scopeSummary(decide)).toBe(SCOPE.summary.decide('in scope', '0.60'));
+    expect(
+      scopeSummary({
+        ...decide,
+        status: 'error',
+        data: { error: { type: 'invalid_decision', message: 'No probability.' } },
+      }),
+    ).toBe(SCOPE.summary.decideError);
     const rules = stage(recording('world-cup'), 'rules');
     expect(scopeSummary({ ...rules, data: { ...rules.data, abstained: true } })).toBe(
       SCOPE.summary.abstained,
