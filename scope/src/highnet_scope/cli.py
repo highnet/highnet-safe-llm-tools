@@ -86,7 +86,8 @@ async def verdicts(settings: ScopeSettings) -> dict[str, Any]:
             "label": steps["fuse"].data["label"],
             "confidence": steps["fuse"].data["confidence"],
             "judge": judge,
-            "ms": sum(s.ms for s in steps.values()),
+            # The recorded model calls only: the steps computed on replay vary run to run.
+            "ms": sum(steps[s].ms for s in ("embed", "judge") if s in steps),
             "cost_usd": round(sum(s.cost_usd for s in steps.values()), 6),
         }
         by_example[example.id] = verdict

@@ -95,6 +95,7 @@ def create_app(
             "scope": scope.store.meta().get("build_id")
             if (scope := request.app.state.scope)
             else None,
+            "scope_recorded_at": scope.store.recorded_at() if scope else None,
             "scope_error": request.app.state.scope_error,
         }
 

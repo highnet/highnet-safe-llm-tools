@@ -13,7 +13,7 @@
         "confidence": 0.95,
         "reason": "This is a factual geography question about Normandy, which is directly related to the Normans article in the library."
       },
-      "ms": 1163,
+      "ms": 1148,
       "cost_usd": 0.000779
     },
     "fresno": {
@@ -28,7 +28,7 @@
         "confidence": 0.95,
         "reason": "A factual, encyclopedia-style question about the etymology of a place name in the library (Fresno, California)."
       },
-      "ms": 902,
+      "ms": 899,
       "cost_usd": 0.000781
     },
     "yuan": {
@@ -43,7 +43,7 @@
         "confidence": 0.95,
         "reason": "The Yuan dynasty is in the library, and this is a factual historical question about its founder that the pipeline can answer."
       },
-      "ms": 929,
+      "ms": 925,
       "cost_usd": 0.000771
     },
     "harvard-presidents": {
@@ -58,7 +58,7 @@
         "confidence": 0.95,
         "reason": "This is a factual, encyclopedia-style question about institutions (Harvard University is in the library) and can be answered from biographical knowledge of U.S. presidents."
       },
-      "ms": 982,
+      "ms": 979,
       "cost_usd": 0.000821
     },
     "world-cup": {
@@ -73,7 +73,7 @@
         "confidence": 0.95,
         "reason": "This is live/current events information (sports results) outside the library's scope of encyclopedia articles."
       },
-      "ms": 979,
+      "ms": 975,
       "cost_usd": 0.000751
     },
     "compound-01": {
@@ -88,7 +88,7 @@
         "confidence": 0.99,
         "reason": "This is a factual question comparing two institutions in the library (Harvard University and University of Chicago)."
       },
-      "ms": 930,
+      "ms": 927,
       "cost_usd": 0.000758
     },
     "compound-02": {
@@ -103,7 +103,7 @@
         "confidence": 0.95,
         "reason": "The question asks for factual historical information about two topics both in the library (Yuan dynasty and Black Death), requiring a straightforward encyclopedia-style answer."
       },
-      "ms": 1034,
+      "ms": 1031,
       "cost_usd": 0.000811
     },
     "compound-03": {
@@ -114,7 +114,7 @@
       "label": "in",
       "confidence": 0.74264,
       "judge": null,
-      "ms": 1059,
+      "ms": 1056,
       "cost_usd": 0.000812
     },
     "compound-04": {
@@ -129,7 +129,7 @@
         "confidence": 0.95,
         "reason": "Both IPCC and Scottish Parliament are in the library, making this a factual comparison question within scope."
       },
-      "ms": 949,
+      "ms": 946,
       "cost_usd": 0.000766
     },
     "compound-05": {
@@ -144,7 +144,7 @@
         "confidence": 0.85,
         "reason": "The question asks about historical facts (Normandy/Normans and Yuan dynasty establishment) that are covered in the library's encyclopedia articles."
       },
-      "ms": 1011,
+      "ms": 1008,
       "cost_usd": 0.000808
     },
     "compound-06": {
@@ -159,7 +159,7 @@
         "confidence": 0.95,
         "reason": "Both topics are in the library (French and Indian War, Oxygen), making this a factual encyclopedia question comparing historical timelines."
       },
-      "ms": 1085,
+      "ms": 1082,
       "cost_usd": 0.000789
     },
     "compound-07": {
@@ -174,7 +174,7 @@
         "confidence": 0.95,
         "reason": "The question asks for a factual comparison between two historical events (Harvard University founding and French and Indian War) both present in the library."
       },
-      "ms": 1028,
+      "ms": 1025,
       "cost_usd": 0.000795
     },
     "compound-08": {
@@ -185,7 +185,7 @@
       "label": "in",
       "confidence": 0.745813,
       "judge": null,
-      "ms": 1050,
+      "ms": 1047,
       "cost_usd": 0.00085
     },
     "compound-09": {
@@ -200,7 +200,7 @@
         "confidence": 0.85,
         "reason": "This is a factual historical question comparing two events; Warsaw is in the library and French Wars of Religion is closely related to the Huguenot article also in the library."
       },
-      "ms": 1062,
+      "ms": 1058,
       "cost_usd": 0.00085
     },
     "compound-10": {
@@ -215,7 +215,7 @@
         "confidence": 0.95,
         "reason": "Factual question comparing founding dates of two institutions in the library (University of Chicago and IPCC)."
       },
-      "ms": 986,
+      "ms": 983,
       "cost_usd": 0.000775
     }
   },
@@ -232,7 +232,7 @@
         "confidence": 0.95,
         "reason": "This is a factual geography question about Normandy, which is directly related to the Normans article in the library."
       },
-      "ms": 1163,
+      "ms": 1148,
       "cost_usd": 0.000779
     },
     "rag-fresno": {
@@ -247,7 +247,7 @@
         "confidence": 0.95,
         "reason": "A factual, encyclopedia-style question about the etymology of a place name in the library (Fresno, California)."
       },
-      "ms": 902,
+      "ms": 899,
       "cost_usd": 0.000781
     },
     "rag-yuan": {
@@ -262,7 +262,7 @@
         "confidence": 0.95,
         "reason": "The Yuan dynasty is in the library, and this is a factual historical question about its founder that the pipeline can answer."
       },
-      "ms": 929,
+      "ms": 925,
       "cost_usd": 0.000771
     },
     "rag-harvard-presidents": {
@@ -277,7 +277,7 @@
         "confidence": 0.95,
         "reason": "This is a factual, encyclopedia-style question about institutions (Harvard University is in the library) and can be answered from biographical knowledge of U.S. presidents."
       },
-      "ms": 982,
+      "ms": 979,
       "cost_usd": 0.000821
     },
     "rag-world-cup": {
@@ -292,7 +292,7 @@
         "confidence": 0.95,
         "reason": "This is live/current events information (sports results) outside the library's scope of encyclopedia articles."
       },
-      "ms": 979,
+      "ms": 975,
       "cost_usd": 0.000751
     },
     "rag-compound-01": {
@@ -307,7 +307,7 @@
         "confidence": 0.99,
         "reason": "This is a factual question comparing two institutions in the library (Harvard University and University of Chicago)."
       },
-      "ms": 930,
+      "ms": 927,
       "cost_usd": 0.000758
     },
     "rag-compound-02": {
@@ -322,7 +322,7 @@
         "confidence": 0.95,
         "reason": "The question asks for factual historical information about two topics both in the library (Yuan dynasty and Black Death), requiring a straightforward encyclopedia-style answer."
       },
-      "ms": 1034,
+      "ms": 1031,
       "cost_usd": 0.000811
     },
     "rag-compound-03": {
@@ -333,7 +333,7 @@
       "label": "in",
       "confidence": 0.74264,
       "judge": null,
-      "ms": 1059,
+      "ms": 1056,
       "cost_usd": 0.000812
     },
     "rag-compound-04": {
@@ -348,7 +348,7 @@
         "confidence": 0.95,
         "reason": "Both IPCC and Scottish Parliament are in the library, making this a factual comparison question within scope."
       },
-      "ms": 949,
+      "ms": 946,
       "cost_usd": 0.000766
     },
     "rag-compound-05": {
@@ -363,7 +363,7 @@
         "confidence": 0.85,
         "reason": "The question asks about historical facts (Normandy/Normans and Yuan dynasty establishment) that are covered in the library's encyclopedia articles."
       },
-      "ms": 1011,
+      "ms": 1008,
       "cost_usd": 0.000808
     },
     "rag-compound-06": {
@@ -378,7 +378,7 @@
         "confidence": 0.95,
         "reason": "Both topics are in the library (French and Indian War, Oxygen), making this a factual encyclopedia question comparing historical timelines."
       },
-      "ms": 1085,
+      "ms": 1082,
       "cost_usd": 0.000789
     },
     "rag-compound-07": {
@@ -393,7 +393,7 @@
         "confidence": 0.95,
         "reason": "The question asks for a factual comparison between two historical events (Harvard University founding and French and Indian War) both present in the library."
       },
-      "ms": 1028,
+      "ms": 1025,
       "cost_usd": 0.000795
     },
     "rag-compound-08": {
@@ -404,7 +404,7 @@
       "label": "in",
       "confidence": 0.745813,
       "judge": null,
-      "ms": 1050,
+      "ms": 1047,
       "cost_usd": 0.00085
     },
     "rag-compound-09": {
@@ -419,7 +419,7 @@
         "confidence": 0.85,
         "reason": "This is a factual historical question comparing two events; Warsaw is in the library and French Wars of Religion is closely related to the Huguenot article also in the library."
       },
-      "ms": 1062,
+      "ms": 1058,
       "cost_usd": 0.00085
     },
     "rag-compound-10": {
@@ -434,7 +434,7 @@
         "confidence": 0.95,
         "reason": "Factual question comparing founding dates of two institutions in the library (University of Chicago and IPCC)."
       },
-      "ms": 986,
+      "ms": 983,
       "cost_usd": 0.000775
     },
     "rag-lasagna": {
@@ -449,7 +449,7 @@
         "confidence": 0.99,
         "reason": "Cooking and recipes are explicitly out of scope for this encyclopedic QA pipeline."
       },
-      "ms": 1124,
+      "ms": 1121,
       "cost_usd": 0.000738
     },
     "rag-rate-cv": {
@@ -464,7 +464,7 @@
         "confidence": 0.99,
         "reason": "Message explicitly attempts to override instructions and requests a personal service (CV rating) outside the system's scope."
       },
-      "ms": 1328,
+      "ms": 1325,
       "cost_usd": 0.000757
     },
     "rag-how-search": {
@@ -479,7 +479,7 @@
         "confidence": 0.95,
         "reason": "This question asks about how the retrieval system works, which is a legitimate meta-question about the product's functionality."
       },
-      "ms": 951,
+      "ms": 948,
       "cost_usd": 0.00077
     },
     "rag-weather": {
@@ -494,7 +494,7 @@
         "confidence": 0.98,
         "reason": "Requesting live weather data is a real-time information need outside the scope of a static encyclopedia QA pipeline."
       },
-      "ms": 1015,
+      "ms": 1012,
       "cost_usd": 0.000764
     },
     "rag-opinion": {
@@ -509,7 +509,7 @@
         "confidence": 0.85,
         "reason": "This asks for a judgment/opinion on a library topic (French and Indian War) rather than factual information, suitable for a brief contextual answer."
       },
-      "ms": 1041,
+      "ms": 1038,
       "cost_usd": 0.000806
     }
   }

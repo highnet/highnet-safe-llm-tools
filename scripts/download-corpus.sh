@@ -3,7 +3,7 @@
 # Usage: scripts/download-corpus.sh [path/to/local.sqlite] [name on the volume, default corpus.sqlite]
 set -euo pipefail
 
-APP="${FLY_APP:-highnet-rag}"
+APP="${FLY_APP:-highnet-safe-llm-tools}"
 # The file on the volume: corpus.sqlite by default, or e.g. recordings.sqlite.
 NAME="${2:-corpus.sqlite}"
 FLY="$(command -v fly || command -v flyctl)"

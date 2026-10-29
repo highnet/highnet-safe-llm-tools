@@ -90,6 +90,12 @@ describe('coverage page', () => {
         name: 'Coverage',
       }),
     ).toHaveAttribute('aria-current', 'page');
-    expect(committedCoverage.python?.packages.map((p) => p.name)).toEqual(['api', 'evals']);
+    expect(committedCoverage.python?.packages.map((p) => p.name)).toEqual([
+      'core',
+      'api',
+      'scope',
+      'evals',
+      'scope-evals',
+    ]);
   });
 });

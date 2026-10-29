@@ -21,7 +21,13 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "web/lib/generated/coverage.json"
 # Python packages measured by pytest-cov, in page order: (name, source root).
-PYTHON_PACKAGES = [("api", "api/src/highnet_rag"), ("evals", "evals/src/highnet_rag_evals")]
+PYTHON_PACKAGES = [
+    ("core", "core/src/highnet_core"),
+    ("api", "api/src/highnet_rag"),
+    ("scope", "scope/src/highnet_scope"),
+    ("evals", "evals/src/highnet_rag_evals"),
+    ("scope-evals", "evals/src/highnet_scope_evals"),
+]
 
 
 def counts(covered: int, total: int) -> dict[str, int]:

@@ -4,7 +4,7 @@
 # Needs uv, flyctl, jq and VOYAGE_API_KEY.
 set -euo pipefail
 
-APP="${FLY_APP:-highnet-rag}"
+APP="${FLY_APP:-highnet-safe-llm-tools}"
 CHUNK_SETS="${CHUNK_SETS:-small,medium,large}"
 BASE="https://$APP.fly.dev"
 health="$(curl -fsS --retry 6 --retry-delay 5 --retry-all-errors "$BASE/api/health")"
