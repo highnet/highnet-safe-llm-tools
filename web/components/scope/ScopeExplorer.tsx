@@ -8,7 +8,9 @@ import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
 import { SCOPE } from '@/content/scope';
 import { SCOPE_STAGE_ORDER, SCOPE_STAGES } from '@/content/scope-stages';
+import { PickCards, PickChips } from '@/components/site/PickCards';
 import { formatMs } from '@/lib/format';
+import { oneLine } from '@/lib/preview';
 import { fetchScopeConfig } from '@/lib/scope/api';
 import { scopeStatuses } from '@/lib/scope/steps';
 import type { Example, RequestData, ScopeConfig, ThresholdsData } from '@/lib/scope/types';
@@ -17,18 +19,10 @@ import {
   parseScopeUrl,
   type ScopeSettings,
   writeScopeUrl,
-  writeScopeView,
 } from '@/lib/scope/url-state';
 import { useScopeStream } from '@/lib/scope/use-scope-stream';
-import {
-  getScopeView as getView,
-  setScopeView,
-  subscribeScopeView,
-  useScopeView,
-} from '@/lib/scope/view-store';
-import { cn } from '@/lib/utils';
+import { getView, useView, useViewLink } from '@/lib/view-store';
 
-import { CompactPicker } from './CompactPicker';
 import { ExamplePicker } from './ExamplePicker';
 import { Principles } from './Principles';
 import { RagBridge } from './RagBridge';
@@ -56,33 +50,40 @@ const tuned = (settings: ScopeSettings, config: ScopeConfig) => {
   return pick(settings) !== pick(base);
 };
 
+// The Simple view's cards: the product's featured messages first (one per action, see
+// SCOPE.featured), then the rest behind "More", each as one clean line.
+const pickItems = (examples: Example[], preset: string) => {
+  const mine = examples.filter((e) => e.preset === preset);
+  const ids = SCOPE.featured[preset] ?? mine.slice(0, 4).map((e) => e.id);
+  const featured = ids.flatMap((id) => mine.filter((e) => e.id === id));
+  const item = (e: Example) => ({
+    id: e.id,
+    text: oneLine(e.text),
+    note: e.context.length > 0 ? SCOPE.pick.turns(e.context.length) : undefined,
+  });
+  return {
+    featured: featured.map(item),
+    more: mine.filter((e) => !featured.includes(e)).map(item),
+  };
+};
+
+// The message that plays when none is linked: the first card in Simple, the preset's first
+// example in every step.
+const firstExample = (config: ScopeConfig, preset: string): string | null =>
+  (getView() === 'simple'
+    ? pickItems(config.examples, preset).featured[0]?.id
+    : config.examples.find((e) => e.preset === preset)?.id) ?? null;
+
 const ScopeExplorer = () => {
   const [configState, setConfigState] = useState<ConfigState>({ status: 'loading' });
   const [settings, setSettings] = useState<ScopeSettings | null>(null);
   const trace = useScopeStream();
   const { run } = trace;
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  // Where to scroll once a switch of view has been drawn ("Show every step", "Change the settings").
-  const scrollTo = useRef<string | null>(null);
-  // The view is shared with the header's toggle (lib/scope/view-store.ts).
-  const view = useScopeView();
-  const simple = view === 'simple';
-
-  // This page owns the link: every change of view, from here or from the header, is written back.
-  useEffect(
-    () =>
-      subscribeScopeView(() => {
-        writeScopeView(getView());
-        const target = scrollTo.current;
-        scrollTo.current = null;
-        if (target) {
-          requestAnimationFrame(() =>
-            document.getElementById(target)?.scrollIntoView?.({ block: 'start' }),
-          );
-        }
-      }),
-    [],
-  );
+  // The view is shared with the header's toggle (lib/view-store.ts); this page owns the link.
+  const simple = useView() === 'simple';
+  // Opens every step and scrolls to the working once it is drawn ("See how it decided").
+  const switchTo = useViewLink();
 
   const replay = useCallback(
     (next: ScopeSettings) => {
@@ -92,15 +93,15 @@ const ScopeExplorer = () => {
   );
 
   // A linked example (?preset=rag&example=rag-world-cup) replays at once: it costs nothing. With
-  // none linked, the preset's first example plays, so the page never opens empty; the link stays
-  // as it was until the visitor picks one.
+  // none linked, the first card plays (the preset's first example in every step), so the page
+  // never opens empty; the link stays as it was until the visitor picks one.
   const requestConfig = useCallback(
     (signal?: AbortSignal) => {
       fetchScopeConfig(signal)
         .then((config) => {
           const parsed = parseScopeUrl(window.location.search, config);
-          const first = config.examples.find((e) => e.preset === parsed.preset);
-          const linked = parsed.example || !first ? parsed : { ...parsed, example: first.id };
+          const first = firstExample(config, parsed.preset);
+          const linked = parsed.example || !first ? parsed : { ...parsed, example: first };
           setConfigState({ status: 'ready', config });
           setSettings(linked);
           replay(linked);
@@ -135,22 +136,15 @@ const ScopeExplorer = () => {
     else timer.current = setTimeout(() => replay(next), delay);
   };
 
-  // Switching the view changes only the layout and the link; nothing is replayed.
-  const switchTo = (target: string) => {
-    scrollTo.current = target;
-    setScopeView('steps');
-  };
-
   const pick = (example: Example) => apply({ ...settings!, example: example.id }, 0);
   const changePreset = (preset: string) => {
     trace.reset();
     apply({ ...settings!, preset, example: null, edit: {} }, 0);
   };
-  // The Simple view never shows an empty sheet: a new product plays its first message.
+  // The Simple view never shows an empty card: a new product plays its first message.
   const choosePreset = (preset: string) => {
     trace.reset();
-    const first = config!.examples.find((e) => e.preset === preset);
-    apply({ ...settings!, preset, example: first?.id ?? null, edit: {} }, 0);
+    apply({ ...settings!, preset, example: firstExample(config!, preset), edit: {} }, 0);
   };
 
   const byStage = useMemo(() => new Map(trace.events.map((e) => [e.stage, e])), [trace.events]);
@@ -175,13 +169,11 @@ const ScopeExplorer = () => {
 
   const hero = (
     <ScopeHero
-      headingAs={simple ? 'h2' : 'h1'}
       diagram={
         <ScopeDiagram
           statusOf={statusOf}
           action={decision?.action}
-          // The twelve-step diagram is every-step material: phones skip it in the Simple view.
-          className={cn('rounded-md border border-solid px-4 md:px-5', simple && 'max-lg:hidden')}
+          className="rounded-md border border-solid px-4 md:px-5"
         />
       }
     />
@@ -239,27 +231,35 @@ const ScopeExplorer = () => {
     </p>
   );
 
-  // Simple: a plain question, the two selects, the result in plain words; the rest below it.
+  // Simple: a one-line question, the product and message as tappable choices, then one card.
   if (simple) {
+    const items = config && settings ? pickItems(config.examples, settings.preset) : null;
     return (
-      <div className="space-y-8 md:space-y-10">
+      <div className="space-y-6">
         <section aria-labelledby="sheet-title" className="space-y-4">
-          <div className="max-w-[68ch] space-y-2">
-            <Typography variant="sheetTitle" as="h1" id="sheet-title">
-              {SCOPE.intro.title}
-            </Typography>
-            <Typography color="muted">{SCOPE.intro.body}</Typography>
-          </div>
+          <Typography variant="sheetTitle" as="h1" id="sheet-title">
+            {SCOPE.intro.title}
+          </Typography>
           {configNotices}
-          {config && settings && (
-            <CompactPicker
-              presets={config.presets}
-              preset={settings.preset}
-              examples={config.examples}
-              selectedId={settings.example}
-              onPreset={choosePreset}
-              onPick={pick}
-            />
+          {config && settings && items && (
+            <>
+              <PickChips
+                label={SCOPE.presets.label}
+                options={config.presets}
+                value={settings.preset}
+                onChange={choosePreset}
+              />
+              <PickCards
+                label={SCOPE.pick.message}
+                featured={items.featured}
+                more={items.more}
+                selectedId={settings.example}
+                empty={SCOPE.picker.empty}
+                moreLabel={SCOPE.pick.more}
+                fewerLabel={SCOPE.pick.fewer}
+                onPick={(id) => pick(config.examples.find((e) => e.id === id)!)}
+              />
+            </>
           )}
           {connectionError}
         </section>
@@ -269,23 +269,20 @@ const ScopeExplorer = () => {
           aria-labelledby="working-title"
           className="scroll-mt-6 space-y-3"
         >
-          {/* The sheet's own labels lead; the section keeps its name for assistive tech. */}
           <Typography variant="label" as="h2" id="working-title" className="sr-only">
             {SCOPE.simple.title}
           </Typography>
           <ScopeSimple
             events={trace.events}
             runStatus={trace.status}
-            signals={ran?.signals ?? null}
             onShowSteps={() => switchTo('scope-working')}
-            onSettings={() => switchTo('scope-settings')}
           />
+          {config && (
+            <Typography variant="small" color="muted">
+              {config.illustrative ? SCOPE.simple.illustrative : SCOPE.simple.recorded}
+            </Typography>
+          )}
         </section>
-
-        {replayNotice}
-        {bridge}
-        {hero}
-        <Principles />
         {announcer}
       </div>
     );

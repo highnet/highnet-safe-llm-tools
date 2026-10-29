@@ -1,3 +1,5 @@
+import { parseView, type View } from '@/lib/view';
+
 import {
   type ScopeConfig,
   SIGNALS,
@@ -13,11 +15,9 @@ import {
 //   &edit=coding_practice:in
 // Only values that differ from the defaults are written. Invalid values fall back to them.
 // `view` picks the page's layout: `simple` (the plain summary, the default) or `steps` (every
-// step, `?view=steps`).
-export type ScopeView = 'simple' | 'steps';
-
+// step, `?view=steps`); see lib/view-store.ts.
 export type ScopeSettings = {
-  view: ScopeView;
+  view: View;
   preset: string;
   example: string | null;
   context: boolean;
@@ -28,10 +28,6 @@ export type ScopeSettings = {
   // The visitor's edit of the scope definition: topic id -> its new class.
   edit: Record<string, TopicClass>;
 };
-
-// Simple unless the link asks for every step.
-export const parseScopeView = (search: string): ScopeView =>
-  new URLSearchParams(search).get('view') === 'steps' ? 'steps' : 'simple';
 
 export const DEFAULT_PRESET = 'career';
 export const K_MAX = 15;
@@ -90,7 +86,7 @@ export const parseScopeUrl = (search: string, config: ScopeConfig): ScopeSetting
       .map((part) => part.split(':') as [string, string]),
   );
   return {
-    view: parseScopeView(search),
+    view: parseView(search),
     preset,
     example: config.examples.some((e) => e.id === example && e.preset === preset) ? example : null,
     context: params.get('context') !== '0',
@@ -135,19 +131,6 @@ export const scopeSearch = (settings: ScopeSettings, config: ScopeConfig): strin
   const edit = editParam(settings.edit);
   if (edit) params.set('edit', edit);
   return `?${params.toString()}`;
-};
-
-// Only the view changes: the rest of the link stays exactly as it was.
-export const writeScopeView = (view: ScopeView) => {
-  const params = new URLSearchParams(window.location.search);
-  if (view === 'steps') params.set('view', 'steps');
-  else params.delete('view');
-  const search = params.toString();
-  window.history.replaceState(
-    null,
-    '',
-    (search ? `?${search}` : window.location.pathname) + window.location.hash,
-  );
 };
 
 export const writeScopeUrl = (settings: ScopeSettings, config: ScopeConfig) => {

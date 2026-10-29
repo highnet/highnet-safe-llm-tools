@@ -9,6 +9,7 @@ import { StepList } from '@/components/pipeline/StepList';
 import { COPY } from '@/content/copy';
 import { AGENT_STAGE_ORDER, STAGES } from '@/content/stages';
 import type { TraceEvent } from '@/lib/generated/trace';
+import { setView } from '@/lib/view-store';
 
 import { ControlledEventSource, ev } from './helpers';
 
@@ -36,6 +37,9 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const context = { chunks: new Map(), cited: new Set<number>(), streamedAnswer: '' };
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('agentic mode', () => {
   it('offers the compound questions, runs the agent and shows each search nested', async () => {

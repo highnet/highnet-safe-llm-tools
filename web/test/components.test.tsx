@@ -479,6 +479,8 @@ describe('site chrome and primitives', () => {
     );
     expect(html).toContain('font-recursive');
     expect(html).toContain('highnet-rag-theme');
+    // Nothing in <head> for React to hydrate: the theme script opens the body (React error #418).
+    expect(html).toContain('<head></head><body><script>');
     expect(metadata.title).toMatchObject({
       default: expect.stringContaining('Highnet Safe LLM Tools'),
     });

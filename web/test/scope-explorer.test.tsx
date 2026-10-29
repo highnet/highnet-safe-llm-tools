@@ -5,7 +5,7 @@ import ScopePage from '@/app/scope/page';
 import { ScopeExplorer } from '@/components/scope/ScopeExplorer';
 import { SCOPE } from '@/content/scope';
 import { clearDatasetCache } from '@/lib/scope/api';
-import { setScopeView } from '@/lib/scope/view-store';
+import { setView } from '@/lib/view-store';
 
 import { ControlledEventSource } from './helpers';
 import { type Recorded, recording, scopeConfig, stubScopeFetch } from './scope-fixtures';
@@ -128,7 +128,7 @@ describe('scope explorer runs', () => {
     expect(screen.getByText(/Recorded totals/)).toBeInTheDocument();
     expect(screen.getAllByText('Answer').length).toBeGreaterThan(1);
     // The same run in the Simple view, switched from outside (the header's toggle).
-    act(() => setScopeView('simple'));
+    act(() => setView('simple'));
     expect(window.location.search).toBe('?preset=career&example=career-lasagna');
     expect(screen.getByText(SCOPE.simple.outcomes.answer)).toBeInTheDocument();
   });

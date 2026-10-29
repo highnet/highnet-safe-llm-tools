@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeEach } from 'vitest';
 
-import { resetScopeView } from '@/lib/scope/view-store';
+import { resetView } from '@/lib/view-store';
 
 // jsdom has no matchMedia. Tests pick the layout by setting `window.__wide` (default: wide).
 declare global {
@@ -30,5 +30,5 @@ afterEach(() => {
   if (!browser) return;
   cleanup();
   window.history.replaceState(null, '', '/');
-  resetScopeView();
+  resetView();
 });

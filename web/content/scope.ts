@@ -189,85 +189,42 @@ export const SCOPE = {
     },
   },
 
-  // The switch between the plain summary and the full working (?view=simple).
-  view: {
-    label: 'Scope view',
-    simple: 'Simple',
-    steps: 'Every step',
-  },
-
-  // The Simple view's top: a plain heading and intro, then the product and message as two selects.
+  // The Simple view: a one-line question, the product and message as tappable choices, and one
+  // result card. No jargon here: no kNN, fusion or distribution.
   intro: {
-    title: 'Will the assistant answer this message?',
-    body: 'Before an AI assistant answers, a guard reads the message and decides what to do with it. Pick a product and a message to see its decision, in plain words.',
+    title: 'Will the assistant answer?',
   },
-  compact: {
-    message: 'Message',
-    withTurns: (text: string, turns: string) => `${text} (${turns})`,
+  pick: {
+    message: 'Pick a message',
+    more: (n: number) => `More messages (${n})`,
+    fewer: 'Fewer messages',
+    turns: (n: number) => plural(n, 'earlier turn'),
   },
-
-  // The Simple view: the same run in plain words, for readers who do not want the working.
-  // No jargon here: no kNN, fusion or distribution; the advisors have everyday names.
+  // The messages shown first under each product: one per action (answer, answer briefly,
+  // redirect, block), picked by the action each one's recorded run takes under the default
+  // settings. The card always shows the action of the run on screen, never this list's intent.
+  featured: {
+    career: ['career-salary', 'career-sql-course', 'career-lasagna', 'career-rate-cv'],
+    recipe: ['recipe-buttermilk', 'recipe-wine', 'recipe-fibonacci', 'recipe-rate-recipe'],
+    bank: ['bank-lost-card', 'bank-credit-score', 'bank-bitcoin', 'bank-other-customer'],
+    rag: ['rag-normandy', 'rag-world-cup', 'rag-lasagna', 'rag-rate-cv'],
+  } as Record<string, string[]>,
   simple: {
-    title: 'In short',
+    title: 'The result',
     empty: 'Pick a message above to see what the assistant decides.',
     deciding: 'Working it out…',
+    stopped: 'The run stopped before the assistant decided.',
     message: 'The message',
-    earlier: 'Said earlier in the conversation',
-    outcome: 'What the assistant does',
+    earlier: (turns: string) => `After ${turns} in the conversation.`,
     outcomes: {
       answer: 'This is what the assistant is for, so it answers.',
-      answer_briefly: 'This is close to what the assistant is for, so it answers in a few lines.',
-      redirect: 'Not what this assistant is for, so it points you back, politely.',
+      answer_briefly: 'Close to what the assistant is for, so it answers in a few lines.',
+      redirect: 'Not what this assistant is for, so it politely points you back.',
       block: 'This looks like an attempt to trick the assistant, so it refuses.',
     },
-    // The four classes as an everyday word, beside the same shapes the full view uses.
-    labels: {
-      in: 'in scope',
-      adjacent: 'close to scope',
-      out: 'off scope',
-      injection: 'a trick',
-    },
-    voters: 'Who voted',
-    votersNote:
-      'Four advisors read the message on their own. Each leans one way, some more sure than others.',
-    advisors: {
-      rules: 'The checklist',
-      knn: 'Similar messages',
-      judge: 'The AI judge',
-      decide: 'The decision model',
-    },
-    advisorHelp: {
-      rules: 'looks for known tricks and topic words',
-      knn: 'the labelled example messages that read most alike',
-      judge: 'an AI model that reads what this assistant is for',
-      decide: 'a second AI model that gives odds for each answer',
-    },
-    sure: (pct: string) => `${pct} sure`,
-    notRun: {
-      off: 'Didn’t vote: switched off in the settings.',
-      edited:
-        'Didn’t vote: you changed what the assistant is for, and its recording used the original.',
-      abstained: 'Didn’t vote: nothing on its list matched.',
-      other: 'Didn’t vote on this message.',
-      notRecorded: 'Left out: there is no recording of it for this message yet.',
-      failed: 'Left out: it ran into a problem on this message.',
-      waiting: 'Waiting…',
-    },
-    combinedTitle: 'Combined',
-    combined: (votes: string, pct: string) =>
-      `Weighing ${votes} together gives this lean, ${pct} sure. Then the assistant checks how far the combined vote leans towards what it is for: far enough for a full answer, partly for a short one, too little for a redirect. A strong lean towards a trick blocks the message.`,
-    votes: (n: number) => plural(n, 'vote'),
-    reply: 'What it says back',
-    handoff:
-      'It hands the question to the RAG pipeline, which looks for the answer in its 35 articles.',
-    handoffBrief:
-      'It hands the question to the RAG pipeline for a short answer from its 35 articles.',
-    openRag: 'Ask the RAG pipeline',
-    noReply: 'There is no recorded reply for these settings.',
-    every: 'Show every step',
-    settings: 'Change the settings',
-    stopped: 'The run stopped before the assistant decided.',
+    every: 'See how it decided',
+    recorded: 'Recorded run · no AI is called when you visit',
+    illustrative: 'Illustrative run · stand-in models, not real results',
   },
 
   workingLabel: 'The working',

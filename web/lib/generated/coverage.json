@@ -719,19 +719,19 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 226,
+    "tests": 232,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2161,
-            "total": 2161
+            "covered": 2198,
+            "total": 2198
           },
           "branches": {
-            "covered": 1710,
-            "total": 1710
+            "covered": 1740,
+            "total": 1740
           }
         },
         "empty_files": 2,
@@ -1091,12 +1091,12 @@
           {
             "path": "components/pipeline/PipelineExplorer.tsx",
             "lines": {
-              "covered": 69,
-              "total": 69
+              "covered": 86,
+              "total": 86
             },
             "branches": {
-              "covered": 119,
-              "total": 119
+              "covered": 147,
+              "total": 147
             }
           },
           {
@@ -1130,6 +1130,17 @@
             "branches": {
               "covered": 22,
               "total": 22
+            }
+          },
+          {
+            "path": "components/pipeline/RagSimple.tsx",
+            "lines": {
+              "covered": 13,
+              "total": 13
+            },
+            "branches": {
+              "covered": 18,
+              "total": 18
             }
           },
           {
@@ -1540,17 +1551,6 @@
             }
           },
           {
-            "path": "components/scope/CompactPicker.tsx",
-            "lines": {
-              "covered": 14,
-              "total": 14
-            },
-            "branches": {
-              "covered": 12,
-              "total": 12
-            }
-          },
-          {
             "path": "components/scope/Disclosure.tsx",
             "lines": {
               "covered": 5,
@@ -1630,12 +1630,12 @@
           {
             "path": "components/scope/ScopeExplorer.tsx",
             "lines": {
-              "covered": 87,
-              "total": 87
+              "covered": 84,
+              "total": 84
             },
             "branches": {
-              "covered": 67,
-              "total": 67
+              "covered": 74,
+              "total": 74
             }
           },
           {
@@ -1656,8 +1656,8 @@
               "total": 2
             },
             "branches": {
-              "covered": 1,
-              "total": 1
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -1696,12 +1696,12 @@
           {
             "path": "components/scope/ScopeSimple.tsx",
             "lines": {
-              "covered": 34,
-              "total": 34
+              "covered": 10,
+              "total": 10
             },
             "branches": {
-              "covered": 52,
-              "total": 52
+              "covered": 14,
+              "total": 14
             }
           },
           {
@@ -1936,14 +1936,14 @@
             }
           },
           {
-            "path": "components/site/ScopeViewToggle.tsx",
+            "path": "components/site/PickCards.tsx",
             "lines": {
-              "covered": 5,
-              "total": 5
+              "covered": 20,
+              "total": 20
             },
             "branches": {
-              "covered": 0,
-              "total": 0
+              "covered": 18,
+              "total": 18
             }
           },
           {
@@ -1964,8 +1964,8 @@
               "total": 8
             },
             "branches": {
-              "covered": 19,
-              "total": 19
+              "covered": 17,
+              "total": 17
             }
           },
           {
@@ -1977,6 +1977,17 @@
             "branches": {
               "covered": 8,
               "total": 8
+            }
+          },
+          {
+            "path": "components/site/ViewToggle.tsx",
+            "lines": {
+              "covered": 6,
+              "total": 6
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -2048,8 +2059,8 @@
           {
             "path": "content/copy.ts",
             "lines": {
-              "covered": 60,
-              "total": 60
+              "covered": 62,
+              "total": 62
             },
             "branches": {
               "covered": 22,
@@ -2136,8 +2147,8 @@
           {
             "path": "content/scope.ts",
             "lines": {
-              "covered": 82,
-              "total": 82
+              "covered": 81,
+              "total": 81
             },
             "branches": {
               "covered": 8,
@@ -2147,8 +2158,8 @@
           {
             "path": "content/site.ts",
             "lines": {
-              "covered": 5,
-              "total": 5
+              "covered": 6,
+              "total": 6
             },
             "branches": {
               "covered": 0,
@@ -2255,6 +2266,17 @@
             }
           },
           {
+            "path": "lib/preview.ts",
+            "lines": {
+              "covered": 11,
+              "total": 11
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
             "path": "lib/scope-verdicts.ts",
             "lines": {
               "covered": 7,
@@ -2334,12 +2356,12 @@
           {
             "path": "lib/scope/url-state.ts",
             "lines": {
-              "covered": 71,
-              "total": 71
+              "covered": 63,
+              "total": 63
             },
             "branches": {
-              "covered": 59,
-              "total": 59
+              "covered": 53,
+              "total": 53
             }
           },
           {
@@ -2358,17 +2380,6 @@
             "lines": {
               "covered": 34,
               "total": 34
-            },
-            "branches": {
-              "covered": 4,
-              "total": 4
-            }
-          },
-          {
-            "path": "lib/scope/view-store.ts",
-            "lines": {
-              "covered": 18,
-              "total": 18
             },
             "branches": {
               "covered": 4,
@@ -2433,12 +2444,12 @@
           {
             "path": "lib/url-state.ts",
             "lines": {
-              "covered": 25,
-              "total": 25
+              "covered": 26,
+              "total": 26
             },
             "branches": {
-              "covered": 24,
-              "total": 24
+              "covered": 26,
+              "total": 26
             }
           },
           {
@@ -2461,6 +2472,28 @@
             "branches": {
               "covered": 8,
               "total": 8
+            }
+          },
+          {
+            "path": "lib/view-store.ts",
+            "lines": {
+              "covered": 37,
+              "total": 37
+            },
+            "branches": {
+              "covered": 10,
+              "total": 10
+            }
+          },
+          {
+            "path": "lib/view.ts",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
             }
           }
         ]

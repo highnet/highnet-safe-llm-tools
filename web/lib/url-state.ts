@@ -1,4 +1,5 @@
 import type { ApiConfig } from '@/lib/api';
+import { parseView } from '@/lib/view';
 
 // The run settings live in the query string, so a trace can be shared by link:
 // ?q=…&mode=hybrid&k=5&chunks=medium&rerank=1&agent=1. Invalid or unknown values fall back to
@@ -57,9 +58,11 @@ export const urlSearch = ({ q, mode, k, chunkSet, rerank, agentic }: UrlState): 
   return `?${params.toString()}`;
 };
 
-// replaceState, not pushState: changing a knob should not fill the back button's history.
+// replaceState, not pushState: changing a knob should not fill the back button's history. The
+// page's view (lib/view-store.ts) is kept as it is.
 export const writeUrlState = (state: UrlState) => {
-  window.history.replaceState(null, '', urlSearch(state) + window.location.hash);
+  const view = parseView(window.location.search) === 'steps' ? '&view=steps' : '';
+  window.history.replaceState(null, '', urlSearch(state) + view + window.location.hash);
 };
 
 // A link that opens the RAG pipeline on one question (it replays that question's recording).

@@ -4,20 +4,20 @@ import { type ProductKey, SITE, type SitePage } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 import { HeaderBar } from './HeaderBar';
-import { ScopeViewToggle } from './ScopeViewToggle';
+import { ViewToggle } from './ViewToggle';
 import { ThemeToggle } from './ThemeToggle';
 
 const PRODUCTS: ProductKey[] = ['rag', 'scope'];
 
 type ProductSwitcherProps = {
   current?: ProductKey;
-  // On the Scope pipeline page the Scope segment also carries its Simple · Every step toggle.
-  scopeView?: boolean;
+  // On a pipeline page the current product's segment also carries its Simple · Every step toggle.
+  viewToggle?: boolean;
 };
 
 // The two products as one ruled pair of links: the current one sits on the blue wash in blue
 // pencil and weight, so it reads without colour too.
-const ProductSwitcher = ({ current, scopeView }: ProductSwitcherProps) => {
+const ProductSwitcher = ({ current, viewToggle }: ProductSwitcherProps) => {
   return (
     <nav aria-label={SITE.productsLabel}>
       <ul
@@ -42,7 +42,7 @@ const ProductSwitcher = ({ current, scopeView }: ProductSwitcherProps) => {
             >
               {SITE.products[key].name}
             </a>
-            {scopeView && key === 'scope' && <ScopeViewToggle />}
+            {viewToggle && key === current && <ViewToggle product={key} />}
           </li>
         ))}
       </ul>
@@ -73,10 +73,7 @@ const SiteHeader = ({ product, current }: SiteHeaderProps) => {
         </div>
         <span aria-hidden className="order-3 basis-full md:hidden" />
         <div className="order-4 md:order-2">
-          <ProductSwitcher
-            current={product}
-            scopeView={product === 'scope' && current === 'pipeline'}
-          />
+          <ProductSwitcher current={product} viewToggle={current === 'pipeline'} />
         </div>
         {product && (
           <nav

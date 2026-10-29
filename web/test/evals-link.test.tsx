@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
 import { COPY } from '@/content/copy';
 import { EVALS } from '@/content/evals';
+import { setView } from '@/lib/view-store';
 
 import { FakeEventSource } from './fake-event-source';
 
@@ -23,6 +24,9 @@ beforeEach(() => {
   );
 });
 afterEach(() => vi.unstubAllGlobals());
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('the link from an answer to the evals', () => {
   it('carries the run settings', async () => {
