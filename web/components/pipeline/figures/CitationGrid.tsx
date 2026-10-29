@@ -17,7 +17,7 @@ const CitationGrid = ({ data, passages }: CitationGridProps) => {
   const used = new Set(blocks.flatMap((b) => b.citation_ids));
   return (
     <figure className="space-y-2">
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="voice-data border-b text-xs text-muted-foreground">

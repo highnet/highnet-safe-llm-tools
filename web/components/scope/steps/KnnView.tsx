@@ -48,7 +48,7 @@ const KnnView = ({ data }: KnnViewProps) => {
         <tbody>
           {data.neighbours.map((n) => (
             <tr key={n.id} className="border-b border-dashed align-baseline last:border-b-0">
-              <th scope="row" className="py-1.5 pr-3 text-left font-normal break-words">
+              <th scope="row" className="py-1.5 pr-3 text-left font-normal wrap-anywhere">
                 {n.text}
                 <span className="voice-data ml-2 text-xs text-muted-foreground">{n.topic}</span>
               </th>

@@ -38,7 +38,7 @@ const CompoundSection = ({ compound, questions }: CompoundSectionProps) => {
   ];
   return (
     <EvalSection id="compound" title={C.title} notes={notes}>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="voice-data border-b text-xs text-muted-foreground">

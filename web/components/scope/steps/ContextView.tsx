@@ -59,7 +59,7 @@ const ContextView = ({ data, skipped }: ContextViewProps) => {
       <Typography variant="label" color="muted" as="p">
         {F.reading}
       </Typography>
-      <pre className="voice-data overflow-x-auto rounded-sm border border-dashed px-3 py-2 text-xs leading-relaxed break-words whitespace-pre-wrap">
+      <pre className="voice-data relative overflow-x-auto rounded-sm border border-dashed px-3 py-2 text-xs leading-relaxed break-words whitespace-pre-wrap">
         {reading}
       </pre>
     </div>

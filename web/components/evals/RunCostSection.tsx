@@ -39,7 +39,7 @@ const RunCostSection = ({ results }: RunCostSectionProps) => {
         ))}
       </dl>
 
-      <div className="mt-5 overflow-x-auto">
+      <div className="mt-5 relative overflow-x-auto">
         <table className="voice-data w-full border-collapse text-sm">
           <caption className="pb-1 text-left font-sans text-xs text-muted-foreground">
             {K.caption}
