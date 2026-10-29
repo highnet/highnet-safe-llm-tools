@@ -19,7 +19,7 @@ const Facts = ({ facts, className }: FactsProps) => {
       {facts.map((fact) => (
         <div key={fact.term} className="contents">
           <dt className="text-muted-foreground">{fact.term}</dt>
-          <dd className={cn('min-w-0 break-words', fact.mono !== false && 'voice-data')}>
+          <dd className={cn('min-w-0 wrap-anywhere', fact.mono !== false && 'voice-data')}>
             {fact.value}
           </dd>
         </div>

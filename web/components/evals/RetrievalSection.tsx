@@ -192,7 +192,7 @@ const RetrievalSection = ({ retrieval }: RetrievalSectionProps) => {
           {R.tableToggle}
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="mt-2 overflow-x-auto">
+          <div className="mt-2 relative overflow-x-auto">
             <table className="voice-data w-full min-w-xl border-collapse text-sm">
               <caption className="sr-only">{R.tableCaption}</caption>
               <thead>

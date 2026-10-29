@@ -24,7 +24,7 @@ const AuditView = ({ data }: AuditViewProps) => {
       signals.length ? (
         <span key="s" className="flex flex-wrap gap-x-3">
           {signals.map((s) => (
-            <span key={s} className="inline-flex items-center gap-1.5">
+            <span key={s} className="inline-flex flex-wrap items-center gap-x-1.5">
               {SCOPE.signals[s]}
               <ClassTag label={record.signals[s]!} short />
             </span>
@@ -46,11 +46,12 @@ const AuditView = ({ data }: AuditViewProps) => {
   ];
   return (
     <div className="space-y-3">
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-sm">
+      {/* Phones stack each label over its value, so long values (hashes, tags) keep the full width. */}
+      <dl className="grid grid-cols-1 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_minmax(0,1fr)]">
         {rows.map(([term, value]) => (
           <div key={term} className="contents">
-            <dt className="text-muted-foreground">{term}</dt>
-            <dd className="voice-data min-w-0">{value}</dd>
+            <dt className="text-muted-foreground max-sm:mt-1.5 max-sm:text-xs">{term}</dt>
+            <dd className="voice-data min-w-0 wrap-anywhere">{value}</dd>
           </div>
         ))}
       </dl>

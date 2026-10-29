@@ -30,12 +30,12 @@ const CodeSnippet = ({ snippets }: CodeSnippetProps) => {
               </Typography>
               <a
                 href={sourceUrl(snippet)}
-                className="voice-data text-xs text-muted-foreground hover:text-primary hover:underline"
+                className="voice-data min-w-0 text-xs wrap-anywhere text-muted-foreground hover:text-primary hover:underline"
               >
                 {snippet.file.replace('api/src/', '')}:{snippet.startLine}–{snippet.endLine}
               </a>
             </figcaption>
-            <pre className="voice-data overflow-x-auto py-2 text-xs leading-relaxed">
+            <pre className="voice-data relative overflow-x-auto py-2 text-xs leading-relaxed">
               <code
                 className="hljs language-python"
                 // Pre-highlighted by highlight.js at build time from our own source files.

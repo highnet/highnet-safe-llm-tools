@@ -76,7 +76,12 @@ const FuseView = ({ data, bm25, vector }: FuseViewProps) => {
           {T.fused(data.k)}
         </Typography>
         {/* On the narrowest phones the table scrolls inside its sheet, never the page. */}
-        <div role="region" aria-label={T.fusedCaption} tabIndex={0} className="overflow-x-auto">
+        <div
+          role="region"
+          aria-label={T.fusedCaption}
+          tabIndex={0}
+          className="relative overflow-x-auto"
+        >
           <table className="w-full border-collapse text-sm">
             <caption className="sr-only">{T.fusedCaption}</caption>
             <thead>

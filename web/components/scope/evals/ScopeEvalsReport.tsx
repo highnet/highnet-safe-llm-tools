@@ -294,7 +294,7 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
               ))}
             </div>
             <Disclosure show={E.sweep.showTable} hide={E.sweep.hideTable} className="mt-4">
-              <div className="overflow-x-auto">
+              <div className="relative overflow-x-auto">
                 <table className="voice-data w-full border-collapse text-xs">
                   <thead>
                     <tr className="border-b text-right text-muted-foreground">
@@ -331,7 +331,7 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
           </EvalSection>
 
           <EvalSection id="cost" title={E.cost.title} notes={E.cost.notes}>
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="voice-data w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b text-right text-xs text-muted-foreground">
@@ -369,7 +369,7 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-5 overflow-x-auto">
+            <div className="mt-5 relative overflow-x-auto">
               <table className="voice-data w-full border-collapse text-sm">
                 <caption className="pb-1 text-left font-sans text-xs text-muted-foreground">
                   {E.cost.byModel}
