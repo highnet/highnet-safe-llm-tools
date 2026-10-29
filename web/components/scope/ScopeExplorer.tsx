@@ -22,6 +22,7 @@ import {
 } from '@/lib/scope/url-state';
 import { useScopeStream } from '@/lib/scope/use-scope-stream';
 
+import { cn } from '@/lib/utils';
 import { ExamplePicker } from './ExamplePicker';
 import { Principles } from './Principles';
 import { RagBridge } from './RagBridge';
@@ -64,12 +65,16 @@ const ScopeExplorer = () => {
     [run],
   );
 
-  // A linked example (?preset=rag&example=rag-world-cup) replays at once: it costs nothing.
+  // A linked example (?preset=rag&example=rag-world-cup) replays at once: it costs nothing. With
+  // none linked, the preset's first example plays, so the page never opens empty; the link stays
+  // as it was until the visitor picks one.
   const requestConfig = useCallback(
     (signal?: AbortSignal) => {
       fetchScopeConfig(signal)
         .then((config) => {
-          const linked = parseScopeUrl(window.location.search, config);
+          const parsed = parseScopeUrl(window.location.search, config);
+          const first = config.examples.find((e) => e.preset === parsed.preset);
+          const linked = parsed.example || !first ? parsed : { ...parsed, example: first.id };
           setConfigState({ status: 'ready', config });
           setSettings(linked);
           replay(linked);
@@ -149,11 +154,14 @@ const ScopeExplorer = () => {
           <ScopeDiagram
             statusOf={statusOf}
             action={decision?.action}
-            className="rounded-md border border-solid px-4 md:px-5"
+            // The twelve-step diagram is every-step material: phones skip it in the Simple view.
+            className={cn(
+              'rounded-md border border-solid px-4 md:px-5',
+              settings?.view === 'simple' && 'max-lg:hidden',
+            )}
           />
         }
       />
-      <Principles />
 
       <section aria-labelledby="sheet-title" className="space-y-4 md:space-y-5">
         <Typography variant="sheetTitle" as="h2" id="sheet-title" className="break-words">
@@ -316,6 +324,8 @@ const ScopeExplorer = () => {
       {decision && !simple && (
         <ScopeResult decision={decision} events={trace.events} done={trace.done !== null} />
       )}
+
+      <Principles />
 
       <p aria-live="polite" className="sr-only">
         {announcement}

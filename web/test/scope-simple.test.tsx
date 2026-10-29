@@ -177,10 +177,10 @@ describe('switching between Simple and every step', () => {
     expect(screen.queryByText(SCOPE.settings.weights)).not.toBeInTheDocument();
     const runs = ControlledEventSource.instances.length;
     fireEvent.click(screen.getByRole('button', { name: S.settings }));
-    expect(window.location.search).toBe('?preset=career&example=career-salary');
+    expect(window.location.search).toBe('?preset=career&view=steps&example=career-salary');
     expect(screen.getByText(SCOPE.settings.weights)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('radio', { name: SCOPE.view.simple }));
-    expect(window.location.search).toBe('?preset=career&view=simple&example=career-salary');
+    expect(window.location.search).toBe('?preset=career&example=career-salary');
     const source = ControlledEventSource.last();
     act(() => recording('world-cup').events.forEach((e) => source.emit('trace', e)));
     // Show every step, scrolling to the working where the browser can.

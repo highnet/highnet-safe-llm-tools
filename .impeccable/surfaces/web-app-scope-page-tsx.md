@@ -26,4 +26,4 @@ FIRST VIEWPORT: The hero: Display headline "Watch an AI agent decide whether a m
 
 FORM: engineer's computation pad, as DESIGN.md.
 
-SIMPLE VIEW: For non-experts, a "Show: Simple / Every step" switch (`?view=simple`; a first visit opens Simple). Simple shows the same run in plain words on one sheet: the message, what the assistant does, who voted (checklist, similar messages, AI judge, decision model, each with its lean and how sure), the combined vote and the reply, with "Show every step" one click away. Every number still comes from the trace; no jargon.
+SIMPLE VIEW: For non-experts, a "Show: Simple / Every step" switch (Simple is the default; `?view=steps` opens every step; with no message linked the first example plays). Simple shows the same run in plain words on one sheet: the message, what the assistant does, who voted (checklist, similar messages, AI judge, decision model, each with its lean and how sure), the combined vote and the reply, with "Show every step" one click away. Every number still comes from the trace; no jargon.
