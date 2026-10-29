@@ -83,6 +83,8 @@ jobs:
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+      # Scope's second judge (decision model); its cached calls make a rerun free.
+      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
       ANTHROPIC_MAX_RETRIES: "8"
       VOYAGE_MAX_RETRIES: "8"
     steps:
