@@ -116,8 +116,9 @@ const PipelineExplorer = () => {
       bm25: ok('bm25') as Bm25Data | undefined,
       vector: ok('vector') as VectorData | undefined,
       chunkSet: (byStage.get('request')?.data as RequestData | undefined)?.settings?.chunk_set,
+      questionId: trace.input?.questionId,
     };
-  }, [trace.events, trace.answer]);
+  }, [trace.events, trace.answer, trace.input]);
 
   const lastEvent = trace.events.at(-1);
   const announcement = lastEvent

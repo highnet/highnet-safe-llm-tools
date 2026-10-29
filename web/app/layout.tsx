@@ -3,7 +3,7 @@ import { Recursive } from 'next/font/google';
 import { type ReactNode } from 'react';
 
 import { themeScript } from '@/components/site/ThemeToggle';
-import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { SITE_DESCRIPTION, SITE_URL, structuredData } from '@/lib/site';
 
 import './globals.css';
@@ -17,13 +17,17 @@ const recursive = Recursive({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${COPY.siteName}: ${COPY.tagline}`, template: `%s · ${COPY.siteName}` },
+  title: { default: `${SITE.name}: ${SITE.tagline}`, template: `%s · ${SITE.name}` },
   description: SITE_DESCRIPTION,
-  applicationName: COPY.siteName,
+  applicationName: SITE.name,
   authors: [{ name: 'highnet', url: 'https://highnet.at' }],
   keywords: [
     'RAG',
     'retrieval-augmented generation',
+    'LLM safety',
+    'prompt injection',
+    'scope guard',
+    'LLM judge',
     'BM25',
     'vector search',
     'reranking',

@@ -7,15 +7,16 @@ import { CORPUS } from '@/content/corpus';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata(
-  '/corpus/',
+  '/rag/corpus/',
   CORPUS.metaTitle,
   CORPUS.metaDescription,
+  'rag',
 );
 
 const CorpusPage = () => {
   return (
     <>
-      <SiteHeader current="corpus" />
+      <SiteHeader product="rag" current="corpus" />
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-8 md:pt-12">
         <CorpusBrowser />
       </main>

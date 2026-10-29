@@ -1,0 +1,516 @@
+{
+  "recorded_at": "2026-10-29T14:39:19+00:00",
+  "verdicts": {
+    "normandy": {
+      "example_id": "rag-normandy",
+      "action": "answer",
+      "scope_score": 0.963676,
+      "p_injection": 0.058309,
+      "label": "in",
+      "confidence": 0.879947,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "This is a factual geography question about Normandy, which is directly related to the Normans article in the library."
+      },
+      "ms": 1163,
+      "cost_usd": 0.000779
+    },
+    "fresno": {
+      "example_id": "rag-fresno",
+      "action": "answer",
+      "scope_score": 0.836006,
+      "p_injection": 0.070299,
+      "label": "in",
+      "confidence": 0.773903,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "A factual, encyclopedia-style question about the etymology of a place name in the library (Fresno, California)."
+      },
+      "ms": 902,
+      "cost_usd": 0.000781
+    },
+    "yuan": {
+      "example_id": "rag-yuan",
+      "action": "answer",
+      "scope_score": 0.969836,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.940076,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The Yuan dynasty is in the library, and this is a factual historical question about its founder that the pipeline can answer."
+      },
+      "ms": 929,
+      "cost_usd": 0.000771
+    },
+    "harvard-presidents": {
+      "example_id": "rag-harvard-presidents",
+      "action": "answer",
+      "scope_score": 0.878211,
+      "p_injection": 0.107651,
+      "label": "in",
+      "confidence": 0.732434,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "This is a factual, encyclopedia-style question about institutions (Harvard University is in the library) and can be answered from biographical knowledge of U.S. presidents."
+      },
+      "ms": 982,
+      "cost_usd": 0.000821
+    },
+    "world-cup": {
+      "example_id": "rag-world-cup",
+      "action": "answer_briefly",
+      "scope_score": 0.54058,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.50521,
+      "judge": {
+        "label": "out",
+        "confidence": 0.95,
+        "reason": "This is live/current events information (sports results) outside the library's scope of encyclopedia articles."
+      },
+      "ms": 979,
+      "cost_usd": 0.000751
+    },
+    "compound-01": {
+      "example_id": "rag-compound-01",
+      "action": "answer",
+      "scope_score": 0.963666,
+      "p_injection": 0.147799,
+      "label": "in",
+      "confidence": 0.791605,
+      "judge": {
+        "label": "in",
+        "confidence": 0.99,
+        "reason": "This is a factual question comparing two institutions in the library (Harvard University and University of Chicago)."
+      },
+      "ms": 930,
+      "cost_usd": 0.000758
+    },
+    "compound-02": {
+      "example_id": "rag-compound-02",
+      "action": "answer",
+      "scope_score": 0.941508,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.931897,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The question asks for factual historical information about two topics both in the library (Yuan dynasty and Black Death), requiring a straightforward encyclopedia-style answer."
+      },
+      "ms": 1034,
+      "cost_usd": 0.000811
+    },
+    "compound-03": {
+      "example_id": "rag-compound-03",
+      "action": "answer",
+      "scope_score": 0.94251,
+      "p_injection": 0.160876,
+      "label": "in",
+      "confidence": 0.74264,
+      "judge": null,
+      "ms": 1059,
+      "cost_usd": 0.000812
+    },
+    "compound-04": {
+      "example_id": "rag-compound-04",
+      "action": "answer",
+      "scope_score": 0.855057,
+      "p_injection": 0.050062,
+      "label": "in",
+      "confidence": 0.787363,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Both IPCC and Scottish Parliament are in the library, making this a factual comparison question within scope."
+      },
+      "ms": 949,
+      "cost_usd": 0.000766
+    },
+    "compound-05": {
+      "example_id": "rag-compound-05",
+      "action": "answer",
+      "scope_score": 0.886841,
+      "p_injection": 0.06925,
+      "label": "in",
+      "confidence": 0.79099,
+      "judge": {
+        "label": "in",
+        "confidence": 0.85,
+        "reason": "The question asks about historical facts (Normandy/Normans and Yuan dynasty establishment) that are covered in the library's encyclopedia articles."
+      },
+      "ms": 1011,
+      "cost_usd": 0.000808
+    },
+    "compound-06": {
+      "example_id": "rag-compound-06",
+      "action": "answer",
+      "scope_score": 0.96248,
+      "p_injection": 0.057015,
+      "label": "in",
+      "confidence": 0.878891,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Both topics are in the library (French and Indian War, Oxygen), making this a factual encyclopedia question comparing historical timelines."
+      },
+      "ms": 1085,
+      "cost_usd": 0.000789
+    },
+    "compound-07": {
+      "example_id": "rag-compound-07",
+      "action": "answer",
+      "scope_score": 0.911515,
+      "p_injection": 0.117763,
+      "label": "in",
+      "confidence": 0.77791,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The question asks for a factual comparison between two historical events (Harvard University founding and French and Indian War) both present in the library."
+      },
+      "ms": 1028,
+      "cost_usd": 0.000795
+    },
+    "compound-08": {
+      "example_id": "rag-compound-08",
+      "action": "answer",
+      "scope_score": 0.785479,
+      "p_injection": 0.0,
+      "label": "in",
+      "confidence": 0.745813,
+      "judge": null,
+      "ms": 1050,
+      "cost_usd": 0.00085
+    },
+    "compound-09": {
+      "example_id": "rag-compound-09",
+      "action": "answer",
+      "scope_score": 0.88326,
+      "p_injection": 0.124297,
+      "label": "in",
+      "confidence": 0.738864,
+      "judge": {
+        "label": "in",
+        "confidence": 0.85,
+        "reason": "This is a factual historical question comparing two events; Warsaw is in the library and French Wars of Religion is closely related to the Huguenot article also in the library."
+      },
+      "ms": 1062,
+      "cost_usd": 0.00085
+    },
+    "compound-10": {
+      "example_id": "rag-compound-10",
+      "action": "answer",
+      "scope_score": 0.909024,
+      "p_injection": 0.054131,
+      "label": "in",
+      "confidence": 0.831374,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Factual question comparing founding dates of two institutions in the library (University of Chicago and IPCC)."
+      },
+      "ms": 986,
+      "cost_usd": 0.000775
+    }
+  },
+  "examples": {
+    "rag-normandy": {
+      "example_id": "rag-normandy",
+      "action": "answer",
+      "scope_score": 0.963676,
+      "p_injection": 0.058309,
+      "label": "in",
+      "confidence": 0.879947,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "This is a factual geography question about Normandy, which is directly related to the Normans article in the library."
+      },
+      "ms": 1163,
+      "cost_usd": 0.000779
+    },
+    "rag-fresno": {
+      "example_id": "rag-fresno",
+      "action": "answer",
+      "scope_score": 0.836006,
+      "p_injection": 0.070299,
+      "label": "in",
+      "confidence": 0.773903,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "A factual, encyclopedia-style question about the etymology of a place name in the library (Fresno, California)."
+      },
+      "ms": 902,
+      "cost_usd": 0.000781
+    },
+    "rag-yuan": {
+      "example_id": "rag-yuan",
+      "action": "answer",
+      "scope_score": 0.969836,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.940076,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The Yuan dynasty is in the library, and this is a factual historical question about its founder that the pipeline can answer."
+      },
+      "ms": 929,
+      "cost_usd": 0.000771
+    },
+    "rag-harvard-presidents": {
+      "example_id": "rag-harvard-presidents",
+      "action": "answer",
+      "scope_score": 0.878211,
+      "p_injection": 0.107651,
+      "label": "in",
+      "confidence": 0.732434,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "This is a factual, encyclopedia-style question about institutions (Harvard University is in the library) and can be answered from biographical knowledge of U.S. presidents."
+      },
+      "ms": 982,
+      "cost_usd": 0.000821
+    },
+    "rag-world-cup": {
+      "example_id": "rag-world-cup",
+      "action": "answer_briefly",
+      "scope_score": 0.54058,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.50521,
+      "judge": {
+        "label": "out",
+        "confidence": 0.95,
+        "reason": "This is live/current events information (sports results) outside the library's scope of encyclopedia articles."
+      },
+      "ms": 979,
+      "cost_usd": 0.000751
+    },
+    "rag-compound-01": {
+      "example_id": "rag-compound-01",
+      "action": "answer",
+      "scope_score": 0.963666,
+      "p_injection": 0.147799,
+      "label": "in",
+      "confidence": 0.791605,
+      "judge": {
+        "label": "in",
+        "confidence": 0.99,
+        "reason": "This is a factual question comparing two institutions in the library (Harvard University and University of Chicago)."
+      },
+      "ms": 930,
+      "cost_usd": 0.000758
+    },
+    "rag-compound-02": {
+      "example_id": "rag-compound-02",
+      "action": "answer",
+      "scope_score": 0.941508,
+      "p_injection": 0.006667,
+      "label": "in",
+      "confidence": 0.931897,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The question asks for factual historical information about two topics both in the library (Yuan dynasty and Black Death), requiring a straightforward encyclopedia-style answer."
+      },
+      "ms": 1034,
+      "cost_usd": 0.000811
+    },
+    "rag-compound-03": {
+      "example_id": "rag-compound-03",
+      "action": "answer",
+      "scope_score": 0.94251,
+      "p_injection": 0.160876,
+      "label": "in",
+      "confidence": 0.74264,
+      "judge": null,
+      "ms": 1059,
+      "cost_usd": 0.000812
+    },
+    "rag-compound-04": {
+      "example_id": "rag-compound-04",
+      "action": "answer",
+      "scope_score": 0.855057,
+      "p_injection": 0.050062,
+      "label": "in",
+      "confidence": 0.787363,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Both IPCC and Scottish Parliament are in the library, making this a factual comparison question within scope."
+      },
+      "ms": 949,
+      "cost_usd": 0.000766
+    },
+    "rag-compound-05": {
+      "example_id": "rag-compound-05",
+      "action": "answer",
+      "scope_score": 0.886841,
+      "p_injection": 0.06925,
+      "label": "in",
+      "confidence": 0.79099,
+      "judge": {
+        "label": "in",
+        "confidence": 0.85,
+        "reason": "The question asks about historical facts (Normandy/Normans and Yuan dynasty establishment) that are covered in the library's encyclopedia articles."
+      },
+      "ms": 1011,
+      "cost_usd": 0.000808
+    },
+    "rag-compound-06": {
+      "example_id": "rag-compound-06",
+      "action": "answer",
+      "scope_score": 0.96248,
+      "p_injection": 0.057015,
+      "label": "in",
+      "confidence": 0.878891,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Both topics are in the library (French and Indian War, Oxygen), making this a factual encyclopedia question comparing historical timelines."
+      },
+      "ms": 1085,
+      "cost_usd": 0.000789
+    },
+    "rag-compound-07": {
+      "example_id": "rag-compound-07",
+      "action": "answer",
+      "scope_score": 0.911515,
+      "p_injection": 0.117763,
+      "label": "in",
+      "confidence": 0.77791,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "The question asks for a factual comparison between two historical events (Harvard University founding and French and Indian War) both present in the library."
+      },
+      "ms": 1028,
+      "cost_usd": 0.000795
+    },
+    "rag-compound-08": {
+      "example_id": "rag-compound-08",
+      "action": "answer",
+      "scope_score": 0.785479,
+      "p_injection": 0.0,
+      "label": "in",
+      "confidence": 0.745813,
+      "judge": null,
+      "ms": 1050,
+      "cost_usd": 0.00085
+    },
+    "rag-compound-09": {
+      "example_id": "rag-compound-09",
+      "action": "answer",
+      "scope_score": 0.88326,
+      "p_injection": 0.124297,
+      "label": "in",
+      "confidence": 0.738864,
+      "judge": {
+        "label": "in",
+        "confidence": 0.85,
+        "reason": "This is a factual historical question comparing two events; Warsaw is in the library and French Wars of Religion is closely related to the Huguenot article also in the library."
+      },
+      "ms": 1062,
+      "cost_usd": 0.00085
+    },
+    "rag-compound-10": {
+      "example_id": "rag-compound-10",
+      "action": "answer",
+      "scope_score": 0.909024,
+      "p_injection": 0.054131,
+      "label": "in",
+      "confidence": 0.831374,
+      "judge": {
+        "label": "in",
+        "confidence": 0.95,
+        "reason": "Factual question comparing founding dates of two institutions in the library (University of Chicago and IPCC)."
+      },
+      "ms": 986,
+      "cost_usd": 0.000775
+    },
+    "rag-lasagna": {
+      "example_id": "rag-lasagna",
+      "action": "redirect",
+      "scope_score": 0.067687,
+      "p_injection": 0.001333,
+      "label": "out",
+      "confidence": 0.930403,
+      "judge": {
+        "label": "out",
+        "confidence": 0.99,
+        "reason": "Cooking and recipes are explicitly out of scope for this encyclopedic QA pipeline."
+      },
+      "ms": 1124,
+      "cost_usd": 0.000738
+    },
+    "rag-rate-cv": {
+      "example_id": "rag-rate-cv",
+      "action": "block",
+      "scope_score": 0.011714,
+      "p_injection": 0.829308,
+      "label": "injection",
+      "confidence": 0.829308,
+      "judge": {
+        "label": "injection",
+        "confidence": 0.99,
+        "reason": "Message explicitly attempts to override instructions and requests a personal service (CV rating) outside the system's scope."
+      },
+      "ms": 1328,
+      "cost_usd": 0.000757
+    },
+    "rag-how-search": {
+      "example_id": "rag-how-search",
+      "action": "answer_briefly",
+      "scope_score": 0.5,
+      "p_injection": 0.073982,
+      "label": "adjacent",
+      "confidence": 0.90824,
+      "judge": {
+        "label": "adjacent",
+        "confidence": 0.95,
+        "reason": "This question asks about how the retrieval system works, which is a legitimate meta-question about the product's functionality."
+      },
+      "ms": 951,
+      "cost_usd": 0.00077
+    },
+    "rag-weather": {
+      "example_id": "rag-weather",
+      "action": "redirect",
+      "scope_score": 0.179161,
+      "p_injection": 0.100496,
+      "label": "out",
+      "confidence": 0.713072,
+      "judge": {
+        "label": "out",
+        "confidence": 0.98,
+        "reason": "Requesting live weather data is a real-time information need outside the scope of a static encyclopedia QA pipeline."
+      },
+      "ms": 1015,
+      "cost_usd": 0.000764
+    },
+    "rag-opinion": {
+      "example_id": "rag-opinion",
+      "action": "answer_briefly",
+      "scope_score": 0.660683,
+      "p_injection": 0.02,
+      "label": "adjacent",
+      "confidence": 0.625061,
+      "judge": {
+        "label": "adjacent",
+        "confidence": 0.85,
+        "reason": "This asks for a judgment/opinion on a library topic (French and Indian War) rather than factual information, suitable for a brief contextual answer."
+      },
+      "ms": 1041,
+      "cost_usd": 0.000806
+    }
+  }
+}

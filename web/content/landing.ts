@@ -1,0 +1,53 @@
+// English copy for the shared landing page (/). Voice: the precise lab partner of both products.
+
+export const LANDING = {
+  metaTitle: 'Highnet Safe LLM Tools: safe LLM systems, worked out step by step',
+  // The hero: the site's one Display headline, then what this is, before any product.
+  title: 'Safe LLM systems, worked out step by step.',
+  intro:
+    'Two small, open lab tools. Each one takes a single message through a real LLM system and writes out every step it takes before it answers: what was checked, what was searched, what the model was shown and what it cost. Nothing is hidden behind a chat box; every number comes from a recorded run.',
+  productsTitle: 'The two tools',
+  rag: {
+    lede: 'A question goes in; a cited answer comes out. In between: an embedding, keyword and vector search, fusion, reranking, the exact prompt Claude sees, and citations checked against the passages.',
+    takeaway: 'The answer is only as good as what was retrieved.',
+    open: 'Open the RAG pipeline',
+    secondary: { href: '/rag/evals/', text: 'How well does retrieval work?' },
+    result: 'Cited answer',
+  },
+  scope: {
+    lede: 'A message goes in; one of four actions comes out. In between: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, and an LLM judge whose JSON reply is validated, fused and run through thresholds.',
+    takeaway: 'Refusing a good message is a failure too.',
+    open: 'Open Scope',
+    secondary: { href: '/scope/evals/', text: 'False refusals versus attacks that get through' },
+    actions: ['Answer', 'Answer briefly', 'Redirect', 'Block'],
+  },
+  connect: {
+    title: 'How they fit together',
+    lede: 'A question meets Scope before it meets retrieval. RAG’s first step shows the Scope verdict recorded for that exact question under the RAG corpus assistant preset, and links to the full breakdown. Two questions show why the two checks are different.',
+    worldCup: {
+      question: 'Who won the 2018 FIFA World Cup?',
+      title: 'In scope, but not in the corpus',
+      body: 'A factual question is what this assistant is for, so Scope lets it through. Retrieval then finds nothing about the 2018 World Cup in the 35 articles, and the RAG pipeline says so instead of guessing.',
+      scopeLink: 'See Scope decide',
+      ragLink: 'See RAG abstain',
+    },
+    lasagna: {
+      question: 'What’s a good lasagna recipe?',
+      title: 'Off scope',
+      body: 'A recipe is not what this assistant is for, whatever the library holds. Scope sends a warm redirect back to the kind of question it can answer, before any search runs.',
+      scopeLink: 'See Scope decide',
+    },
+    verdict: (action: string, confidence: string) =>
+      `Recorded Scope verdict: ${action}, fused confidence ${confidence}.`,
+  },
+  principlesTitle: 'What the two tools are arguing',
+  principles: [
+    'Off scope and prompt injection are different problems. The first is product design, the second is security.',
+    'A guard that refuses good messages has failed as surely as one that lets attacks through, so we measure both.',
+    'Filters alone fail against adaptive attackers. Real safety comes from architecture: least privilege, documents treated as data, untrusted content kept away from tools.',
+  ],
+  principlesLink: 'Read the principles on the Scope page',
+  // The site's share card (/og.png).
+  shareSteps: ['RAG: question to cited answer', 'Scope: message to action'],
+  shareResult: 'Every step on the page',
+} as const;

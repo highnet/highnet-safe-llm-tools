@@ -5,7 +5,7 @@ export const CORPUS = {
   title: 'The corpus',
   metaTitle: 'Corpus: the 35 Wikipedia articles',
   metaDescription:
-    'The 35 Wikipedia articles highnet-rag answers from, with the text of each and where its chunks fall at every chunk size.',
+    'The 35 Wikipedia articles the RAG pipeline answers from, with the text of each and where its chunks fall at every chunk size.',
   lede: 'Every answer comes from these 35 English Wikipedia articles, the SQuAD 2.0 dev set (CC BY-SA 4.0). Before any question is asked, we cut each article into chunks at three sizes. The searches only ever see chunks, never whole articles. Pick an article to read it and see where its chunks fall.',
   loading: 'Loading the corpus…',
   error: (message: string) => `The corpus could not be loaded. ${message}`,

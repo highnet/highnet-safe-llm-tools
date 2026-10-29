@@ -8,7 +8,7 @@ export const EVALS = {
   sheetLabel: 'Sheet 2',
   metaTitle: 'Evals: how well the retrieval works',
   metaDescription:
-    'Recall, MRR, faithfulness and abstention for the highnet-rag pipeline, measured offline over golden question sets with real models.',
+    'Recall, MRR, faithfulness and abstention for the RAG pipeline, measured offline over golden question sets with real models.',
 
   lede: (questions: number, graded: boolean) =>
     graded

@@ -1,5 +1,6 @@
-// Extracts `# snippet: <stages> | <title>` ... `# /snippet` regions from the Python pipeline
-// and pre-highlights them with highlight.js. The page shows exactly the code that runs:
+// Extracts `# snippet: <stages> | <title>` ... `# /snippet` regions from the Python packages
+// (the RAG API, Scope and the shared core) and pre-highlights them with highlight.js. Stages from
+// scope/ are keyed `scope/<stage>`; a shared core file names a Scope stage as `scope/<stage>`. The page shows exactly the code that runs:
 // the source files are the single source of truth; lib/generated/snippets.json is derived.
 // Run: npm run gen:snippets (CI fails if the committed output is stale).
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -14,6 +15,11 @@ hljs.registerLanguage('python', python);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '../..');
 const sourceRoot = path.join(repoRoot, 'api/src/highnet_rag');
+const sourceRoots = [
+  { dir: sourceRoot, prefix: '' },
+  { dir: path.join(repoRoot, 'core/src/highnet_core'), prefix: '' },
+  { dir: path.join(repoRoot, 'scope/src/highnet_scope'), prefix: 'scope/' },
+];
 const outFile = path.join(here, '../lib/generated/snippets.json');
 
 // A web-only checkout (no api/) keeps the committed snippets.json; CI regenerates and diffs it.
@@ -22,7 +28,7 @@ if (!existsSync(sourceRoot)) {
   process.exit(0);
 }
 
-const START = /^\s*# snippet: ([\w,]+) \| (.+)$/;
+const START = /^\s*# snippet: ([\w,/]+) \| (.+)$/;
 const END = /^\s*# \/snippet\s*$/;
 
 const pythonFiles = (dir) =>
@@ -46,7 +52,7 @@ const trimBlank = (lines, offset) => {
   return { lines: lines.slice(start, end), startLine: offset + start };
 };
 
-const extract = (file) => {
+const extract = (file, prefix) => {
   const rel = path.relative(repoRoot, file).split(path.sep).join('/');
   const lines = readFileSync(file, 'utf8').split('\n');
   const found = [];
@@ -55,7 +61,8 @@ const extract = (file) => {
     const start = line.match(START);
     if (start) {
       if (open) throw new Error(`${rel}:${i + 1}: nested snippet`);
-      open = { stages: start[1].split(','), title: start[2].trim(), from: i + 1 };
+      const stages = start[1].split(',').map((s) => (s.includes('/') ? s : prefix + s));
+      open = { stages, title: start[2].trim(), from: i + 1 };
       return;
     }
     if (END.test(line)) {
@@ -79,9 +86,13 @@ const extract = (file) => {
 };
 
 // The stage's own pipeline code comes first, then the helpers it calls.
-const rank = (file) => (file.endsWith('pipeline/classic.py') ? 0 : 1);
+const rank = (file) =>
+  file.endsWith('pipeline/classic.py') || file.endsWith('highnet_scope/pipeline.py') ? 0 : 1;
 const snippets = {};
-for (const { stage, snippet } of pythonFiles(sourceRoot).flatMap(extract)) {
+const found = sourceRoots
+  .filter(({ dir }) => existsSync(dir))
+  .flatMap(({ dir, prefix }) => pythonFiles(dir).flatMap((file) => extract(file, prefix)));
+for (const { stage, snippet } of found) {
   (snippets[stage] ??= []).push(snippet);
 }
 for (const list of Object.values(snippets)) {

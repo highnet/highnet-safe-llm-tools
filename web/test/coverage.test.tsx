@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import CoveragePage from '@/app/coverage/page';
+import CoveragePage from '@/app/rag/coverage/page';
 import { CoverageReport } from '@/components/coverage/CoverageReport';
-import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { COVERAGE } from '@/content/coverage';
 import {
   type CoverageReport as Report,
@@ -86,7 +86,7 @@ describe('coverage page', () => {
   it('renders the committed report as a page', () => {
     render(<CoveragePage />);
     expect(
-      within(screen.getByRole('navigation', { name: COPY.nav.label })).getByRole('link', {
+      within(screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) })).getByRole('link', {
         name: 'Coverage',
       }),
     ).toHaveAttribute('aria-current', 'page');

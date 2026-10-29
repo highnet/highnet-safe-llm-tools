@@ -13,6 +13,7 @@ import { SiteHeader } from '@/components/site/SiteHeader';
 import { themeScript, ThemeToggle } from '@/components/site/ThemeToggle';
 import { Button } from '@/components/ui/Button';
 import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { SITE_URL } from '@/lib/site';
 import { STAGE_ORDER, STAGES } from '@/content/stages';
 import { snippetsFor } from '@/lib/snippets';
@@ -375,7 +376,7 @@ describe('site chrome and primitives', () => {
   it('renders header, footer, notices and buttons', () => {
     render(
       <>
-        <SiteHeader current="pipeline" />
+        <SiteHeader product="rag" current="pipeline" />
         <SiteFooter />
         <Notice tone="warning">careful</Notice>
         <Notice tone="error">broken</Notice>
@@ -384,15 +385,27 @@ describe('site chrome and primitives', () => {
       </>,
     );
     // The name links home; the footer maps every page and names its sections.
-    expect(screen.getByRole('link', { name: COPY.siteName })).toHaveAttribute('href', '/');
-    const pages = screen.getByRole('navigation', { name: COPY.footer.pages });
-    for (const link of COPY.nav.links) {
-      expect(within(pages).getByRole('link', { name: link.text })).toHaveAttribute(
-        'href',
-        link.href,
-      );
+    expect(screen.getByRole('link', { name: SITE.name })).toHaveAttribute('href', '/');
+    // The product switcher marks the current product; the product's own pages follow.
+    const products = screen.getByRole('navigation', { name: SITE.productsLabel });
+    expect(within(products).getByRole('link', { name: 'RAG' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(within(products).getByRole('link', { name: 'Scope' })).toHaveAttribute(
+      'href',
+      '/scope/',
+    );
+    for (const product of ['rag', 'scope'] as const) {
+      const pages = screen.getByRole('navigation', { name: SITE.products[product].name });
+      for (const link of SITE.pages[product]) {
+        expect(within(pages).getByRole('link', { name: link.text })).toHaveAttribute(
+          'href',
+          link.href,
+        );
+      }
     }
-    expect(screen.getByRole('navigation', { name: COPY.footer.project })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: SITE.footer.project })).toBeInTheDocument();
     // The sticky header draws its bottom rule only once the page scrolls under it.
     const bar = document.querySelector('[data-slot="header-bar"]')!;
     expect(bar).not.toHaveAttribute('data-scrolled');
@@ -441,7 +454,7 @@ describe('site chrome and primitives', () => {
     );
     expect(html).toContain('font-recursive');
     expect(html).toContain('highnet-rag-theme');
-    expect(metadata.title).toMatchObject({ default: expect.stringContaining('highnet-rag') });
+    expect(metadata.title).toMatchObject({ default: expect.stringContaining('Highnet Safe LLM Tools') });
     // Canonical and share-card addresses resolve against the public site address.
     expect(String(metadata.metadataBase)).toBe(`${SITE_URL}/`);
     expect(viewport.themeColor).toHaveLength(2);

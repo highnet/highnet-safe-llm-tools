@@ -7,12 +7,17 @@ import { EVALS } from '@/content/evals';
 import { publishedResults } from '@/lib/evals';
 import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = pageMetadata('/evals/', EVALS.metaTitle, EVALS.metaDescription);
+export const metadata: Metadata = pageMetadata(
+  '/rag/evals/',
+  EVALS.metaTitle,
+  EVALS.metaDescription,
+  'rag',
+);
 
 const EvalsPage = () => {
   return (
     <>
-      <SiteHeader current="evals" />
+      <SiteHeader product="rag" current="evals" />
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-8 md:pt-12">
         <EvalsReport results={publishedResults} />
       </main>

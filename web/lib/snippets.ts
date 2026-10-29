@@ -13,7 +13,7 @@ export type Snippet = {
 
 const SNIPPETS = generated as Partial<Record<Stage, Snippet[]>>;
 
-export const REPO_URL = 'https://github.com/highnet/highnet-rag';
+export const REPO_URL = 'https://github.com/highnet/highnet-safe-llm-tools';
 
 export const snippetsFor = (stage: Stage): Snippet[] => SNIPPETS[stage] ?? [];
 

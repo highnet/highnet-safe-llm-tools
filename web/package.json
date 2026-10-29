@@ -1,5 +1,5 @@
 {
-  "name": "highnet-rag-web",
+  "name": "highnet-safe-llm-tools-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "format": "prettier --write .",
-    "gen:types": "cd .. && uv run highnet-rag schema && uv run highnet-rag-evals schema && cd web && json2ts -i lib/generated/trace.schema.json -o lib/generated/trace.ts --bannerComment \"/* Generated from api/src/highnet_rag/trace.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && json2ts -i lib/generated/evals.schema.json -o lib/generated/evals.ts --bannerComment \"/* Generated from evals/src/highnet_rag_evals/results.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && prettier --write lib/generated/trace.ts lib/generated/evals.ts",
+    "gen:types": "cd .. && uv run highnet-rag schema && uv run highnet-rag-evals schema && uv run highnet-scope schema && uv run highnet-scope-evals schema && cd web && json2ts -i lib/generated/trace.schema.json -o lib/generated/trace.ts --bannerComment \"/* Generated from api/src/highnet_rag/trace.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && json2ts -i lib/generated/evals.schema.json -o lib/generated/evals.ts --bannerComment \"/* Generated from evals/src/highnet_rag_evals/results.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && json2ts -i lib/generated/scope-trace.schema.json -o lib/generated/scope-trace.ts --bannerComment \"/* Generated from scope/src/highnet_scope/trace.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && json2ts -i lib/generated/scope-evals.schema.json -o lib/generated/scope-evals.ts --bannerComment \"/* Generated from evals/src/highnet_scope_evals/results.py by \\`npm run gen:types\\`. Do not edit. */\" --unreachableDefinitions --additionalProperties false && prettier --write lib/generated/trace.ts lib/generated/evals.ts lib/generated/scope-trace.ts lib/generated/scope-evals.ts",
     "gen:snippets": "node scripts/gen-snippets.mjs && prettier --write lib/generated/snippets.json",
     "prebuild": "npm run gen:snippets && npm run gen:evals",
     "gen:evals": "node scripts/gen-evals.mjs"

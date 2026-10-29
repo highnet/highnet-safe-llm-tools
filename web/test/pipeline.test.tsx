@@ -42,7 +42,7 @@ describe('pipeline view (smoke)', () => {
     // next/link drops the trailing slash under test; the static build (trailingSlash) keeps it.
     expect(screen.getByRole('link', { name: COPY.hero.corpus })).toHaveAttribute(
       'href',
-      expect.stringMatching(/^\/corpus\/?$/),
+      expect.stringMatching(/^\/rag\/corpus\/?$/),
     );
     // The page opens by defining the term it is about.
     expect(screen.getAllByRole('term')[0]).toHaveTextContent(COPY.rag.term);

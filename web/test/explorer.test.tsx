@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
 import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { useTraceStream } from '@/lib/use-trace-stream';
 
@@ -240,9 +241,9 @@ describe('useMediaQuery', () => {
 describe('page', () => {
   it('assembles header, explorer and footer', async () => {
     withConfig();
-    const { default: Page } = await import('@/app/page');
+    const { default: Page } = await import('@/app/rag/page');
     render(<Page />);
     expect(await screen.findByText(COPY.settings.topK)).toBeInTheDocument();
-    expect(screen.getByText(COPY.footer.corpus)).toBeInTheDocument();
+    expect(screen.getByText(SITE.footer.corpus)).toBeInTheDocument();
   });
 });

@@ -38,6 +38,8 @@ export type RunContext = {
   bm25?: Bm25Data;
   vector?: VectorData;
   chunkSet?: string;
+  // The recorded question being replayed, if any: its Scope verdict shows in the request step.
+  questionId?: string;
 };
 
 type StageBodyProps = {
@@ -56,7 +58,7 @@ const StageBody = ({ event, context }: StageBodyProps) => {
   }
   switch (event.stage) {
     case 'request':
-      return <RequestView data={data as RequestData} />;
+      return <RequestView data={data as RequestData} questionId={context.questionId} />;
     case 'embed_query':
       return <EmbedView data={data as EmbedData} />;
     case 'map_project':

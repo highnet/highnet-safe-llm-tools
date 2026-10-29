@@ -3,19 +3,20 @@ import type { Metadata } from 'next';
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
-import { COPY } from '@/content/copy';
-import { pageMetadata, SITE_DESCRIPTION } from '@/lib/site';
+import { SITE } from '@/content/site';
+import { pageMetadata, PRODUCT_DESCRIPTION } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata(
-  '/',
-  `${COPY.siteName}: ${COPY.tagline}`,
-  SITE_DESCRIPTION,
+  '/rag/',
+  `${SITE.products.rag.name}: ${SITE.products.rag.tagline}`,
+  PRODUCT_DESCRIPTION.rag,
+  'rag',
 );
 
-const Page = () => {
+const RagPage = () => {
   return (
     <>
-      <SiteHeader current="pipeline" />
+      <SiteHeader product="rag" current="pipeline" hideTagline />
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-8 md:pt-12">
         <PipelineExplorer />
       </main>
@@ -24,4 +25,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default RagPage;
