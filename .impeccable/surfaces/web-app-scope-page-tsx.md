@@ -25,3 +25,5 @@ STORY: The visitor sees three independent signals disagree, watches fusion and t
 FIRST VIEWPORT: The hero: Display headline "Watch an AI agent decide whether a message is in scope, step by step.", the "Scope guard" definition, intro, "Try a message" / "Browse the labeled prompts", and the Scope diagram as the picture on the right; phones stack them. Below: "What we hold to", then "Sheet 1 · <message>", the replay notice, the picker and settings, and the twelve numbered steps.
 
 FORM: engineer's computation pad, as DESIGN.md.
+
+SIMPLE VIEW: For non-experts, a "Show: Simple / Every step" switch (`?view=simple`; a first visit opens Simple). Simple shows the same run in plain words on one sheet: the message, what the assistant does, who voted (checklist, similar messages, AI judge, decision model, each with its lean and how sure), the combined vote and the reply, with "Show every step" one click away. Every number still comes from the trace; no jargon.

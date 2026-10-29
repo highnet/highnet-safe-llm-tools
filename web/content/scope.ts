@@ -188,6 +188,79 @@ export const SCOPE = {
     },
   },
 
+  // The switch between the plain summary and the full working (?view=simple).
+  view: {
+    label: 'Show',
+    simple: 'Simple',
+    steps: 'Every step',
+  },
+
+  // The Simple view: the same run in plain words, for readers who do not want the working.
+  // No jargon here: no kNN, fusion or distribution; the advisors have everyday names.
+  simple: {
+    title: 'In short',
+    intro: 'The same run in plain words: what came in, who voted, and what the assistant does.',
+    empty: 'Pick a message above to see what the assistant decides.',
+    deciding: 'Working it out…',
+    message: 'The message',
+    earlier: 'Said earlier in the conversation',
+    outcome: 'What the assistant does',
+    outcomes: {
+      answer: 'This is what the assistant is for, so it answers.',
+      answer_briefly: 'This is close to what the assistant is for, so it answers in a few lines.',
+      redirect: 'Not what this assistant is for, so it points you back, politely.',
+      block: 'This looks like an attempt to trick the assistant, so it refuses.',
+    },
+    // The four classes as an everyday word, beside the same shapes the full view uses.
+    labels: {
+      in: 'in scope',
+      adjacent: 'close to scope',
+      out: 'off scope',
+      injection: 'a trick',
+    },
+    voters: 'Who voted',
+    votersNote:
+      'Four advisors read the message on their own. Each leans one way, some more sure than others.',
+    advisors: {
+      rules: 'The checklist',
+      knn: 'Similar messages',
+      judge: 'The AI judge',
+      decide: 'The decision model',
+    },
+    advisorHelp: {
+      rules: 'looks for known tricks and topic words',
+      knn: 'the labelled example messages that read most alike',
+      judge: 'an AI model that reads what this assistant is for',
+      decide: 'a second AI model that gives odds for each answer',
+    },
+    sure: (pct: string) => `${pct} sure`,
+    notRun: {
+      off: 'Didn’t vote: switched off in the settings.',
+      edited:
+        'Didn’t vote: you changed what the assistant is for, and its recording used the original.',
+      abstained: 'Didn’t vote: nothing on its list matched.',
+      other: 'Didn’t vote on this message.',
+      notRecorded: 'Left out: there is no recording of it for this message yet.',
+      failed: 'Left out: it ran into a problem on this message.',
+      waiting: 'Waiting…',
+    },
+    combinedTitle: 'Combined',
+    combined: (votes: string, pct: string) =>
+      `Weighing ${votes} together gives this lean, ${pct} sure. Then the assistant checks how far the combined vote leans towards what it is for: far enough for a full answer, partly for a short one, too little for a redirect. A strong lean towards a trick blocks the message.`,
+    votes: (n: number) => plural(n, 'vote'),
+    reply: 'What it says back',
+    handoff:
+      'It hands the question to the RAG pipeline, which looks for the answer in its 35 articles.',
+    handoffBrief:
+      'It hands the question to the RAG pipeline for a short answer from its 35 articles.',
+    openRag: 'Ask the RAG pipeline',
+    noReply: 'There is no recorded reply for these settings.',
+    every: 'Show every step',
+    settings: 'Change the settings',
+    settingsNote: 'Settings and the scope definition live in the every-step view.',
+    stopped: 'The run stopped before the assistant decided.',
+  },
+
   workingLabel: 'The working',
   workingNote: (n: number) => `${n} steps, top to bottom`,
   announce: (label: string, title: string, status: string, ms: string) =>

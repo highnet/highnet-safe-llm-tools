@@ -103,7 +103,8 @@ describe('scope explorer runs', () => {
     fireEvent.click(screen.getByRole('button', { name: /What's a good lasagna recipe\?/ }));
     const source = ControlledEventSource.last();
     expect(source.url).toContain('/api/scope/run?preset=career&example=career-lasagna');
-    expect(window.location.search).toBe('?preset=career&example=career-lasagna');
+    // A first visit opens the Simple view, and the link keeps it.
+    expect(window.location.search).toBe('?preset=career&view=simple&example=career-lasagna');
     expect(screen.getByRole('button', { name: SCOPE.stop })).toBeInTheDocument();
     const rec = recording('lasagna-recipe');
     play({ ...rec, events: rec.events.slice(0, 3) }, source, false);
@@ -116,6 +117,9 @@ describe('scope explorer runs', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /What's a good lasagna recipe\?/ }));
     play(rec);
+    expect(screen.getByText(SCOPE.simple.outcomes.answer)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: SCOPE.view.steps }));
+    expect(window.location.search).toBe('?preset=career&example=career-lasagna');
     expect(screen.getByRole('heading', { name: SCOPE.result.label })).toBeInTheDocument();
     expect(screen.getByText(/Recorded totals/)).toBeInTheDocument();
     expect(screen.getAllByText('Answer').length).toBeGreaterThan(1);
@@ -230,7 +234,7 @@ describe('scope explorer runs', () => {
     fireEvent.click(screen.getByRole('button', { name: /lasagna/ }));
     play(recording('lasagna-recipe'));
     fireEvent.click(screen.getByRole('button', { name: 'Recipe assistant' }));
-    expect(window.location.search).toBe('?preset=recipe');
+    expect(window.location.search).toBe('?preset=recipe&view=simple');
     expect(screen.getByText(SCOPE.emptyTitle)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: SCOPE.result.label })).not.toBeInTheDocument();
     const more = screen.getByRole('button', { name: SCOPE.picker.more(13) });

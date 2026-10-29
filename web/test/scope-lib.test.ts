@@ -36,8 +36,15 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('scope url state', () => {
   it('falls back to the defaults for a bare or broken link', () => {
+    // A first visit (no query at all) opens the Simple view; any other link keeps every step.
     const bare = parseScopeUrl('', config);
-    expect(bare).toEqual(defaultScopeSettings(config, 'career'));
+    expect(bare).toEqual({ ...defaultScopeSettings(config, 'career'), view: 'simple' });
+    expect(parseScopeUrl('?view=steps', config).view).toBe('steps');
+    expect(parseScopeUrl('?preset=rag', config).view).toBe('steps');
+    expect(parseScopeUrl('?preset=rag&view=simple', config).view).toBe('simple');
+    expect(scopeSearch({ ...defaultScopeSettings(config, 'rag'), view: 'simple' }, config)).toBe(
+      '?preset=rag&view=simple',
+    );
     const broken = parseScopeUrl(
       '?preset=nope&example=x&k=99&w_rules=2&t_block=abc&edit=nope:in,cv:wrong',
       config,

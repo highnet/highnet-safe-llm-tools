@@ -12,7 +12,13 @@ import {
 // ?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&t_brief=0.3&k=5
 //   &edit=coding_practice:in
 // Only values that differ from the defaults are written. Invalid values fall back to them.
+// `view` picks the page's layout: `simple` (the plain summary) or `steps` (every step). A first
+// visit with no query at all opens Simple; any other link without `view` keeps every step, as
+// links made before the Simple view did.
+export type ScopeView = 'simple' | 'steps';
+
 export type ScopeSettings = {
+  view: ScopeView;
   preset: string;
   example: string | null;
   context: boolean;
@@ -32,6 +38,7 @@ export const defaultScopeSettings = (
   config: ScopeConfig,
   preset = DEFAULT_PRESET,
 ): ScopeSettings => ({
+  view: 'steps',
   preset,
   example: null,
   context: true,
@@ -79,7 +86,10 @@ export const parseScopeUrl = (search: string, config: ScopeConfig): ScopeSetting
       .filter(Boolean)
       .map((part) => part.split(':') as [string, string]),
   );
+  const view = params.get('view');
+  const firstVisit = view === null && [...params.keys()].length === 0;
   return {
+    view: view === 'simple' || firstVisit ? 'simple' : 'steps',
     preset,
     example: config.examples.some((e) => e.id === example && e.preset === preset) ? example : null,
     context: params.get('context') !== '0',
@@ -107,6 +117,7 @@ export const editParam = (edit: Record<string, TopicClass>) =>
 export const scopeSearch = (settings: ScopeSettings, config: ScopeConfig): string => {
   const fallback = defaultScopeSettings(config, settings.preset);
   const params = new URLSearchParams({ preset: settings.preset });
+  if (settings.view === 'simple') params.set('view', 'simple');
   if (settings.example) params.set('example', settings.example);
   if (!settings.context) params.set('context', '0');
   for (const s of SIGNALS) {
