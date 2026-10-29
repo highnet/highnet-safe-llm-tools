@@ -81,10 +81,8 @@ def decode_runs(text: str) -> list[str]:
         if decoded:
             found.append(decoded)
     for run in HEX_RUN.findall(text):
-        try:
-            decoded = _readable(bytes.fromhex(re.sub(r"[\s:]", "", run)))
-        except ValueError:
-            decoded = None
+        # HEX_RUN only matches whole byte pairs, so the run always parses as hex.
+        decoded = _readable(bytes.fromhex(re.sub(r"[\s:]", "", run)))
         if decoded:
             found.append(decoded)
     return found

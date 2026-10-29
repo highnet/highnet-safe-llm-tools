@@ -181,7 +181,9 @@ class ScopeStore:
                 "SELECT * FROM prompts WHERE preset = ? ORDER BY ord", (preset,)
             ).fetchall()
             matrix = np.stack([np.frombuffer(r["embedding"], dtype=np.float32) for r in rows])
-            matrix = matrix / np.linalg.norm(matrix, axis=1, keepdims=True)
+            norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+            # An all-zero vector stays zero (similarity 0 to everything) instead of NaN.
+            matrix = matrix / np.where(norms == 0, 1.0, norms)
             self._matrices[preset] = (matrix, [self._prompt(r) for r in rows])
         return self._matrices[preset]
 

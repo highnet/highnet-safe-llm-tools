@@ -57,7 +57,8 @@ def cmd_record(args: argparse.Namespace) -> None:
 
 
 async def verdicts(settings: ScopeSettings) -> dict[str, Any]:
-    """The default-settings Scope run of every RAG question, for RAG's request step."""
+    """The default-settings Scope run of every message under the RAG corpus assistant preset,
+    by example id and, for RAG's own recorded questions, by question id (RAG's request step)."""
     from highnet_core.trace import TraceEvent
     from highnet_scope.api import build_scope_deps
     from highnet_scope.pipeline import ScopeParams, run_scope
@@ -65,17 +66,19 @@ async def verdicts(settings: ScopeSettings) -> dict[str, Any]:
     deps, error = build_scope_deps(settings.model_copy(update={"scope_replay_speed": 1e9}))
     if deps is None:
         raise SystemExit(error)
-    out: dict[str, Any] = {}
+    by_question: dict[str, Any] = {}
+    by_example: dict[str, Any] = {}
     for example in deps.store.examples():
-        if not example.rag_question:
+        if example.preset != "rag":
             continue
         steps: dict[str, TraceEvent] = {}
         params = ScopeParams(preset="rag", example_id=example.id)
-        async for item in run_scope(params, deps, "export"):
+        # One caller per run, so the export never meets the per-IP rate limit.
+        async for item in run_scope(params, deps, f"export-{example.id}"):
             if isinstance(item, TraceEvent):
                 steps[item.stage] = item
         judge = steps["judge"].data.get("verdict")
-        out[example.rag_question] = {
+        verdict = {
             "example_id": example.id,
             "action": steps["thresholds"].data["action"],
             "scope_score": steps["thresholds"].data["scope_score"],
@@ -86,7 +89,14 @@ async def verdicts(settings: ScopeSettings) -> dict[str, Any]:
             "ms": sum(s.ms for s in steps.values()),
             "cost_usd": round(sum(s.cost_usd for s in steps.values()), 6),
         }
-    return {"recorded_at": deps.store.recorded_at(), "verdicts": out}
+        by_example[example.id] = verdict
+        if example.rag_question:
+            by_question[example.rag_question] = verdict
+    return {
+        "recorded_at": deps.store.recorded_at(),
+        "verdicts": by_question,
+        "examples": by_example,
+    }
 
 
 def cmd_export(args: argparse.Namespace) -> None:

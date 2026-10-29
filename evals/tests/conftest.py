@@ -107,3 +107,27 @@ def corpus_path(tmp_path_factory: pytest.TempPathFactory, squad_path: Path) -> P
         )
     )
     return out
+
+
+@pytest.fixture(scope="session")
+def scope_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Scope's labeled prompts with offline embeddings (dims=64), for the Scope eval tests."""
+    from highnet_core.providers.fake import FakeEmbedder
+    from highnet_scope.config import ScopeSettings
+    from highnet_scope.ingest import build_scope, load_examples, load_golden
+    from highnet_scope.store import ScopeStore
+
+    repo = Path(__file__).resolve().parents[2]
+    out = tmp_path_factory.mktemp("scope") / "scope.sqlite"
+    settings = ScopeSettings(fake_providers=True, embed_dims=64, _env_file=None)  # pyright: ignore[reportCallIssue]
+    asyncio.run(
+        build_scope(
+            load_golden(repo / "evals/golden/scope"),
+            load_examples(repo / "recordings/scope/examples.json"),
+            ScopeStore(out),
+            FakeEmbedder(64),
+            settings,
+            log=lambda _: None,
+        )
+    )
+    return out

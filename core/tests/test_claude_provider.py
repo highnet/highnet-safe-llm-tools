@@ -8,7 +8,7 @@ from pydantic import SecretStr
 from highnet_core.config import CoreSettings as Settings
 from highnet_core.providers import claude as claude_module
 from highnet_core.providers.base import FinalAnswer, ProviderNotConfiguredError
-from highnet_core.providers.claude import ClaudeAnswerModel, ClaudeJudge
+from highnet_core.providers.claude import ClaudeAnswerModel, ClaudeJudge, ClaudeTextModel
 
 
 class FakeStream:
@@ -174,3 +174,42 @@ async def test_judge_forces_its_tool_and_returns_the_input(
     assert calls[0]["model"] == "claude-sonnet-5"
     with pytest.raises(RuntimeError, match="did not call grade"):
         await judge.call("sys", "{}", tool)
+
+
+async def test_text_model_makes_one_plain_call_with_the_prefill(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[dict] = []
+
+    async def create(**kwargs: object) -> SimpleNamespace:
+        calls.append(kwargs)
+        return SimpleNamespace(
+            content=[
+                SimpleNamespace(type="thinking", thinking=""),
+                SimpleNamespace(type="text", text='"label": "in", '),
+                SimpleNamespace(type="text", text='"confidence": 0.9}'),
+            ],
+            stop_reason="end_turn",
+            usage=SimpleNamespace(input_tokens=120, output_tokens=15),
+        )
+
+    monkeypatch.setattr(
+        claude_module.anthropic,
+        "AsyncAnthropic",
+        lambda api_key, **options: SimpleNamespace(messages=SimpleNamespace(create=create)),
+    )
+    settings = Settings(anthropic_api_key=SecretStr("sk-test"), _env_file=None)  # pyright: ignore[reportCallIssue]
+    model = ClaudeTextModel(settings, "claude-haiku-4-5")
+    messages = [
+        {"role": "user", "content": "<message>hi</message>"},
+        {"role": "assistant", "content": "{"},
+    ]
+    result = await model.complete("rubric", messages, 200)
+    assert result.text == '"label": "in", "confidence": 0.9}'
+    assert (result.stop_reason, result.input_tokens, result.output_tokens) == ("end_turn", 120, 15)
+    assert calls[0] == {
+        "model": "claude-haiku-4-5",
+        "max_tokens": 200,
+        "system": "rubric",
+        "messages": messages,
+    }
