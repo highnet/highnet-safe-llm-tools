@@ -70,6 +70,7 @@ Changing any of this needs the owner's approval.
   - stronger model for demos: default `claude-opus-5`;
   - judge model for evals: default `claude-sonnet-5`.
 - **Embeddings:** API only (Voyage). The 2D map uses PCA in numpy, fitted at ingest time.
+- **Decision model (Scope's second judge; owner decision 2026-10-29):** `typesafe-ai/jev` through Vercel AI Gateway's HTTP API (`AI_GATEWAY_API_KEY`), called directly with httpx, no SDK. Like every model call it is recorded once and replayed on visits.
 - **Storage:** SQLite on a Fly volume, with sqlite-vec for vectors and FTS5 for BM25, behind a storage interface.
 - **Streaming:** SSE with one trace event per pipeline stage.
 - **Hosting (changed by the owner, 2026-09-28):**
@@ -100,7 +101,7 @@ Changing any of this needs the owner's approval.
 
 | #   | Question            | Decision |
 | --- | ------------------- | -------- |
-| S1  | Concept             | A product agent guards its scope. A message (optionally with earlier turns) runs through 11 traced steps and ends in **answer** (in scope), **answer briefly** (adjacent), **redirect** (off scope: a warm pivot back, never a cold refusal) or **block** (prompt injection or abuse). |
+| S1  | Concept             | A product agent guards its scope. A message (optionally with earlier turns) runs through 12 traced steps (the 12th, a decision model as second judge, added 2026-10-29) and ends in **answer** (in scope), **answer briefly** (adjacent), **redirect** (off scope: a warm pivot back, never a cold refusal) or **block** (prompt injection or abuse). |
 | S2  | Presets             | Four, each with an editable scope definition (topics in / adjacent / out, with examples): **career agent** (default), **recipe assistant**, **bank support bot**, **RAG corpus assistant** (its scope is defined by the 35 SQuAD articles; a factual question outside them is in scope, and RAG then abstains). |
 | S3  | Dataset             | About 300 labeled prompts per preset (1,200), drafted by Claude across in / adjacent / out / injection with hard edge cases, stored as JSONL golden files and labelled as Claude-drafted on the site. Embedded with `voyage-3.5-lite`; a PCA per preset is fitted at ingest. |
 | S4  | Pipeline            | Request check · conversation context · rule prefilter · embed · map · kNN vote · LLM judge (Claude Haiku, strict JSON validated with Pydantic; the message is data inside delimiters and never followed) · weighted fusion · thresholds · action and response (hard length caps) · audit record. |

@@ -6,17 +6,9 @@ import type { JudgeData } from '@/lib/scope/types';
 import { ClassTag } from '../ClassTag';
 import { Disclosure } from '../Disclosure';
 import { DistributionBar } from '../DistributionBar';
+import { Verbatim } from './Verbatim';
 
 const F = SCOPE.steps.judge;
-
-type VerbatimProps = { text: string };
-
-// A model's words exactly as sent or received, wrapped so nothing scrolls sideways.
-const Verbatim = ({ text }: VerbatimProps) => (
-  <pre className="voice-data max-h-80 overflow-auto rounded-sm border border-dashed px-3 py-2 text-xs leading-relaxed break-words whitespace-pre-wrap">
-    {text}
-  </pre>
-);
 
 type JudgeViewProps = { data: JudgeData; status: string };
 

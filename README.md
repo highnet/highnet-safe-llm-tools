@@ -9,7 +9,7 @@ Safe LLM systems, worked out step by step. Two small, open teaching tools that t
 - choosing the context and the exact prompt;
 - the streamed answer and its citations, or an agent that plans its own searches.
 
-**Scope** (`/scope/`): watch an AI agent decide whether a message is in scope, step by step. A message runs through eleven steps (request check, conversation context, a rule prefilter for injections and hidden text, an embedding placed on a map, a nearest-neighbour vote over 1,200 labeled prompts, an LLM judge whose JSON reply is validated, weighted fusion, thresholds) and ends in **answer**, **answer briefly**, **redirect** or **block**. Four presets (career agent, recipe assistant, bank support bot, RAG corpus assistant), each with an editable scope definition.
+**Scope** (`/scope/`): watch an AI agent decide whether a message is in scope, step by step. A message runs through twelve steps (request check, conversation context, a rule prefilter for injections and hidden text, an embedding placed on a map, a nearest-neighbour vote over 1,200 labeled prompts, an LLM judge whose JSON reply is validated, a decision model (Jev) as a second judge that returns a probability per label, weighted fusion, thresholds) and ends in **answer**, **answer briefly**, **redirect** or **block**. Four presets (career agent, recipe assistant, bank support bot, RAG corpus assistant), each with an editable scope definition.
 
 Both replay runs recorded once with the real models: a visit calls no model and costs nothing, and every number on the page is the recorded one. Settings replay or recompute; nothing is simulated.
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Notice } from '@/components/site/Notice';
 import { Button } from '@/components/ui/Button';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
 import { SCOPE } from '@/content/scope';
@@ -16,6 +17,7 @@ import {
   defaultScopeSettings,
   parseScopeUrl,
   type ScopeSettings,
+  type ScopeView,
   writeScopeUrl,
 } from '@/lib/scope/url-state';
 import { useScopeStream } from '@/lib/scope/use-scope-stream';
@@ -28,6 +30,7 @@ import { ScopeEditor } from './ScopeEditor';
 import { ScopeHero } from './ScopeHero';
 import { ScopeResult } from './ScopeResult';
 import { ScopeSettingsStrip } from './ScopeSettings';
+import { ScopeSimple } from './ScopeSimple';
 import { ScopeStepList } from './ScopeStepList';
 
 // A slider sends many changes in a row; the replay starts once it rests.
@@ -52,6 +55,7 @@ const ScopeExplorer = () => {
   const trace = useScopeStream();
   const { run } = trace;
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const working = useRef<HTMLElement>(null);
 
   const replay = useCallback(
     (next: ScopeSettings) => {
@@ -100,6 +104,17 @@ const ScopeExplorer = () => {
     else timer.current = setTimeout(() => replay(next), delay);
   };
 
+  // Switching the view changes only the layout and the link; nothing is replayed.
+  const setView = (view: ScopeView) => {
+    const next = { ...settings!, view };
+    setSettings(next);
+    writeScopeUrl(next, config!);
+  };
+  const showSteps = () => {
+    setView('steps');
+    working.current?.scrollIntoView?.({ block: 'start' });
+  };
+
   const pick = (example: Example) => apply({ ...settings!, example: example.id }, 0);
   const changePreset = (preset: string) => {
     trace.reset();
@@ -115,6 +130,7 @@ const ScopeExplorer = () => {
   const preset = config && settings ? config.presets.find((p) => p.id === settings.preset)! : null;
   const example = config?.examples.find((e) => e.id === settings?.example);
   const ran = trace.input;
+  const simple = settings?.view === 'simple';
 
   const lastEvent = trace.events.at(-1);
   const announcement = lastEvent
@@ -197,56 +213,107 @@ const ScopeExplorer = () => {
                 onPick={pick}
               />
             )}
-            <ScopeSettingsStrip
-              settings={settings}
-              changed={tuned(settings, config)}
-              disabled={false}
-              onChange={(next) => apply(next, REPLAY_DELAY_MS)}
-              onReset={() =>
-                apply(
-                  {
-                    ...defaultScopeSettings(config, settings.preset),
-                    example: settings.example,
-                    edit: settings.edit,
-                  },
-                  0,
-                )
-              }
-            />
-            <ScopeEditor
-              key={preset.id}
-              preset={preset}
-              edit={settings.edit}
-              disabled={false}
-              onChange={(edit) => apply({ ...settings, edit }, 0)}
-            />
+            {simple ? (
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-y border-dashed py-2">
+                <Typography variant="small" color="muted" as="span">
+                  {SCOPE.simple.settingsNote}
+                </Typography>
+                <Button
+                  variant="pencil"
+                  size="inline"
+                  className="min-h-10 text-sm"
+                  onClick={() => setView('steps')}
+                >
+                  {SCOPE.simple.settings}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <ScopeSettingsStrip
+                  settings={settings}
+                  changed={tuned(settings, config)}
+                  disabled={false}
+                  onChange={(next) => apply(next, REPLAY_DELAY_MS)}
+                  onReset={() =>
+                    apply(
+                      {
+                        ...defaultScopeSettings(config, settings.preset),
+                        example: settings.example,
+                        edit: settings.edit,
+                      },
+                      0,
+                    )
+                  }
+                />
+                <ScopeEditor
+                  key={preset.id}
+                  preset={preset}
+                  edit={settings.edit}
+                  disabled={false}
+                  onChange={(edit) => apply({ ...settings, edit }, 0)}
+                />
+              </>
+            )}
           </>
         )}
         {trace.connectionError && <Notice tone="warning">{trace.connectionError}</Notice>}
       </section>
 
-      <section aria-labelledby="working-title" className="space-y-3 md:space-y-4">
-        <div className="flex items-baseline gap-3 border-b pb-2">
-          <Typography variant="label" as="h2" id="working-title">
-            {SCOPE.workingLabel}
-          </Typography>
-          <Typography variant="small" color="muted" as="span">
-            {SCOPE.workingNote(SCOPE_STAGE_ORDER.length)}
-          </Typography>
+      <section
+        ref={working}
+        aria-labelledby="working-title"
+        className="scroll-mt-6 space-y-3 md:space-y-4"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b pb-2">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">
+            <Typography variant="label" as="h2" id="working-title">
+              {simple ? SCOPE.simple.title : SCOPE.workingLabel}
+            </Typography>
+            <Typography variant="small" color="muted" as="span">
+              {simple ? SCOPE.simple.intro : SCOPE.workingNote(SCOPE_STAGE_ORDER.length)}
+            </Typography>
+          </div>
+          {settings && (
+            <div className="flex items-center gap-2">
+              <span id="scope-view-label" className="text-sm text-muted-foreground">
+                {SCOPE.view.label}
+              </span>
+              <SegmentedControl
+                name="scope-view"
+                labelledBy="scope-view-label"
+                size="sm"
+                value={settings.view}
+                onChange={(value) => setView(value as ScopeView)}
+                options={[
+                  { value: 'simple', label: SCOPE.view.simple },
+                  { value: 'steps', label: SCOPE.view.steps },
+                ]}
+              />
+            </div>
+          )}
         </div>
-        <ScopeStepList
-          events={trace.events}
-          runStatus={trace.status}
-          context={{
-            preset: ran?.preset ?? settings?.preset ?? '',
-            message: request?.message ?? '',
-            block: ran?.thresholds.block ?? 0.5,
-            edit: ran?.edit ?? {},
-          }}
-        />
+        {simple ? (
+          <ScopeSimple
+            events={trace.events}
+            runStatus={trace.status}
+            signals={ran?.signals ?? null}
+            onShowSteps={showSteps}
+          />
+        ) : (
+          <ScopeStepList
+            events={trace.events}
+            runStatus={trace.status}
+            context={{
+              preset: ran?.preset ?? settings?.preset ?? '',
+              message: request?.message ?? '',
+              block: ran?.thresholds.block ?? 0.5,
+              edit: ran?.edit ?? {},
+            }}
+          />
+        )}
       </section>
 
-      {decision && (
+      {decision && !simple && (
         <ScopeResult decision={decision} events={trace.events} done={trace.done !== null} />
       )}
 

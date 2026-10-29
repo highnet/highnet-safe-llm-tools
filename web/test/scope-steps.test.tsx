@@ -4,7 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScopeStageBody, type ScopeRunContext } from '@/components/scope/ScopeStageBody';
 import { ScopeStepList } from '@/components/scope/ScopeStepList';
 import { ScopeMap } from '@/components/scope/ScopeMap';
-import { SCOPE } from '@/content/scope';
+import { FORMAL } from '@/content/formal';
+import { SCOPE, SCOPE_KEY } from '@/content/scope';
+import { SCOPE_STAGE_ORDER } from '@/content/scope-stages';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { clearDatasetCache } from '@/lib/scope/api';
 
@@ -164,8 +166,96 @@ describe('scope step views', () => {
     expect(screen.getByText(S.fuse.tiers.judge)).toBeInTheDocument();
     expect(screen.getByText('$0.0008')).toBeInTheDocument();
     unmount();
-    body(stage(recording('rules-only'), 'fuse'));
-    expect(screen.getAllByText(S.fuse.notRun)).toHaveLength(2);
+    // Recorded before the second judge: it shows as not used.
+    const rulesOnly = body(stage(recording('rules-only'), 'fuse'));
+    expect(screen.getAllByText(S.fuse.notRun)).toHaveLength(3);
+    rulesOnly.unmount();
+    body(stage(recording('decide'), 'fuse'));
+    expect(screen.getByText(SCOPE.signals.decide)).toBeInTheDocument();
+    expect(screen.getByText(S.fuse.tiers.decide)).toBeInTheDocument();
+    expect(screen.queryByText(S.fuse.notRun)).not.toBeInTheDocument();
+  });
+
+  // test/fixtures/scope/decide*.sse come from the offline stand-ins (FAKE_PROVIDERS=true): the
+  // shape is real, the numbers are illustrative.
+  it('shows the second judge’s probabilities, the model and how it compares', () => {
+    const decide = stage(recording('decide'), 'decide');
+    const { unmount } = body(decide, { judge: 'in' });
+    expect(screen.getByText(S.decide.choice)).toBeInTheDocument();
+    expect(screen.getByText(S.decide.probability('0.60'))).toBeInTheDocument();
+    expect(screen.getByText(S.decide.agree('in scope'))).toBeInTheDocument();
+    expect(screen.getByText(S.decide.modelValue('fake-decider', 'fake'))).toBeInTheDocument();
+    expect(screen.getByText(S.decide.recordedValue('2026-10-29', true))).toBeInTheDocument();
+    expect(screen.getByText(S.decide.reportedCostValue('$0', '$0'))).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: S.decide.question }));
+    expect(screen.getByText(S.decide.criteria)).toBeInTheDocument();
+    expect(screen.getByText(/Coding practice for interviews/)).toBeInTheDocument();
+    expect(screen.getByText(/I have a coding interview tomorrow/)).toBeInTheDocument();
+    unmount();
+    const injection = stage(recording('decide-injection'), 'decide');
+    const disagree = body(injection, { judge: 'in' });
+    expect(screen.getByText(S.decide.disagree('injection', 'in scope'))).toBeInTheDocument();
+    disagree.unmount();
+    body({
+      ...decide,
+      data: { ...decide.data, reported_cost_usd: null, replayed: false },
+    });
+    expect(screen.queryByText(/compare|Agrees|Disagrees/)).not.toBeInTheDocument();
+    expect(screen.queryByText(S.decide.reportedCost)).not.toBeInTheDocument();
+    expect(screen.getByText(S.decide.recordedValue('2026-10-29', false))).toBeInTheDocument();
+  });
+
+  it('shows a decision without every label, and a call that failed', () => {
+    const decide = stage(recording('decide'), 'decide');
+    const { unmount } = body({
+      ...decide,
+      status: 'error',
+      data: {
+        ...decide.data,
+        distribution: undefined,
+        choice: undefined,
+        answers: { label: { choice: 'in', probabilities: { in: 1 } } },
+        error: { type: 'invalid_decision', message: 'No probability for every label' },
+      },
+    });
+    expect(screen.getByText(S.decide.invalid)).toBeInTheDocument();
+    expect(screen.getByText(/"probabilities"/)).toBeInTheDocument();
+    unmount();
+    body({
+      ...decide,
+      status: 'error',
+      data: {
+        questions: (decide.data as { questions: object }).questions,
+        error: { type: 'NotRecordedError', message: 'No decide call was recorded.' },
+      },
+    });
+    expect(screen.getByText(S.decide.failed)).toBeInTheDocument();
+    expect(screen.queryByText(S.decide.model)).not.toBeInTheDocument();
+  });
+
+  it('explains a skipped second judge', () => {
+    const decide = stage(recording('decide'), 'decide');
+    const { questions } = decide.data as { questions: object };
+    const edited = {
+      ...decide,
+      status: 'skipped' as const,
+      data: {
+        reason: 'rubric changed; this run was recorded with the original rubric',
+        relabelled_topics: ['coding_practice'],
+        questions,
+      },
+    };
+    const { unmount } = body(edited);
+    expect(screen.getByText(S.decide.relabelled('coding_practice'))).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: S.decide.question }));
+    expect(screen.queryByText(S.decide.state)).not.toBeInTheDocument();
+    unmount();
+    const none = body({ ...edited, data: { ...edited.data, relabelled_topics: [] } });
+    expect(screen.queryByText(/Topics you moved/)).not.toBeInTheDocument();
+    none.unmount();
+    body({ ...edited, data: { reason: 'The second judge is switched off in the settings.' } });
+    expect(screen.getByText('The second judge is switched off in the settings.')).toBeVisible();
+    expect(screen.queryByRole('button', { name: S.decide.question })).not.toBeInTheDocument();
   });
 
   it('draws the threshold bands, and the block line when it is crossed', () => {
@@ -259,12 +349,29 @@ describe('scope map label', () => {
 });
 
 describe('scope step list', () => {
-  it('draws all eleven steps, filled from the trace, folded on phones', () => {
+  it('draws all twelve steps, filled from the trace, folded on phones', () => {
     globalThis.__wide = false;
     const { events } = recording('lasagna-recipe');
     render(<ScopeStepList events={events} runStatus="finished" context={context} />);
-    expect(screen.getAllByRole('listitem').length).toBeGreaterThanOrEqual(11);
+    expect(screen.getAllByRole('listitem').length).toBeGreaterThanOrEqual(12);
     expect(screen.getByText('no review needed')).toBeInTheDocument();
+  });
+
+  it('writes every step as a formula whose symbols explain themselves', () => {
+    globalThis.__wide = true;
+    const { events } = recording('decide');
+    render(<ScopeStepList events={events} runStatus="finished" context={context} />);
+    expect(screen.getAllByText(FORMAL.label)).toHaveLength(SCOPE_STAGE_ORDER.length);
+    const [message] = screen.getAllByRole('button', { name: `m: ${SCOPE_KEY.m.name}` });
+    fireEvent.click(message);
+    expect(screen.getAllByText(SCOPE_KEY.m.meaning, { exact: false }).length).toBeGreaterThan(0);
+  });
+
+  it('hands the LLM judge’s label to the second judge’s step', () => {
+    globalThis.__wide = true;
+    const { events } = recording('decide');
+    render(<ScopeStepList events={events} runStatus="finished" context={context} />);
+    expect(screen.getByText(S.decide.agree('in scope'))).toBeInTheDocument();
   });
 
   it('draws the map with misses, sparse cells and its legend', () => {

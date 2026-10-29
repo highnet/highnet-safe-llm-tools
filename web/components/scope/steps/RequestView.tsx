@@ -56,7 +56,10 @@ const RequestView = ({ data }: RequestViewProps) => {
           { term: F.language, value: F.languageValue(data.language, data.language_words) },
           {
             term: F.models,
-            value: `${data.models.embed.model} · ${data.models.judge.model}`,
+            value: [data.models.embed, data.models.judge, data.models.decide]
+              .filter((m) => m !== undefined)
+              .map((m) => m.model)
+              .join(' · '),
           },
         ]}
       />

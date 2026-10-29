@@ -5,6 +5,7 @@ import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import type {
   AuditData,
   ContextData,
+  DecideData,
   Distribution,
   EmbedData,
   FuseData,
@@ -54,6 +55,12 @@ export const scopeSummary = (event: ScopeTraceEvent): string => {
       return d.verdict
         ? S.judge(SCOPE.labels[d.verdict.label], d.verdict.confidence.toFixed(2))
         : S.judgeError;
+    }
+    case 'decide': {
+      const d = data as DecideData;
+      return d.distribution && d.choice
+        ? S.decide(SCOPE.labels[d.choice], d.distribution[d.choice].toFixed(2))
+        : S.decideError;
     }
     case 'fuse': {
       const d = data as FuseData;

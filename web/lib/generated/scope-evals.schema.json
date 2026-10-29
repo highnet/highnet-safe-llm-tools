@@ -127,6 +127,7 @@
             "rules",
             "knn",
             "judge",
+            "decide",
             "fused"
           ],
           "title": "Method",
@@ -320,6 +321,10 @@
           "title": "Judge Model",
           "type": "string"
         },
+        "decide_model": {
+          "title": "Decide Model",
+          "type": "string"
+        },
         "prompts": {
           "title": "Prompts",
           "type": "integer"
@@ -352,6 +357,7 @@
         "build_id",
         "embed_model",
         "judge_model",
+        "decide_model",
         "prompts",
         "k",
         "weights",
@@ -386,7 +392,7 @@
   },
   "properties": {
     "schema_version": {
-      "default": 1,
+      "default": 2,
       "title": "Schema Version",
       "type": "integer"
     },

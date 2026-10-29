@@ -32,7 +32,7 @@ const ExampleGroup = ({ label, examples, selectedId, disabled, onPick }: Example
       <Typography variant="label" color="muted" as="h3">
         {label}
       </Typography>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {shown.map((example) => (
           <li key={example.id}>
             <Button
@@ -43,7 +43,7 @@ const ExampleGroup = ({ label, examples, selectedId, disabled, onPick }: Example
               onClick={() => onPick(example)}
               className="h-auto min-h-11 w-full flex-col items-start gap-0.5 py-2 text-left leading-snug font-normal whitespace-normal"
             >
-              <span className="line-clamp-3 break-words">{example.text}</span>
+              <span className="line-clamp-3 wrap-anywhere">{example.text}</span>
               {example.context.length > 0 && (
                 <span className="voice-data text-xs text-muted-foreground">
                   {P.turns(example.context.length)}

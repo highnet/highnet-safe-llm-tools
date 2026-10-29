@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any
 
 from highnet_core.config import CoreSettings
-from highnet_core.providers.base import Completion
+from highnet_core.providers.base import Completion, Decision
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_scope.fusion import Thresholds, Weights
-from highnet_scope.models import FakeTextModel, LiveModels
+from highnet_scope.models import FakeDecisionModel, FakeTextModel, LiveModels
 from highnet_scope.presets import Label
 from highnet_scope.store import Prompt, ScopeStore
 from highnet_scope_evals.runner import (
@@ -48,7 +48,9 @@ class PickyJudge:
 
 def evaluator(scope_db: Path, tmp_path: Path, text: Any = None) -> ScopeEvaluator:
     cache = ScopeStore(tmp_path / "cache.sqlite")
-    models = LiveModels(cache, FakeEmbedder(64), text or FakeTextModel(), SETTINGS)
+    models = LiveModels(
+        cache, FakeEmbedder(64), text or FakeTextModel(), FakeDecisionModel(), SETTINGS
+    )
     return ScopeEvaluator(
         ScopeStore(scope_db, readonly=True), models, concurrency=2, log=lambda _: None
     )
@@ -63,7 +65,7 @@ async def test_a_full_run_scores_every_method(scope_db: Path, tmp_path: Path) ->
     results = await ev.run("abc123", ("career", "bank"), limit=6)
     assert results.run.prompts == 12 and results.run.git_sha == "abc123"
     assert results.run.illustrative is True and results.run.embed_model == "fake-hashed-bow"
-    assert [m.method for m in results.methods] == ["rules", "knn", "judge", "fused"]
+    assert [m.method for m in results.methods] == ["rules", "knn", "judge", "decide", "fused"]
     for m in results.methods:
         assert sum(map(sum, m.confusion)) == 12
         assert set(m.by_preset) == {"career", "bank"}
@@ -72,11 +74,19 @@ async def test_a_full_run_scores_every_method(scope_db: Path, tmp_path: Path) ->
     judge = results.methods[2]
     assert judge.cost.calls == 12 and judge.abstained == 0
     assert results.methods[1].cost.calls == 12  # the embedding latency sample
+    assert results.methods[3].cost.calls == 12 and results.run.decide_model == "fake-decider"
     assert {(c.provider, c.model) for c in results.cost} == {
         ("fake", "fake-hashed-bow"),
         ("fake", "fake-judge"),
+        ("fake", "fake-decider"),
     }
-    assert len(ev.details) == 12 and set(ev.details[0]) >= {"rules", "knn", "judge", "fused"}
+    assert len(ev.details) == 12 and set(ev.details[0]) >= {
+        "rules",
+        "knn",
+        "judge",
+        "decide",
+        "fused",
+    }
     fused_wrong = {d["id"] for d in ev.details if d["fused"] != d["label"]}
     assert {m.id for m in results.misclassified} == fused_wrong
 
@@ -111,8 +121,9 @@ def test_score_without_any_model_call() -> None:
 
 def test_method_signals_and_predict() -> None:
     row = RowSignals(prompt("injection"), rules=INJECTION, knn=IN, judge=IN)
-    assert method_signals("knn", row) == {"rules": None, "knn": IN, "judge": None}
-    assert method_signals("fused", row) == {"rules": INJECTION, "knn": IN, "judge": IN}
+    assert method_signals("knn", row) == {"rules": None, "knn": IN, "judge": None, "decide": None}
+    fused = {"rules": INJECTION, "knn": IN, "judge": IN, "decide": None}
+    assert method_signals("fused", row) == fused
     assert predict("rules", row, Weights(), Thresholds()) == "injection"
     assert predict("judge", row, Weights(), Thresholds()) == "in"
 
@@ -136,3 +147,39 @@ async def test_no_limit_reads_the_whole_preset(scope_db: Path, tmp_path: Path) -
     ev = evaluator(scope_db, tmp_path)
     collected = await ev.collect(("rag",))
     assert len(collected.rows) == 300 and len(collected.embed_ms) == 24
+
+
+class PickyDecider(FakeDecisionModel):
+    """Fails on one prompt and returns an incomplete reply on another."""
+
+    def __init__(self, fail_on: str, invalid_on: str) -> None:
+        self.fail_on, self.invalid_on = fail_on, invalid_on
+
+    async def decide(self, state: Any, questions: dict[str, Any]) -> Decision:
+        if state["message"] == self.fail_on:
+            raise RuntimeError("overloaded")
+        if state["message"] == self.invalid_on:
+            return Decision({"label": {"probabilities": {"in": 1.0}}}, 10, 0)
+        return await super().decide(state, questions)
+
+
+async def test_a_failed_or_incomplete_decision_drops_out_for_that_row(
+    scope_db: Path, tmp_path: Path
+) -> None:
+    _, prompts = ScopeStore(scope_db, readonly=True).prompts("recipe")
+    ev = evaluator(scope_db, tmp_path)
+    ev.models = LiveModels(
+        ScopeStore(tmp_path / "cache2.sqlite"),
+        FakeEmbedder(64),
+        FakeTextModel(),
+        PickyDecider(prompts[0].text, prompts[1].text),
+        SETTINGS,
+    )
+    collected = await ev.collect(("recipe",), limit=4)
+    rows = collected.rows
+    assert rows[0].decide is None and rows[0].decide_reason == "call failed: overloaded"
+    assert rows[1].decide is None and rows[1].decide_reason.startswith("invalid: ")
+    assert rows[2].decide is not None
+    assert len(collected.decide_ms) == 3
+    methods, _ = ev.score(collected)
+    assert methods[3].failed == 2 and methods[2].failed == 0

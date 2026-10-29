@@ -1,19 +1,19 @@
 {
   "python": {
     "runner": "pytest + coverage.py",
-    "tests": 248,
+    "tests": 258,
     "packages": [
       {
         "name": "core",
         "root": "core/src/highnet_core",
         "totals": {
           "lines": {
-            "covered": 467,
-            "total": 467
+            "covered": 518,
+            "total": 518
           },
           "branches": {
-            "covered": 40,
-            "total": 40
+            "covered": 46,
+            "total": 46
           }
         },
         "empty_files": 3,
@@ -32,8 +32,8 @@
           {
             "path": "config.py",
             "lines": {
-              "covered": 29,
-              "total": 29
+              "covered": 33,
+              "total": 33
             },
             "branches": {
               "covered": 0,
@@ -65,8 +65,8 @@
           {
             "path": "providers/base.py",
             "lines": {
-              "covered": 79,
-              "total": 79
+              "covered": 89,
+              "total": 89
             },
             "branches": {
               "covered": 0,
@@ -93,6 +93,17 @@
             "branches": {
               "covered": 2,
               "total": 2
+            }
+          },
+          {
+            "path": "providers/gateway.py",
+            "lines": {
+              "covered": 37,
+              "total": 37
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
             }
           },
           {
@@ -383,12 +394,12 @@
         "root": "scope/src/highnet_scope",
         "totals": {
           "lines": {
-            "covered": 1049,
-            "total": 1049
+            "covered": 1144,
+            "total": 1144
           },
           "branches": {
-            "covered": 176,
-            "total": 176
+            "covered": 194,
+            "total": 194
           }
         },
         "empty_files": 1,
@@ -396,8 +407,8 @@
           {
             "path": "api.py",
             "lines": {
-              "covered": 62,
-              "total": 62
+              "covered": 65,
+              "total": 65
             },
             "branches": {
               "covered": 14,
@@ -427,10 +438,21 @@
             }
           },
           {
+            "path": "decider.py",
+            "lines": {
+              "covered": 26,
+              "total": 26
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
             "path": "fusion.py",
             "lines": {
-              "covered": 49,
-              "total": 49
+              "covered": 50,
+              "total": 50
             },
             "branches": {
               "covered": 8,
@@ -473,23 +495,23 @@
           {
             "path": "models.py",
             "lines": {
-              "covered": 76,
-              "total": 76
+              "covered": 109,
+              "total": 109
             },
             "branches": {
-              "covered": 10,
-              "total": 10
+              "covered": 16,
+              "total": 16
             }
           },
           {
             "path": "pipeline.py",
             "lines": {
-              "covered": 234,
-              "total": 234
+              "covered": 266,
+              "total": 266
             },
             "branches": {
-              "covered": 44,
-              "total": 44
+              "covered": 50,
+              "total": 50
             }
           },
           {
@@ -648,8 +670,8 @@
         "root": "evals/src/highnet_scope_evals",
         "totals": {
           "lines": {
-            "covered": 307,
-            "total": 307
+            "covered": 333,
+            "total": 333
           },
           "branches": {
             "covered": 26,
@@ -672,8 +694,8 @@
           {
             "path": "results.py",
             "lines": {
-              "covered": 82,
-              "total": 82
+              "covered": 83,
+              "total": 83
             },
             "branches": {
               "covered": 0,
@@ -683,8 +705,8 @@
           {
             "path": "runner.py",
             "lines": {
-              "covered": 158,
-              "total": 158
+              "covered": 183,
+              "total": 183
             },
             "branches": {
               "covered": 20,
@@ -697,19 +719,19 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 204,
+    "tests": 220,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2007,
-            "total": 2007
+            "covered": 2098,
+            "total": 2098
           },
           "branches": {
-            "covered": 1557,
-            "total": 1557
+            "covered": 1676,
+            "total": 1676
           }
         },
         "empty_files": 2,
@@ -1029,8 +1051,8 @@
               "total": 22
             },
             "branches": {
-              "covered": 8,
-              "total": 8
+              "covered": 10,
+              "total": 10
             }
           },
           {
@@ -1480,8 +1502,8 @@
               "total": 5
             },
             "branches": {
-              "covered": 7,
-              "total": 7
+              "covered": 9,
+              "total": 9
             }
           },
           {
@@ -1597,12 +1619,12 @@
           {
             "path": "components/scope/ScopeExplorer.tsx",
             "lines": {
-              "covered": 57,
-              "total": 57
+              "covered": 68,
+              "total": 68
             },
             "branches": {
-              "covered": 48,
-              "total": 48
+              "covered": 61,
+              "total": 61
             }
           },
           {
@@ -1661,21 +1683,32 @@
             }
           },
           {
-            "path": "components/scope/ScopeStageBody.tsx",
+            "path": "components/scope/ScopeSimple.tsx",
             "lines": {
-              "covered": 21,
-              "total": 21
+              "covered": 34,
+              "total": 34
             },
             "branches": {
-              "covered": 19,
-              "total": 19
+              "covered": 48,
+              "total": 48
+            }
+          },
+          {
+            "path": "components/scope/ScopeStageBody.tsx",
+            "lines": {
+              "covered": 22,
+              "total": 22
+            },
+            "branches": {
+              "covered": 21,
+              "total": 21
             }
           },
           {
             "path": "components/scope/ScopeStepList.tsx",
             "lines": {
-              "covered": 6,
-              "total": 6
+              "covered": 8,
+              "total": 8
             },
             "branches": {
               "covered": 6,
@@ -1707,12 +1740,12 @@
           {
             "path": "components/scope/evals/ScopeEvalsReport.tsx",
             "lines": {
-              "covered": 47,
-              "total": 47
+              "covered": 54,
+              "total": 54
             },
             "branches": {
-              "covered": 22,
-              "total": 22
+              "covered": 27,
+              "total": 27
             }
           },
           {
@@ -1749,6 +1782,17 @@
             }
           },
           {
+            "path": "components/scope/steps/DecideView.tsx",
+            "lines": {
+              "covered": 15,
+              "total": 15
+            },
+            "branches": {
+              "covered": 32,
+              "total": 32
+            }
+          },
+          {
             "path": "components/scope/steps/EmbedView.tsx",
             "lines": {
               "covered": 7,
@@ -1773,8 +1817,8 @@
           {
             "path": "components/scope/steps/JudgeView.tsx",
             "lines": {
-              "covered": 9,
-              "total": 9
+              "covered": 7,
+              "total": 7
             },
             "branches": {
               "covered": 18,
@@ -1806,8 +1850,8 @@
           {
             "path": "components/scope/steps/RequestView.tsx",
             "lines": {
-              "covered": 8,
-              "total": 8
+              "covered": 10,
+              "total": 10
             },
             "branches": {
               "covered": 4,
@@ -1845,6 +1889,17 @@
             "branches": {
               "covered": 8,
               "total": 8
+            }
+          },
+          {
+            "path": "components/scope/steps/Verbatim.tsx",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -2026,8 +2081,8 @@
           {
             "path": "content/landing.ts",
             "lines": {
-              "covered": 3,
-              "total": 3
+              "covered": 4,
+              "total": 4
             },
             "branches": {
               "covered": 0,
@@ -2059,12 +2114,12 @@
           {
             "path": "content/scope.ts",
             "lines": {
-              "covered": 68,
-              "total": 68
+              "covered": 81,
+              "total": 81
             },
             "branches": {
-              "covered": 6,
-              "total": 6
+              "covered": 8,
+              "total": 8
             }
           },
           {
@@ -2235,12 +2290,12 @@
           {
             "path": "lib/scope/summary.ts",
             "lines": {
-              "covered": 25,
-              "total": 25
+              "covered": 27,
+              "total": 27
             },
             "branches": {
-              "covered": 21,
-              "total": 21
+              "covered": 26,
+              "total": 26
             }
           },
           {
@@ -2257,12 +2312,12 @@
           {
             "path": "lib/scope/url-state.ts",
             "lines": {
-              "covered": 62,
-              "total": 62
+              "covered": 65,
+              "total": 65
             },
             "branches": {
-              "covered": 51,
-              "total": 51
+              "covered": 59,
+              "total": 59
             }
           },
           {

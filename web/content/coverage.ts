@@ -24,7 +24,7 @@ export const COVERAGE = {
     },
     scope: {
       title: 'Scope',
-      note: 'The rules, the nearest-neighbour vote, the judge and its validation, fusion, thresholds, the eleven steps, the recorder and the routes, run on fake models and a fake-embedded dataset.',
+      note: 'The rules, the nearest-neighbour vote, the judge and its validation, the decision model, fusion, thresholds, the twelve steps, the recorder and the routes, run on fake models and a fake-embedded dataset.',
     },
     'scope-evals': {
       title: 'Scope’s eval runner',

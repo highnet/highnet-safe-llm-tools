@@ -49,26 +49,45 @@ const RATES: {
 type FindingProps = { results: ScopeEvalResults };
 
 const Finding = ({ results }: FindingProps) => {
-  const judge = methodOf(results, 'judge')!.rates;
   const fused = methodOf(results, 'fused')!.rates;
   const rules = methodOf(results, 'rules')!.rates;
   const knn = methodOf(results, 'knn')!.rates;
+  const judge = methodOf(results, 'judge');
+  const decide = methodOf(results, 'decide');
+  // The single signal with the best accuracy in this file; the first in the file's order on a tie.
+  const best = results.methods
+    .filter((m) => m.method !== 'fused')
+    .reduce((a, b) => (b.rates.accuracy > a.rates.accuracy ? b : a));
+  const single = best.rates;
+  const name = SCOPE.methodsInProse[best.method];
   const F = E.finding;
+  const singleWins = single.accuracy > fused.accuracy;
   return (
     <div className="space-y-3">
       <Typography className="text-lg leading-relaxed">
-        {judge.accuracy > fused.accuracy
-          ? F.judgeWins(
-              pct(judge.accuracy),
+        {singleWins
+          ? F.singleWins(
+              name,
+              pct(single.accuracy),
               pct(fused.accuracy),
-              pct(judge.injection_missed),
+              pct(single.injection_missed),
               pct(fused.injection_missed),
-              pct(judge.over_compliance),
+              pct(single.over_compliance),
               pct(fused.over_compliance),
             )
-          : F.fusedWins(pct(fused.accuracy), pct(judge.accuracy))}
+          : F.fusedWins(pct(fused.accuracy), name, pct(single.accuracy))}
       </Typography>
-      {judge.accuracy > fused.accuracy && <Typography color="muted">{F.why}</Typography>}
+      {singleWins && <Typography color="muted">{F.why}</Typography>}
+      {judge && decide && (
+        <Typography color="muted">
+          {F.judges(
+            pct(judge.rates.accuracy),
+            formatUsd(judge.cost.usd_mean),
+            pct(decide.rates.accuracy),
+            formatUsd(decide.cost.usd_mean),
+          )}
+        </Typography>
+      )}
       <Typography color="muted">
         {F.cheap(pct(rules.over_compliance), pct(knn.over_compliance))}
       </Typography>
@@ -182,7 +201,12 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
                 [
                   [E.record.date, results.run.started_at.slice(0, 10)],
                   [E.record.build, results.run.build_id],
-                  [E.record.models, `${results.run.embed_model}, ${results.run.judge_model}`],
+                  [
+                    E.record.models,
+                    [results.run.embed_model, results.run.judge_model, results.run.decide_model]
+                      .filter(Boolean)
+                      .join(', '),
+                  ],
                   [E.record.prompts, integer.format(results.run.prompts)],
                   [E.record.k, String(results.run.k)],
                   [
@@ -220,7 +244,7 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
           </EvalSection>
 
           <EvalSection id="rates" title={E.rates.title} notes={E.rates.notes}>
-            <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
               {results.methods.map((m) => (
                 <div key={m.method} className="min-w-0 space-y-2">
                   <Typography as="h3" className="font-semibold">
@@ -415,7 +439,9 @@ const ScopeEvalsReport = ({ results }: ScopeEvalsReportProps) => {
               {results.methods
                 .filter((m) => m.failed > 0)
                 .map((m) => (
-                  <li key={`f-${m.method}`}>{E.method.failed(m.failed)}</li>
+                  <li key={`f-${m.method}`}>
+                    {E.method.failed(SCOPE.methods[m.method], m.failed)}
+                  </li>
                 ))}
             </ul>
             <a

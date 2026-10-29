@@ -1,4 +1,5 @@
 import type { KeyEntry } from '@/content/formal';
+import type { Stage as ScopeStage } from '@/lib/generated/scope-trace';
 
 // English copy for the Scope pages (/scope/, /scope/dataset/, /scope/evals/, /scope/coverage/).
 // Voice: the same precise lab partner as the RAG pipeline. Plain, exact, first-person plural,
@@ -18,8 +19,22 @@ export const SCOPE = {
     injection: 'injection',
   },
   labelsShort: { in: 'in', adjacent: 'adj.', out: 'out', injection: 'inj.' },
-  signals: { rules: 'Rules', knn: 'kNN', judge: 'LLM judge' },
-  methods: { rules: 'Rules', knn: 'kNN', judge: 'LLM judge', fused: 'Fused' },
+  signals: { rules: 'Rules', knn: 'kNN', judge: 'LLM judge', decide: 'Decision model' },
+  methods: {
+    rules: 'Rules',
+    knn: 'kNN',
+    judge: 'LLM judge',
+    decide: 'Decision model (Jev)',
+    fused: 'Fused',
+  },
+  // The same methods inside a sentence.
+  methodsInProse: {
+    rules: 'the rules',
+    knn: 'kNN',
+    judge: 'the LLM judge',
+    decide: 'the decision model',
+    fused: 'the fused pipeline',
+  },
 
   hero: {
     title: 'Watch an AI agent decide whether a message is in scope, step by step.',
@@ -28,7 +43,7 @@ export const SCOPE = {
     definition:
       'A product agent is built for one job. A scope guard reads each message first and picks one of four actions: answer it, answer it briefly, redirect it warmly back to the job, or block it when it tries to take over the agent.',
     intro:
-      'We run each message through eleven steps: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, and an LLM judge, fused into one decision you can see the arithmetic of. The runs were recorded once; every setting you change is recomputed from them at no cost.',
+      'We run each message through twelve steps: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, an LLM judge and a second judge, a decision model, fused into one decision you can see the arithmetic of. The runs were recorded once; every setting you change is recomputed from them at no cost.',
     action: 'Try a message',
     dataset: 'Browse the labeled prompts',
   },
@@ -44,7 +59,7 @@ export const SCOPE = {
     ],
     online: 'Every message',
     result: 'One action',
-    note: 'Rules, kNN and the judge are three independent signals; each can be switched off below. Fusion averages the ones that ran, and two thresholds turn the average into one of the four actions.',
+    note: 'Rules, kNN, the LLM judge and the decision model are four independent signals; each can be switched off below. Fusion averages the ones that ran, and two thresholds turn the average into one of the four actions.',
   },
 
   principles: {
@@ -143,12 +158,12 @@ export const SCOPE = {
     open: 'Edit the scope definition',
     close: 'Close the editor',
     intro:
-      'Move a topic to another class and its labeled prompts change label with it: the kNN vote and the keyword rules follow at once. The judge was recorded with the original rubric, so after any change its step is skipped rather than guessed.',
+      'Move a topic to another class and its labeled prompts change label with it: the kNN vote and the keyword rules follow at once. Both judges were recorded with the original definition, so after any change their steps are skipped rather than guessed.',
     topic: 'Topic',
     keywords: 'Keywords',
     injection: 'Prompt injection is not a scope decision; it stays fixed.',
     reset: 'Reset to the original',
-    judgeSkipped: 'The judge will be skipped: its recording used the original rubric.',
+    judgeSkipped: 'Both judges will be skipped: their recordings used the original definition.',
     changedFrom: (label: string) => `was ${label}`,
   },
 
@@ -174,6 +189,79 @@ export const SCOPE = {
     },
   },
 
+  // The switch between the plain summary and the full working (?view=simple).
+  view: {
+    label: 'Show',
+    simple: 'Simple',
+    steps: 'Every step',
+  },
+
+  // The Simple view: the same run in plain words, for readers who do not want the working.
+  // No jargon here: no kNN, fusion or distribution; the advisors have everyday names.
+  simple: {
+    title: 'In short',
+    intro: 'The same run in plain words: what came in, who voted, and what the assistant does.',
+    empty: 'Pick a message above to see what the assistant decides.',
+    deciding: 'Working it out…',
+    message: 'The message',
+    earlier: 'Said earlier in the conversation',
+    outcome: 'What the assistant does',
+    outcomes: {
+      answer: 'This is what the assistant is for, so it answers.',
+      answer_briefly: 'This is close to what the assistant is for, so it answers in a few lines.',
+      redirect: 'Not what this assistant is for, so it points you back, politely.',
+      block: 'This looks like an attempt to trick the assistant, so it refuses.',
+    },
+    // The four classes as an everyday word, beside the same shapes the full view uses.
+    labels: {
+      in: 'in scope',
+      adjacent: 'close to scope',
+      out: 'off scope',
+      injection: 'a trick',
+    },
+    voters: 'Who voted',
+    votersNote:
+      'Four advisors read the message on their own. Each leans one way, some more sure than others.',
+    advisors: {
+      rules: 'The checklist',
+      knn: 'Similar messages',
+      judge: 'The AI judge',
+      decide: 'The decision model',
+    },
+    advisorHelp: {
+      rules: 'looks for known tricks and topic words',
+      knn: 'the labelled example messages that read most alike',
+      judge: 'an AI model that reads what this assistant is for',
+      decide: 'a second AI model that gives odds for each answer',
+    },
+    sure: (pct: string) => `${pct} sure`,
+    notRun: {
+      off: 'Didn’t vote: switched off in the settings.',
+      edited:
+        'Didn’t vote: you changed what the assistant is for, and its recording used the original.',
+      abstained: 'Didn’t vote: nothing on its list matched.',
+      other: 'Didn’t vote on this message.',
+      notRecorded: 'Left out: there is no recording of it for this message yet.',
+      failed: 'Left out: it ran into a problem on this message.',
+      waiting: 'Waiting…',
+    },
+    combinedTitle: 'Combined',
+    combined: (votes: string, pct: string) =>
+      `Weighing ${votes} together gives this lean, ${pct} sure. Then the assistant checks how far the combined vote leans towards what it is for: far enough for a full answer, partly for a short one, too little for a redirect. A strong lean towards a trick blocks the message.`,
+    votes: (n: number) => plural(n, 'vote'),
+    reply: 'What it says back',
+    handoff:
+      'It hands the question to the RAG pipeline, which looks for the answer in its 35 articles.',
+    handoffBrief:
+      'It hands the question to the RAG pipeline for a short answer from its 35 articles.',
+    openRag: 'Ask the RAG pipeline',
+    noReply: 'There is no recorded reply for these settings.',
+    every: 'Show every step',
+    settings: 'Change the settings',
+    settingsNote: 'Settings and the scope definition live in the every-step view.',
+    stopped: 'The run stopped before the assistant decided.',
+  },
+
   workingLabel: 'The working',
   workingNote: (n: number) => `${n} steps, top to bottom`,
   announce: (label: string, title: string, status: string, ms: string) =>
@@ -197,6 +285,8 @@ export const SCOPE = {
     knn: (label: string, share: string) => `vote: ${label} ${share}`,
     judge: (label: string, confidence: string) => `${label} · confidence ${confidence}`,
     judgeError: 'reply failed validation',
+    decide: (label: string, p: string) => `${label} · p ${p}`,
+    decideError: 'no usable reply: dropped out',
     fuse: (label: string, share: string) => `${label} ${share}`,
     thresholds: (action: string, score: string) => `${action} · scope ${score}`,
     respond: (action: string) => action,
@@ -284,6 +374,29 @@ export const SCOPE = {
       relabelled: (topics: string) => `Topics you moved: ${topics}.`,
       model: (model: string, tokens: number) => `${model} · max ${tokens} output tokens`,
     },
+    decide: {
+      choice: 'Most probable label',
+      probability: (p: string) => `p ${p}`,
+      model: 'Model',
+      modelValue: (model: string, provider: string) => `${model} · through ${provider}`,
+      recorded: 'Recorded',
+      recordedValue: (date: string, replayed: boolean) =>
+        replayed ? `${date}, replayed now` : `${date}, called now`,
+      reportedCost: 'Cost reported',
+      reportedCostValue: (reported: string, ours: string) =>
+        `${reported} by the gateway itself; ${ours} priced by us`,
+      agree: (label: string) => `Agrees with the LLM judge: both chose ${label}.`,
+      disagree: (mine: string, judge: string) =>
+        `Disagrees with the LLM judge, which chose ${judge}; this model chose ${mine}.`,
+      invalid: 'The reply had no probability for every label, so the second judge drops out:',
+      failed: 'The call failed, so the second judge drops out:',
+      question: 'Show the question',
+      hideQuestion: 'Hide the question',
+      instructions: 'Instructions',
+      criteria: 'Criteria, one per label (the scope definition)',
+      state: 'State (the message, as data)',
+      relabelled: (topics: string) => `Topics you moved: ${topics}.`,
+    },
     fuse: {
       heads: { signal: 'Signal', share: 'Share per class', weight: 'Weight', used: 'Used' },
       fused: 'Fused',
@@ -294,7 +407,8 @@ export const SCOPE = {
       tiers: {
         rules: 'rules only',
         knn: '+ kNN',
-        judge: 'full pipeline',
+        judge: '+ LLM judge',
+        decide: 'full pipeline',
       },
       tradeoffNote: 'Times and costs are the recorded ones; kNN’s includes its Voyage embedding.',
     },
@@ -347,7 +461,7 @@ export const SCOPE = {
   formal: {
     title: 'The same guard, as formulas',
     intro:
-      'The arithmetic behind steps 3, 6, 8 and 9, exactly as the code computes it. Tap an underlined symbol for its definition.',
+      'The arithmetic behind steps 3, 6, 9 and 10, exactly as the code computes it. Tap an underlined symbol for its definition.',
     lines: [
       { label: 'Rules (noisy-or)', source: 'P_{inj} = 1 − ∏ (1 − w_{h}) over the rule hits h' },
       { label: 'Cosine similarity', source: 'cos(q, x) = q·x / (|q| |x|)' },
@@ -408,7 +522,7 @@ export const SCOPE = {
   evals: {
     metaTitle: 'Scope: evals',
     metaDescription:
-      'How well each signal guards the scope: false refusals, over-compliance and missed injections for rules, kNN, the LLM judge and the fused pipeline, measured on 1,200 labeled prompts.',
+      'How well each signal guards the scope: false refusals, over-compliance and missed injections for rules, kNN, the LLM judge, a decision model and the fused pipeline, measured on 1,200 labeled prompts.',
     sheetLabel: 'Sheet 3',
     title: 'How well does each signal guard the scope?',
     lede: (prompts: number) =>
@@ -428,18 +542,21 @@ export const SCOPE = {
     },
     finding: {
       title: 'What this run found',
-      judgeWins: (
-        judgeAcc: string,
+      singleWins: (
+        method: string,
+        acc: string,
         fusedAcc: string,
-        judgeMissed: string,
+        missed: string,
         fusedMissed: string,
-        judgeOver: string,
+        over: string,
         fusedOver: string,
       ) =>
-        `In this run the judge alone beats the default fused pipeline: ${judgeAcc} accuracy against ${fusedAcc}, ${judgeMissed} of injections missed against ${fusedMissed}, and ${judgeOver} over-compliance against ${fusedOver}.`,
-      why: 'Fusion averages. When the judge is confident a message is an injection but the rules see nothing and the neighbours are split, the average can fall below the block line. The weights and thresholds are defaults, not tuned on this set.',
-      fusedWins: (fusedAcc: string, judgeAcc: string) =>
-        `In this run the fused pipeline reaches ${fusedAcc} accuracy against ${judgeAcc} for the judge alone.`,
+        `In this run ${method} alone beats the default fused pipeline: ${acc} accuracy against ${fusedAcc}, ${missed} of injections missed against ${fusedMissed}, and ${over} over-compliance against ${fusedOver}.`,
+      why: 'Fusion averages. When one signal is confident a message is an injection but the others see nothing or are split, the average can fall below the block line. The weights and thresholds are defaults, not tuned on this set.',
+      fusedWins: (fusedAcc: string, method: string, acc: string) =>
+        `In this run the fused pipeline reaches ${fusedAcc} accuracy against ${acc} for the best single signal, ${method}.`,
+      judges: (judgeAcc: string, judgeUsd: string, decideAcc: string, decideUsd: string) =>
+        `The two judges side by side: the LLM judge reaches ${judgeAcc} accuracy at ${judgeUsd} per message, the decision model ${decideAcc} at ${decideUsd}.`,
       cheap: (rulesOver: string, knnOver: string) =>
         `The free signals are far weaker on their own: the rules let ${rulesOver} of off-scope and injection prompts through, kNN ${knnOver}.`,
     },
@@ -487,7 +604,7 @@ export const SCOPE = {
     cost: {
       title: 'Cost and latency per message',
       notes: [
-        'Medians and means from this run’s own calls. kNN’s time is one Voyage embedding plus the vote; the fused time is all three, one after another.',
+        'Medians and means from this run’s own calls. kNN’s time is one Voyage embedding plus the vote; the fused time is all four, one after another.',
       ],
       heads: {
         method: 'Method',
@@ -512,11 +629,12 @@ export const SCOPE = {
       notes: [
         'Each action is scored against the prompt’s label: answer = in scope, answer briefly = adjacent, redirect = off scope, block = injection.',
         'kNN is scored leave-one-out: a prompt never votes for itself.',
-        'When no rule fires, the rules abstain and the guard falls back to the middle band, a brief answer. When the judge’s reply fails validation it drops out.',
-        'The labels were drafted by Claude and checked by script, and the judge is Claude too, so its scores are likely flattering. Read them as a comparison between methods, not as a promise.',
+        'When no rule fires, the rules abstain and the guard falls back to the middle band, a brief answer. When the LLM judge’s reply fails validation, or the decision model’s reply lacks a probability for a label, that judge drops out.',
+        'The labels were drafted by Claude and checked by script, and the LLM judge is Claude too, so its scores are likely flattering. Read them as a comparison between methods, not as a promise.',
       ],
       abstained: (method: string, n: number) => `${method} abstained on ${plural(n, 'prompt')}.`,
-      failed: (n: number) => `The judge’s reply failed validation on ${plural(n, 'prompt')}.`,
+      failed: (method: string, n: number) =>
+        `${method}: the reply failed on ${plural(n, 'prompt')}, so it dropped out there.`,
       details: 'Every prompt’s label and each method’s choice (JSONL)',
     },
   },
@@ -556,6 +674,17 @@ export const SCOPE = {
 
 // The symbols of Scope's formulas, explained on tap (components/formal/Formula).
 export const SCOPE_KEY: Record<string, KeyEntry> = {
+  m: { group: 'value', name: 'message', meaning: 'the message as sent' },
+  r: {
+    group: 'value',
+    name: 'reading',
+    meaning: 'the message with up to 4 earlier turns before it, or the message alone',
+  },
+  p: {
+    group: 'function',
+    name: 'decision probability',
+    meaning: 'the decision model’s probability for a class, as returned',
+  },
   q: { group: 'value', name: 'message vector', meaning: 'embed(message), a unit vector' },
   x: { group: 'value', name: 'labeled prompt', meaning: 'one of the preset’s 300 prompt vectors' },
   cos: {
@@ -579,7 +708,7 @@ export const SCOPE_KEY: Record<string, KeyEntry> = {
   S: {
     group: 'table',
     name: 'signals that ran',
-    meaning: 'rules, kNN, judge, minus any off or failed',
+    meaning: 'rules, kNN, the two judges, minus any off or failed',
   },
   P: {
     group: 'function',
@@ -592,4 +721,23 @@ export const SCOPE_KEY: Record<string, KeyEntry> = {
     name: 'scope score',
     meaning: '0 = off scope, 1 = in scope; adjacent counts half',
   },
+};
+
+// One formula per step, shown on each step sheet under "As a formula" (the RAG pipeline's own
+// box). They match scope/src/highnet_scope/{pipeline,rules,knn,judge,decider,fusion}.py.
+export const SCOPE_STEP_FORMULAS: Record<ScopeStage, string> = {
+  request: 'm ↦ m  if  |m| ≤ max_{chars} ∧ runs_{minute} < limit,  otherwise ⊥',
+  context: 'r = turns_{last 4} + m   (context off or no turns: r = m)',
+  rules:
+    'P_{inj} = 1 − ∏ (1 − w_{h}) over the rule hits h in the raw, normalized, decoded and hidden views of r',
+  embed: 'q = embed(r)',
+  map: '(u, v) = (q − μ) W^{T},  W: the preset’s first two principal components',
+  knn: 'P_{knn}(c) = Σ_{x ∈ N_{k}, ℓ(x) = c} max(cos(q, x), 0) / Σ_{x ∈ N_{k}} max(cos(q, x), 0)',
+  judge: 'P_{judge}(c) = conf  if c = label,  otherwise (1 − conf) / 3',
+  decide: 'P_{decide}(c) = p(c) / Σ_{c′} p(c′)',
+  fuse: 'P(c) = Σ_{s ∈ S} w_{s} P_{s}(c) / Σ_{s ∈ S} w_{s}',
+  thresholds: 'score = (P(in) + ½ P(adj)) / (P(in) + P(adj) + P(out))',
+  respond:
+    'action = block if P(inj) ≥ t_{block}; answer if score ≥ t_{answer}; brief if score ≥ t_{brief}; otherwise redirect',
+  audit: 'review = max_{c} P(c) < 0.6 ∨ the signals’ top classes differ ∨ action = block',
 };

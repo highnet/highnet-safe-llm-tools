@@ -23,7 +23,8 @@ describe('landing page', () => {
     expect(within(rag).getAllByRole('listitem')).toHaveLength(12);
     expect(rag).toHaveTextContent(LANDING.rag.result);
     const scope = screen.getByRole('list', { name: SITE.products.scope.name });
-    expect(within(scope).getAllByRole('listitem')).toHaveLength(12);
+    // Twelve steps and the result.
+    expect(within(scope).getAllByRole('listitem')).toHaveLength(13);
     for (const action of LANDING.scope.actions) expect(scope).toHaveTextContent(action);
     expect(screen.getByRole('link', { name: LANDING.rag.open })).toHaveAttribute(
       'href',
@@ -61,6 +62,20 @@ describe('landing page', () => {
       .mockReturnValue({ ...recorded, judge: null });
     render(<HomePage />);
     expect(screen.getAllByText(LANDING.connect.judgeFailed)).toHaveLength(2);
+    spy.mockRestore();
+  });
+
+  it('adds the second judge’s line only when the export has one', () => {
+    const recorded = verdictForExample('rag-lasagna')!;
+    const spy = vi
+      .spyOn(verdictLib, 'verdictForExample')
+      .mockReturnValue({ ...recorded, decide: { label: 'out', confidence: 0.91 } });
+    const { unmount } = render(<HomePage />);
+    expect(screen.getAllByText(LANDING.connect.decide('off scope', '0.91'))).toHaveLength(2);
+    unmount();
+    spy.mockReturnValue({ ...recorded, decide: null });
+    render(<HomePage />);
+    expect(screen.queryByText(/The decision model said/)).toBeNull();
     spy.mockRestore();
   });
 });

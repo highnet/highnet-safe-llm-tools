@@ -7,7 +7,7 @@ related_targets: ['web/components/scope', 'web/content/scope.ts', 'web/content/s
 
 # Surface: Scope pipeline explorer (`/scope/`)
 
-Scope: Sheet 1 of Scope, the product's main surface. Pick a preset and a message, watch the guard work it out in eleven steps (request, context, rules, embed, map, nearest neighbours, LLM judge, fuse, thresholds, respond, audit) and read the one action it chooses: answer, answer briefly, redirect or block. Visitor mode: **Operate**, with a Read layer (hero definition, principles, "Why this step?" notes).
+Scope: Sheet 1 of Scope, the product's main surface. Pick a preset and a message, watch the guard work it out in twelve steps (request, context, rules, embed, map, nearest neighbours, LLM judge, decision model, fuse, thresholds, respond, audit) and read the one action it chooses: answer, answer briefly, redirect or block. Visitor mode: **Operate**, with a Read layer (hero definition, principles, "Why this step?" notes).
 
 - Audience and job: developers building LLM agents, then recruiters. The job is to see how a scope guard decides, which signal pulled which way, and what changing a weight, threshold or topic does.
 - Action: pick a recorded example → read the replayed steps and the action → change a setting or move a topic in the scope definition (it replays at once). Under the RAG corpus assistant preset, "Scope first, then RAG" replays the World Cup and lasagna questions and links to RAG.
@@ -22,6 +22,8 @@ OWN-WORLD: As DESIGN.md. Reuses RAG's hero, diagram, step sheets, margin notes, 
 
 STORY: The visitor sees three independent signals disagree, watches fusion and two thresholds turn them into one action, and learns that refusing a good message is a failure too.
 
-FIRST VIEWPORT: The hero: Display headline "Watch an AI agent decide whether a message is in scope, step by step.", the "Scope guard" definition, intro, "Try a message" / "Browse the labeled prompts", and the Scope diagram as the picture on the right; phones stack them. Below: "What we hold to", then "Sheet 1 · <message>", the replay notice, the picker and settings, and the eleven numbered steps.
+FIRST VIEWPORT: The hero: Display headline "Watch an AI agent decide whether a message is in scope, step by step.", the "Scope guard" definition, intro, "Try a message" / "Browse the labeled prompts", and the Scope diagram as the picture on the right; phones stack them. Below: "What we hold to", then "Sheet 1 · <message>", the replay notice, the picker and settings, and the twelve numbered steps.
 
 FORM: engineer's computation pad, as DESIGN.md.
+
+SIMPLE VIEW: For non-experts, a "Show: Simple / Every step" switch (`?view=simple`; a first visit opens Simple). Simple shows the same run in plain words on one sheet: the message, what the assistant does, who voted (checklist, similar messages, AI judge, decision model, each with its lean and how sure), the combined vote and the reply, with "Show every step" one click away. Every number still comes from the trace; no jargon.

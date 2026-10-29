@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-Method = Literal["rules", "knn", "judge", "fused"]
+Method = Literal["rules", "knn", "judge", "decide", "fused"]
 Label = Literal["in", "adjacent", "out", "injection"]
 
 WIRE = ConfigDict(json_schema_serialization_defaults_required=True)
@@ -94,6 +94,7 @@ class ScopeRun(BaseModel):
     build_id: str
     embed_model: str
     judge_model: str
+    decide_model: str
     prompts: int
     k: int
     weights: dict[str, float]
@@ -114,7 +115,7 @@ class CostLine(BaseModel):
 class ScopeEvalResults(BaseModel):
     model_config = WIRE
 
-    schema_version: int = 1
+    schema_version: int = 2
     run: ScopeRun
     labels: list[Label]
     methods: list[MethodResult]

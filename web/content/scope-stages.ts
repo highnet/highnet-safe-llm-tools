@@ -1,7 +1,7 @@
 import type { StageCopy } from '@/content/stages';
 import type { Stage as ScopeStage } from '@/lib/generated/scope-trace';
 
-// English copy for Scope's eleven steps. Voice: the same precise lab partner as the RAG pipeline.
+// English copy for Scope's twelve steps. Voice: the same precise lab partner as the RAG pipeline.
 // Plain, exact, first-person plural, no hype; name trade-offs and say when a step is weak.
 
 export const SCOPE_STAGE_ORDER: ScopeStage[] = [
@@ -12,6 +12,7 @@ export const SCOPE_STAGE_ORDER: ScopeStage[] = [
   'map',
   'knn',
   'judge',
+  'decide',
   'fuse',
   'thresholds',
   'respond',
@@ -61,11 +62,17 @@ export const SCOPE_STAGES: Record<ScopeStage, StageCopy> = {
     detail:
       'The reply is forced to start with “{” (an assistant prefill) and parsed with a Pydantic model that forbids extra keys, allows only the four labels and a confidence from 0 to 1. Tags inside the message that imitate our delimiters are neutralised first. The call was recorded with each preset’s original rubric, so editing the definition skips this step on replay rather than pretending.',
   },
+  decide: {
+    title: 'Ask a second judge',
+    why: 'A decision model answers one typed question, which of the four labels fits, and returns a probability for every label instead of writing a reply. So there is no JSON to validate and no self-reported confidence: the probabilities go straight into the fusion. It reads the same scope definition as the LLM judge, and the message is data it scores, never instructions it follows.',
+    detail:
+      'The question is a “choice” with one criterion per label, built from the preset’s topics; the message and any earlier turns are sent as the state. The probabilities are normalised to sum to 1, and a reply without one for every label fails the step, so the second judge drops out. Like the first judge, it was recorded with each preset’s original definition, so editing the definition skips this step on replay.',
+  },
   fuse: {
     title: 'Fuse the signals',
     why: 'Each signal gives a share to each of the four labels. We take their weighted average over the signals that actually ran: a skipped or failed signal drops out and the others are re-weighted. The cost and latency of each signal sit beside it, so you can see what each extra signal buys.',
     detail:
-      'P(label) = Σ wᵢ·Pᵢ(label) / Σ wᵢ over the active signals. The judge’s share puts its confidence on its label and splits the rest evenly. Averaging can dilute one confident signal with two hesitant ones; the evals show where that happens.',
+      'P(label) = Σ wᵢ·Pᵢ(label) / Σ wᵢ over the active signals. The LLM judge’s share puts its confidence on its label and splits the rest evenly; the decision model’s share is its own probabilities. Averaging can dilute one confident signal with two hesitant ones; the evals show where that happens.',
   },
   thresholds: {
     title: 'Apply the thresholds',

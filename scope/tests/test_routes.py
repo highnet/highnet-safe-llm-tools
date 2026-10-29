@@ -67,7 +67,7 @@ def test_a_recorded_example_streams_every_stage(recorded: TestClient) -> None:
         recorded, preset="career", example="career-salary", edit="cv:out,,salary:in", w_judge=0.5
     )
     names = [n for n, _ in events]
-    assert names == ["trace"] * 11 + ["done"]
+    assert names == ["trace"] * 12 + ["done"]
     request = events[0][1]["data"]
     assert request["settings"]["overrides"] == {"cv": "out", "salary": "in"}
     assert request["settings"]["weights"]["judge"] == 0.5

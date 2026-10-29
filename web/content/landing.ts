@@ -15,7 +15,7 @@ export const LANDING = {
     result: 'Cited answer',
   },
   scope: {
-    lede: 'A message goes in; one of four actions comes out. In between: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, and an LLM judge whose JSON reply is validated, fused and run through thresholds.',
+    lede: 'A message goes in; one of four actions comes out. In between: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, and an LLM judge whose JSON reply is validated and a decision model that returns a probability per label, fused and run through thresholds.',
     takeaway: 'Refusing a good message is a failure too.',
     open: 'Open Scope',
     secondary: { href: '/scope/evals/', text: 'False refusals versus attacks that get through' },
@@ -46,6 +46,7 @@ export const LANDING = {
     judge: (label: string, confidence: string) =>
       `The LLM judge alone said ${label} (${confidence}).`,
     judgeFailed: 'The LLM judge’s reply failed validation, so it dropped out.',
+    decide: (label: string, p: string) => `The decision model said ${label} (p ${p}).`,
     steps: { scope: 'Scope', rag: 'RAG' },
     outcome: 'Outcome',
   },

@@ -27,7 +27,7 @@ type ScopeDiagramProps = {
   className?: string;
 };
 
-// The whole guard on one figure: what was built ahead of time, then the eleven steps every
+// The whole guard on one figure: what was built ahead of time, then the twelve steps every
 // message takes, ending in the four actions. It follows the run on screen as it streams.
 const ScopeDiagram = ({ statusOf, action, className }: ScopeDiagramProps) => {
   const offline = (

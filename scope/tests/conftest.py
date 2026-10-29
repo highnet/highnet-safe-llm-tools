@@ -11,7 +11,7 @@ from scope_helpers import EXAMPLES, GOLDEN, scope_settings
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_core.storage.state import SqliteStateStore
 from highnet_scope.ingest import build_scope, load_examples, load_golden
-from highnet_scope.models import FakeTextModel, LiveModels, RecordedModels
+from highnet_scope.models import FakeDecisionModel, FakeTextModel, LiveModels, RecordedModels
 from highnet_scope.pipeline import ScopeDeps
 from highnet_scope.recorder import record_examples
 from highnet_scope.store import ScopeStore
@@ -34,7 +34,7 @@ def built_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
             settings,
             log=lambda _: None,
         )
-        models = LiveModels(store, embedder, FakeTextModel(), settings)
+        models = LiveModels(store, embedder, FakeTextModel(), FakeDecisionModel(), settings)
         deps = ScopeDeps(settings, store, SqliteStateStore(settings.state_db_path), models)
         report = await record_examples(store.examples(), deps, models, log=lambda _: None)
         assert report.failed == []
@@ -55,5 +55,10 @@ def recorded_deps(built_db: Path, tmp_path: Path) -> ScopeDeps:
     """Visitor deps: the recorded store, read-only, replayed instantly."""
     settings = scope_settings(tmp_path, scope_db_path=built_db)
     store = ScopeStore(built_db, readonly=True)
-    models = RecordedModels(store, ("fake", FakeEmbedder.model), ("fake", FakeTextModel.model))
+    models = RecordedModels(
+        store,
+        ("fake", FakeEmbedder.model),
+        ("fake", FakeTextModel.model),
+        ("fake", FakeDecisionModel.model),
+    )
     return ScopeDeps(settings, store, SqliteStateStore(settings.state_db_path), models)

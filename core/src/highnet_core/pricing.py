@@ -9,6 +9,8 @@ DEFAULT_PRICES: dict[str, ModelPrice] = {
     "claude-opus-5": ModelPrice(input=5.0, output=25.0),
     "voyage-3.5-lite": ModelPrice(input=0.02),
     "rerank-2.5-lite": ModelPrice(input=0.02),
+    # Decision model via Vercel AI Gateway: input tokens only (no output price is listed).
+    "typesafe-ai/jev": ModelPrice(input=0.042),
 }
 
 # Context window (input tokens) per answer model, for the prompt step's window bar. Only models

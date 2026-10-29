@@ -12,6 +12,9 @@ export type ScopeVerdict = {
   label: string;
   confidence: number;
   judge: { label: string; confidence: number; reason: string } | null;
+  // The second judge (a decision model): its most probable label and that probability. Null when
+  // its reply was unusable; absent from exports made before it existed.
+  decide?: { label: string; confidence: number } | null;
   ms: number;
   cost_usd: number;
 };

@@ -1452,7 +1452,8 @@
   "weights": {
    "rules": 0.25,
    "knn": 0.35,
-   "judge": 0.4
+   "judge": 0.4,
+   "decide": 0.4
   },
   "thresholds": {
    "block": 0.5,
@@ -1469,6 +1470,10 @@
   "judge": {
    "provider": "anthropic",
    "model": "claude-haiku-4-5"
+  },
+  "decide": {
+   "provider": "vercel-ai-gateway",
+   "model": "typesafe-ai/jev"
   }
  },
  "live": false,

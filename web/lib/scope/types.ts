@@ -6,12 +6,12 @@ import type { ScopeAction } from '@/content/scope-verdict';
 
 export type Label = ClassLabel;
 export type TopicClass = 'in' | 'adjacent' | 'out';
-export type Signal = 'rules' | 'knn' | 'judge';
+export type Signal = 'rules' | 'knn' | 'judge' | 'decide';
 export type Distribution = Record<Label, number>;
 export type Turn = { role: string; text: string };
 
 export const LABELS: Label[] = ['in', 'adjacent', 'out', 'injection'];
-export const SIGNALS: Signal[] = ['rules', 'knn', 'judge'];
+export const SIGNALS: Signal[] = ['rules', 'knn', 'judge', 'decide'];
 export const TOPIC_CLASSES: TopicClass[] = ['in', 'adjacent', 'out'];
 
 export type Topic = { id: string; name: string; class: Label; keywords: string[] };
@@ -46,6 +46,7 @@ export type ScopeConfig = {
   models: {
     embed: { provider: string; model: string };
     judge: { provider: string; model: string };
+    decide: { provider: string; model: string };
   };
   live: boolean;
   illustrative: boolean;
@@ -69,7 +70,8 @@ export type RequestData = StepError & {
     limit_minute: number;
     limit_day: number;
   };
-  models: ScopeConfig['models'];
+  // Runs recorded before the second judge existed name only the embedder and the judge.
+  models: Partial<ScopeConfig['models']> & Pick<ScopeConfig['models'], 'embed' | 'judge'>;
 };
 
 export type SkippedData = { reason: string; turns?: Turn[]; relabelled_topics?: string[] };
@@ -139,15 +141,37 @@ export type JudgeData = StepError &
     relabelled_topics?: string[];
   };
 
+// The second judge's one typed question: the scope definition as a criterion per label.
+export type DecisionQuestions = {
+  label: { type: 'choice'; instructions: string; criteria: Record<Label, string> };
+};
+
+export type DecideData = StepError &
+  Partial<Recorded> & {
+    state?: { message: string; conversation?: Turn[] };
+    questions?: DecisionQuestions;
+    provider?: string;
+    model?: string;
+    // The reply as the gateway sent it.
+    answers?: { label?: { choice?: string; probabilities?: Partial<Record<Label, number>> } };
+    // The gateway's own cost figure for the call, when it reports one (ours is the event's).
+    reported_cost_usd?: number | null;
+    distribution?: Distribution;
+    choice?: Label;
+    reason?: string;
+    relabelled_topics?: string[];
+  };
+
 export type Tradeoff = {
-  per_signal: Record<Signal, { ms: number; cost_usd: number }>;
+  per_signal: Partial<Record<Signal, { ms: number; cost_usd: number }>>;
   cumulative: { signals: Signal[]; ms: number; cost_usd: number }[];
 };
 
 export type FuseData = {
   weights: Weights;
   used_weights: Partial<Weights>;
-  signals: Record<Signal, Distribution | null>;
+  // Runs recorded before the second judge existed have no `decide` entry.
+  signals: Partial<Record<Signal, Distribution | null>>;
   contributions: Partial<Record<Signal, Distribution>>;
   distribution: Distribution;
   label: Label;

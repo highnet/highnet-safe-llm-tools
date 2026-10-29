@@ -92,7 +92,7 @@ type VerdictLinesProps = {
   verdict?: ScopeVerdict;
 };
 
-// One recorded Scope verdict and what the judge alone said, read from the export; nothing here
+// One recorded Scope verdict and what each judge alone said, read from the export; nothing here
 // is typed in by hand.
 const VerdictLines = ({ verdict }: VerdictLinesProps) => {
   if (!verdict) return null;
@@ -112,6 +112,14 @@ const VerdictLines = ({ verdict }: VerdictLinesProps) => {
             )
           : LANDING.connect.judgeFailed}
       </Typography>
+      {verdict.decide && (
+        <Typography variant="small" color="muted">
+          {LANDING.connect.decide(
+            SCOPE.labels[verdict.decide.label as ClassLabel],
+            formatNumber(verdict.decide.confidence, 2),
+          )}
+        </Typography>
+      )}
     </>
   );
 };
