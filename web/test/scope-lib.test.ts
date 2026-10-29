@@ -14,6 +14,7 @@ import {
 } from '@/lib/scope/map';
 import { scopeSnippets, scopeStatuses } from '@/lib/scope/steps';
 import { scopeSummary } from '@/lib/scope/summary';
+import { getScopeView, setScopeView, subscribeScopeView } from '@/lib/scope/view-store';
 import {
   cleanEdit,
   defaultScopeSettings,
@@ -21,6 +22,7 @@ import {
   ragHref,
   runQuery,
   scopeSearch,
+  writeScopeView,
 } from '@/lib/scope/url-state';
 import { SCOPE_STAGE_ORDER } from '@/content/scope-stages';
 import { SCOPE } from '@/content/scope';
@@ -36,14 +38,14 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('scope url state', () => {
   it('falls back to the defaults for a bare or broken link', () => {
-    // A first visit (no query at all) opens the Simple view; any other link keeps every step.
+    // Simple is the default view everywhere; only ?view=steps opens every step.
     const bare = parseScopeUrl('', config);
-    expect(bare).toEqual({ ...defaultScopeSettings(config, 'career'), view: 'simple' });
+    expect(bare).toEqual(defaultScopeSettings(config, 'career'));
+    expect(bare.view).toBe('simple');
+    expect(parseScopeUrl('?preset=rag', config).view).toBe('simple');
     expect(parseScopeUrl('?view=steps', config).view).toBe('steps');
-    expect(parseScopeUrl('?preset=rag', config).view).toBe('steps');
-    expect(parseScopeUrl('?preset=rag&view=simple', config).view).toBe('simple');
-    expect(scopeSearch({ ...defaultScopeSettings(config, 'rag'), view: 'simple' }, config)).toBe(
-      '?preset=rag&view=simple',
+    expect(scopeSearch({ ...defaultScopeSettings(config, 'rag'), view: 'steps' }, config)).toBe(
+      '?preset=rag&view=steps',
     );
     const broken = parseScopeUrl(
       '?preset=nope&example=x&k=99&w_rules=2&t_block=abc&edit=nope:in,cv:wrong',
@@ -73,6 +75,29 @@ describe('scope url state', () => {
     expect(scopeSearch(defaultScopeSettings(config, 'rag'), config)).toBe('?preset=rag');
     // An example from another preset is dropped.
     expect(parseScopeUrl('?preset=rag&example=career-fibonacci', config).example).toBeNull();
+  });
+
+  it('tells listeners only about a real change of view', () => {
+    window.history.replaceState(null, '', '/scope/?view=steps');
+    const listener = vi.fn();
+    const stop = subscribeScopeView(listener);
+    setScopeView('steps');
+    expect(listener).not.toHaveBeenCalled();
+    setScopeView('simple');
+    expect(listener).toHaveBeenCalledOnce();
+    stop();
+    expect(getScopeView()).toBe('simple');
+  });
+
+  it('writes only the view into the link, leaving the rest as it was', () => {
+    window.history.replaceState(null, '', '/scope/?view=steps#step-judge');
+    writeScopeView('simple');
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe(
+      '/scope/#step-judge',
+    );
+    window.history.replaceState(null, '', '/scope/?preset=rag');
+    writeScopeView('steps');
+    expect(window.location.search).toBe('?preset=rag&view=steps');
   });
 
   it('keeps only real moves of editable topics', () => {

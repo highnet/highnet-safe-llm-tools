@@ -4,25 +4,34 @@ import { type ProductKey, SITE, type SitePage } from '@/content/site';
 import { cn } from '@/lib/utils';
 
 import { HeaderBar } from './HeaderBar';
+import { ScopeViewToggle } from './ScopeViewToggle';
 import { ThemeToggle } from './ThemeToggle';
 
 const PRODUCTS: ProductKey[] = ['rag', 'scope'];
 
 type ProductSwitcherProps = {
   current?: ProductKey;
+  // On the Scope pipeline page the Scope segment also carries its Simple · Every step toggle.
+  scopeView?: boolean;
 };
 
 // The two products as one ruled pair of links: the current one sits on the blue wash in blue
 // pencil and weight, so it reads without colour too.
-const ProductSwitcher = ({ current }: ProductSwitcherProps) => {
+const ProductSwitcher = ({ current, scopeView }: ProductSwitcherProps) => {
   return (
     <nav aria-label={SITE.productsLabel}>
       <ul
         data-slot="product-switcher"
-        className="flex rounded-sm border border-input bg-card has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+        className="flex rounded-sm border border-input bg-card has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-ring"
       >
         {PRODUCTS.map((key) => (
-          <li key={key} className="border-l border-input first:border-l-0">
+          <li
+            key={key}
+            className={cn(
+              'flex items-center border-l border-input first:border-l-0',
+              key === current && 'bg-accent',
+            )}
+          >
             <a
               href={SITE.products[key].href}
               aria-current={key === current ? 'page' : undefined}
@@ -33,6 +42,7 @@ const ProductSwitcher = ({ current }: ProductSwitcherProps) => {
             >
               {SITE.products[key].name}
             </a>
+            {scopeView && key === 'scope' && <ScopeViewToggle />}
           </li>
         ))}
       </ul>
@@ -63,7 +73,10 @@ const SiteHeader = ({ product, current }: SiteHeaderProps) => {
         </div>
         <span aria-hidden className="order-3 basis-full md:hidden" />
         <div className="order-4 md:order-2">
-          <ProductSwitcher current={product} />
+          <ProductSwitcher
+            current={product}
+            scopeView={product === 'scope' && current === 'pipeline'}
+          />
         </div>
         {product && (
           <nav

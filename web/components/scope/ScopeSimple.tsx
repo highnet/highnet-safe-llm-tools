@@ -18,6 +18,7 @@ import {
 } from '@/lib/scope/types';
 import { ragHref } from '@/lib/scope/url-state';
 import type { RunStatus } from '@/lib/use-trace-stream';
+import { cn } from '@/lib/utils';
 
 import { ActionTag, ClassTag } from './ClassTag';
 import { Turns } from './steps/ContextView';
@@ -74,10 +75,11 @@ type ScopeSimpleProps = {
   // Which advisors the run on screen had switched on (null before the first run).
   signals: Record<Signal, boolean> | null;
   onShowSteps: () => void;
+  onSettings: () => void;
 };
 
 // The Simple view: the run on screen in plain words, read only from its trace.
-const ScopeSimple = ({ events, runStatus, signals, onShowSteps }: ScopeSimpleProps) => {
+const ScopeSimple = ({ events, runStatus, signals, onShowSteps, onSettings }: ScopeSimpleProps) => {
   const byStage = new Map(events.map((e) => [e.stage, e]));
   const request = byStage.get('request');
   const context = byStage.get('context');
@@ -87,11 +89,28 @@ const ScopeSimple = ({ events, runStatus, signals, onShowSteps }: ScopeSimplePro
   const running = runStatus === 'running';
   const requestData = request?.data as RequestData | undefined;
 
+  // The way on: the full working, or the settings (both live in the every-step view).
   const showSteps = (
-    <Button variant="pencil" size="inline" className="min-h-10 gap-1 text-sm" onClick={onShowSteps}>
-      {S.every}
-      <ArrowRight aria-hidden className="size-3.5" />
-    </Button>
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
+      <Button
+        variant="pencil"
+        size="inline"
+        className="min-h-10 gap-1 text-sm"
+        onClick={onShowSteps}
+      >
+        {S.every}
+        <ArrowRight aria-hidden className="size-3.5" />
+      </Button>
+      <Button
+        variant="pencil"
+        size="inline"
+        className="min-h-10 gap-1 text-sm"
+        onClick={onSettings}
+      >
+        {S.settings}
+        <ArrowRight aria-hidden className="size-3.5" />
+      </Button>
+    </div>
   );
 
   if (!requestData) {
@@ -107,7 +126,28 @@ const ScopeSimple = ({ events, runStatus, signals, onShowSteps }: ScopeSimplePro
   return (
     <div className="space-y-3">
       <div className="min-w-0 space-y-6 rounded-md border bg-card px-4 py-4 md:px-6 md:py-5">
-        <section aria-labelledby="simple-message" className="space-y-2">
+        {!requestData.error && (
+          <section aria-labelledby="simple-outcome" aria-live="polite" className="space-y-2">
+            <Typography variant="label" color="muted" as="h3" id="simple-outcome">
+              {S.outcome}
+            </Typography>
+            {decision ? (
+              <>
+                <p className="text-2xl font-semibold">
+                  <ActionTag action={decision.action} size="lg" />
+                </p>
+                <Typography className="text-lg">{S.outcomes[decision.action]}</Typography>
+              </>
+            ) : (
+              <Typography color="muted">{running ? S.deciding : S.stopped}</Typography>
+            )}
+          </section>
+        )}
+
+        <section
+          aria-labelledby="simple-message"
+          className={cn('space-y-2', !requestData.error && 'border-t border-dashed pt-4')}
+        >
           <Typography variant="label" color="muted" as="h3" id="simple-message">
             {S.message}
           </Typography>
@@ -129,26 +169,6 @@ const ScopeSimple = ({ events, runStatus, signals, onShowSteps }: ScopeSimplePro
 
         {!requestData.error && (
           <>
-            <section
-              aria-labelledby="simple-outcome"
-              aria-live="polite"
-              className="space-y-2 border-t border-dashed pt-4"
-            >
-              <Typography variant="label" color="muted" as="h3" id="simple-outcome">
-                {S.outcome}
-              </Typography>
-              {decision ? (
-                <>
-                  <p className="text-2xl font-semibold">
-                    <ActionTag action={decision.action} size="lg" />
-                  </p>
-                  <Typography className="text-lg">{S.outcomes[decision.action]}</Typography>
-                </>
-              ) : (
-                <Typography color="muted">{running ? S.deciding : S.stopped}</Typography>
-              )}
-            </section>
-
             <section
               aria-labelledby="simple-voters"
               className="space-y-2 border-t border-dashed pt-4"

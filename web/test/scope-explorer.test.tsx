@@ -5,6 +5,7 @@ import ScopePage from '@/app/scope/page';
 import { ScopeExplorer } from '@/components/scope/ScopeExplorer';
 import { SCOPE } from '@/content/scope';
 import { clearDatasetCache } from '@/lib/scope/api';
+import { setScopeView } from '@/lib/scope/view-store';
 
 import { ControlledEventSource } from './helpers';
 import { type Recorded, recording, scopeConfig, stubScopeFetch } from './scope-fixtures';
@@ -19,7 +20,10 @@ const play = (rec: Recorded, source = ControlledEventSource.last(), finish = tru
 
 const ready = () => screen.findByRole('heading', { name: SCOPE.picker.title });
 
+// These tests read the every-step view (the full picker, settings and step sheets); the Simple
+// view has its own tests (test/scope-simple.test.tsx).
 beforeEach(() => {
+  window.history.replaceState(null, '', '/scope/?view=steps');
   ControlledEventSource.instances = [];
   vi.stubGlobal('EventSource', ControlledEventSource);
   clearDatasetCache();
@@ -99,12 +103,15 @@ describe('scope explorer runs', () => {
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
-    expect(screen.getByText(SCOPE.emptyTitle)).toBeInTheDocument();
+    // With no message linked, the preset's first example plays at once; the link stays bare.
+    expect(ControlledEventSource.last().url).toMatch(/preset=career&example=career-/);
+    expect(screen.queryByText(SCOPE.emptyTitle)).not.toBeInTheDocument();
+    expect(window.location.search).toBe('?view=steps');
+    play(recording('lasagna-recipe'), ControlledEventSource.last());
     fireEvent.click(screen.getByRole('button', { name: /What's a good lasagna recipe\?/ }));
     const source = ControlledEventSource.last();
     expect(source.url).toContain('/api/scope/run?preset=career&example=career-lasagna');
-    // A first visit opens the Simple view, and the link keeps it.
-    expect(window.location.search).toBe('?preset=career&view=simple&example=career-lasagna');
+    expect(window.location.search).toBe('?preset=career&view=steps&example=career-lasagna');
     expect(screen.getByRole('button', { name: SCOPE.stop })).toBeInTheDocument();
     const rec = recording('lasagna-recipe');
     play({ ...rec, events: rec.events.slice(0, 3) }, source, false);
@@ -117,16 +124,21 @@ describe('scope explorer runs', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /What's a good lasagna recipe\?/ }));
     play(rec);
-    expect(screen.getByText(SCOPE.simple.outcomes.answer)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('radio', { name: SCOPE.view.steps }));
-    expect(window.location.search).toBe('?preset=career&example=career-lasagna');
     expect(screen.getByRole('heading', { name: SCOPE.result.label })).toBeInTheDocument();
     expect(screen.getByText(/Recorded totals/)).toBeInTheDocument();
     expect(screen.getAllByText('Answer').length).toBeGreaterThan(1);
+    // The same run in the Simple view, switched from outside (the header's toggle).
+    act(() => setScopeView('simple'));
+    expect(window.location.search).toBe('?preset=career&example=career-lasagna');
+    expect(screen.getByText(SCOPE.simple.outcomes.answer)).toBeInTheDocument();
   });
 
   it('marks a failed step on the diagram and explains the formulas', async () => {
-    window.history.replaceState(null, '', '/scope/?preset=career&example=career-recruiter');
+    window.history.replaceState(
+      null,
+      '',
+      '/scope/?view=steps&preset=career&example=career-recruiter',
+    );
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
@@ -151,7 +163,7 @@ describe('scope explorer runs', () => {
   });
 
   it('replays a linked example at once and connects the RAG preset to RAG', async () => {
-    window.history.replaceState(null, '', '/scope/?preset=rag&example=rag-world-cup');
+    window.history.replaceState(null, '', '/scope/?view=steps&preset=rag&example=rag-world-cup');
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
@@ -172,7 +184,7 @@ describe('scope explorer runs', () => {
   });
 
   it('re-runs when a setting changes, and resets the settings', async () => {
-    window.history.replaceState(null, '', '/scope/?preset=career&example=career-salary');
+    window.history.replaceState(null, '', '/scope/?view=steps&preset=career&example=career-salary');
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
@@ -207,7 +219,11 @@ describe('scope explorer runs', () => {
   });
 
   it('edits the scope definition, then resets it', async () => {
-    window.history.replaceState(null, '', '/scope/?preset=career&example=career-fibonacci');
+    window.history.replaceState(
+      null,
+      '',
+      '/scope/?view=steps&preset=career&example=career-fibonacci',
+    );
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
@@ -234,7 +250,7 @@ describe('scope explorer runs', () => {
     fireEvent.click(screen.getByRole('button', { name: /lasagna/ }));
     play(recording('lasagna-recipe'));
     fireEvent.click(screen.getByRole('button', { name: 'Recipe assistant' }));
-    expect(window.location.search).toBe('?preset=recipe&view=simple');
+    expect(window.location.search).toBe('?preset=recipe&view=steps');
     expect(screen.getByText(SCOPE.emptyTitle)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: SCOPE.result.label })).not.toBeInTheDocument();
     const more = screen.getByRole('button', { name: SCOPE.picker.more(13) });
@@ -245,7 +261,11 @@ describe('scope explorer runs', () => {
   });
 
   it('keeps a folded group open when its selected message is folded', async () => {
-    window.history.replaceState(null, '', '/scope/?preset=career&example=career-linkedin');
+    window.history.replaceState(
+      null,
+      '',
+      '/scope/?view=steps&preset=career&example=career-linkedin',
+    );
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();
@@ -255,7 +275,11 @@ describe('scope explorer runs', () => {
 
   it('folds the settings to one line on phones', async () => {
     globalThis.__wide = false;
-    window.history.replaceState(null, '', '/scope/?preset=career&rules=0&judge=0&context=0');
+    window.history.replaceState(
+      null,
+      '',
+      '/scope/?view=steps&preset=career&rules=0&judge=0&context=0',
+    );
     stubScopeFetch();
     render(<ScopeExplorer />);
     await ready();

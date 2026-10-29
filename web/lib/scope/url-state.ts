@@ -12,9 +12,8 @@ import {
 // ?preset=career&example=career-fibonacci&context=0&knn=0&w_judge=0.6&t_brief=0.3&k=5
 //   &edit=coding_practice:in
 // Only values that differ from the defaults are written. Invalid values fall back to them.
-// `view` picks the page's layout: `simple` (the plain summary) or `steps` (every step). A first
-// visit with no query at all opens Simple; any other link without `view` keeps every step, as
-// links made before the Simple view did.
+// `view` picks the page's layout: `simple` (the plain summary, the default) or `steps` (every
+// step, `?view=steps`).
 export type ScopeView = 'simple' | 'steps';
 
 export type ScopeSettings = {
@@ -30,6 +29,10 @@ export type ScopeSettings = {
   edit: Record<string, TopicClass>;
 };
 
+// Simple unless the link asks for every step.
+export const parseScopeView = (search: string): ScopeView =>
+  new URLSearchParams(search).get('view') === 'steps' ? 'steps' : 'simple';
+
 export const DEFAULT_PRESET = 'career';
 export const K_MAX = 15;
 const THRESHOLD_KEYS: (keyof Thresholds)[] = ['block', 'answer', 'brief'];
@@ -38,7 +41,7 @@ export const defaultScopeSettings = (
   config: ScopeConfig,
   preset = DEFAULT_PRESET,
 ): ScopeSettings => ({
-  view: 'steps',
+  view: 'simple',
   preset,
   example: null,
   context: true,
@@ -86,10 +89,8 @@ export const parseScopeUrl = (search: string, config: ScopeConfig): ScopeSetting
       .filter(Boolean)
       .map((part) => part.split(':') as [string, string]),
   );
-  const view = params.get('view');
-  const firstVisit = view === null && [...params.keys()].length === 0;
   return {
-    view: view === 'simple' || firstVisit ? 'simple' : 'steps',
+    view: parseScopeView(search),
     preset,
     example: config.examples.some((e) => e.id === example && e.preset === preset) ? example : null,
     context: params.get('context') !== '0',
@@ -117,7 +118,7 @@ export const editParam = (edit: Record<string, TopicClass>) =>
 export const scopeSearch = (settings: ScopeSettings, config: ScopeConfig): string => {
   const fallback = defaultScopeSettings(config, settings.preset);
   const params = new URLSearchParams({ preset: settings.preset });
-  if (settings.view === 'simple') params.set('view', 'simple');
+  if (settings.view === 'steps') params.set('view', 'steps');
   if (settings.example) params.set('example', settings.example);
   if (!settings.context) params.set('context', '0');
   for (const s of SIGNALS) {
@@ -134,6 +135,19 @@ export const scopeSearch = (settings: ScopeSettings, config: ScopeConfig): strin
   const edit = editParam(settings.edit);
   if (edit) params.set('edit', edit);
   return `?${params.toString()}`;
+};
+
+// Only the view changes: the rest of the link stays exactly as it was.
+export const writeScopeView = (view: ScopeView) => {
+  const params = new URLSearchParams(window.location.search);
+  if (view === 'steps') params.set('view', 'steps');
+  else params.delete('view');
+  const search = params.toString();
+  window.history.replaceState(
+    null,
+    '',
+    (search ? `?${search}` : window.location.pathname) + window.location.hash,
+  );
 };
 
 export const writeScopeUrl = (settings: ScopeSettings, config: ScopeConfig) => {

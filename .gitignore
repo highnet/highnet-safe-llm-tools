@@ -89,3 +89,6 @@ graphify-out/
 # Coverage reports written by CI's test run (scripts/coverage_report.py reads them)
 /coverage.json
 /junit.xml
+
+# Impeccable engine binary: the launcher downloads it (checksum-verified) where it is missing.
+.claude/skills/impeccable/scripts/bin/
