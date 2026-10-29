@@ -20,6 +20,12 @@ export const SITE = {
     },
   },
   navLabel: (product: string) => `${product} pages`,
+  // Each pipeline page's two views, nested in that product's segment of the header switcher.
+  view: {
+    label: (product: string) => `${product} view`,
+    simple: 'Simple',
+    steps: 'Every step',
+  },
   pages: {
     rag: [
       { key: 'pipeline', href: '/rag/', text: 'Pipeline' },

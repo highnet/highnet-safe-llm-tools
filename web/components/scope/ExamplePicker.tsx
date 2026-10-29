@@ -6,6 +6,7 @@ import { ChevronDown, Square } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Typography } from '@/components/ui/Typography';
 import { SCOPE } from '@/content/scope';
+import { oneLine } from '@/lib/preview';
 import type { Example, Preset } from '@/lib/scope/types';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +21,7 @@ type ExampleGroupProps = {
   onPick: (example: Example) => void;
 };
 
-// Long groups show six and fold the rest; a folded example that is selected keeps it open.
+// Each message is shown as one clean line (lib/preview.ts). Long groups show six and fold the rest; a folded example that is selected keeps it open.
 const ExampleGroup = ({ label, examples, selectedId, disabled, onPick }: ExampleGroupProps) => {
   const [showAll, setShowAll] = useState(false);
   const selectedAt = examples.findIndex((e) => e.id === selectedId);
@@ -43,7 +44,7 @@ const ExampleGroup = ({ label, examples, selectedId, disabled, onPick }: Example
               onClick={() => onPick(example)}
               className="h-auto min-h-11 w-full flex-col items-start gap-0.5 py-2 text-left leading-snug font-normal whitespace-normal"
             >
-              <span className="line-clamp-3 wrap-anywhere">{example.text}</span>
+              <span className="line-clamp-3 wrap-anywhere">{oneLine(example.text)}</span>
               {example.context.length > 0 && (
                 <span className="voice-data text-xs text-muted-foreground">
                   {P.turns(example.context.length)}

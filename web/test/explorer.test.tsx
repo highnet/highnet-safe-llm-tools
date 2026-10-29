@@ -9,6 +9,7 @@ import { COPY } from '@/content/copy';
 import { SITE } from '@/content/site';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { useTraceStream } from '@/lib/use-trace-stream';
+import { setView } from '@/lib/view-store';
 
 import { ControlledEventSource, ev } from './helpers';
 
@@ -26,6 +27,9 @@ beforeEach(() => {
 });
 
 afterEach(() => vi.unstubAllGlobals());
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('explorer states', () => {
   it('explains a failed connection and retries', async () => {

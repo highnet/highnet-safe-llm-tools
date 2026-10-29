@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
 import { COPY } from '@/content/copy';
 import type { DemoQuestion } from '@/lib/api';
+import { setView } from '@/lib/view-store';
 
 import { ControlledEventSource, ev } from './helpers';
 
@@ -43,6 +44,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
   window.history.replaceState(null, '', '/');
 });
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('replayed questions', () => {
   it('offers the recorded questions instead of a text box and says runs are replays', async () => {

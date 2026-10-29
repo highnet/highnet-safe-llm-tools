@@ -7,11 +7,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
 import { COPY } from '@/content/copy';
 import { STAGE_ORDER, STAGES } from '@/content/stages';
+import { setView } from '@/lib/view-store';
 
 import { FakeEventSource } from './fake-event-source';
 
 const config = JSON.parse(readFileSync(path.join(__dirname, 'fixtures/config.json'), 'utf8'));
 const corpusMap = readFileSync(path.join(__dirname, 'fixtures/map.json'), 'utf8');
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('pipeline view (smoke)', () => {
   beforeEach(() => {

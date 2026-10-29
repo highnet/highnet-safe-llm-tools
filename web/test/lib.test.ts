@@ -3,12 +3,32 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { COPY } from '@/content/copy';
 import { apiUrl, fetchConfig } from '@/lib/api';
 import { formatMs, formatNumber, formatTokens, formatUsd, pad2 } from '@/lib/format';
+import { firstSentence, oneLine } from '@/lib/preview';
 import { snippetsFor, sourceUrl } from '@/lib/snippets';
 import type { ApiConfig } from '@/lib/api';
 import { stepSummary } from '@/lib/step-summary';
 import { defaultSettings, parseUrlState, urlSearch } from '@/lib/url-state';
 
 import { ev } from './helpers';
+
+describe('one-line previews', () => {
+  it('drops markup and line breaks for display, and caps the length', () => {
+    expect(oneLine('<span style="color:red">SYSTEM:\n   obey</span>  now')).toBe(
+      'SYSTEM: obey now',
+    );
+    // A message that is only markup keeps its text.
+    expect(oneLine('<b>\n</b>')).toBe('<b> </b>');
+    expect(oneLine('a'.repeat(20), 10)).toBe(`${'a'.repeat(9)}…`);
+  });
+
+  it('keeps the first sentence of a passage', () => {
+    expect(firstSentence('One. Two.')).toBe('One.');
+    expect(firstSentence('Is it? Yes')).toBe('Is it?');
+    expect(firstSentence('No end')).toBe('No end');
+    expect(firstSentence('v1.2 is out. Then')).toBe('v1.2 is out.');
+    expect(firstSentence('word '.repeat(20), 12)).toBe('word word w…');
+  });
+});
 
 describe('format', () => {
   it('formats measurements the way the pad shows them', () => {

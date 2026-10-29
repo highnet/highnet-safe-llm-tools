@@ -11,6 +11,7 @@ import { COPY } from '@/content/copy';
 import { clearMapCache, fetchCorpusMap } from '@/lib/api';
 import type { ContextChunk, RerankData } from '@/lib/stage-data';
 import { stepSummary } from '@/lib/step-summary';
+import { setView } from '@/lib/view-store';
 
 import { ControlledEventSource, ev } from './helpers';
 
@@ -52,6 +53,9 @@ const rerank = (overrides: Partial<RerankData> = {}): RerankData => ({
   ],
   ...overrides,
 });
+
+// These tests read every step; the Simple view has its own tests (test/rag-simple.test.tsx).
+beforeEach(() => setView('steps'));
 
 describe('rerank step', () => {
   it('shows each move, the cut, and the candidates below it on request', () => {

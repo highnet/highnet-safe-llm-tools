@@ -50,10 +50,13 @@ type RootLayoutProps = {
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
     <html lang="en" className={recursive.variable} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body>
+        {/* The theme script opens the body rather than sitting in <head>: it still runs before
+            anything is painted, and <head> then holds nothing React has to hydrate. A
+            React-rendered script in <head> made hydration intermittently resume with its cursor
+            still in <head> on deployments with a deployment id (Vercel), so the header was
+            compared with <meta charset> and the page threw React error #418. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {children}
         <script
           type="application/ld+json"
