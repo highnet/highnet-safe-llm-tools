@@ -719,15 +719,15 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 219,
+    "tests": 220,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2097,
-            "total": 2097
+            "covered": 2098,
+            "total": 2098
           },
           "branches": {
             "covered": 1676,
@@ -2114,8 +2114,8 @@
           {
             "path": "content/scope.ts",
             "lines": {
-              "covered": 80,
-              "total": 80
+              "covered": 81,
+              "total": 81
             },
             "branches": {
               "covered": 8,
