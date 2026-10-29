@@ -1,6 +1,6 @@
 ---
-name: highnet-rag
-description: A transparent RAG pipeline worked out on an engineer's computation pad.
+name: Highnet Safe LLM Tools
+description: Two transparent LLM systems, RAG and Scope, worked out on an engineer's computation pad.
 colors:
   paper: '#eef3e4'
   paper-raised: '#f7faf1'
@@ -37,6 +37,13 @@ colors:
   lamp-data-rerank: '#8cc79a'
   lamp-data-neutral: '#a5b39e'
 typography:
+  display:
+    fontFamily: 'Recursive, ui-sans-serif, system-ui, sans-serif'
+    fontSize: 'clamp(2rem, 1.4rem + 2.4vw, 3.5rem)'
+    fontWeight: 650
+    lineHeight: 1.04
+    letterSpacing: '-0.02em'
+    fontVariation: "'MONO' 0, 'CASL' 0, 'slnt' 0"
   sheet-title:
     fontFamily: 'Recursive, ui-sans-serif, system-ui, sans-serif'
     fontSize: 'clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem)'
@@ -144,6 +151,16 @@ components:
     rounded: '{rounded.sm}'
     padding: '0 12px'
     height: '32px'
+  product-switcher:
+    backgroundColor: '{colors.paper-raised}'
+    textColor: '{colors.graphite-muted}'
+    typography: '{typography.data}'
+    rounded: '{rounded.sm}'
+    padding: '0 12px'
+    height: '36px'
+  product-switcher-current:
+    backgroundColor: '{colors.blue-wash}'
+    textColor: '{colors.blue-pencil}'
   input-field:
     backgroundColor: '{colors.paper-raised}'
     textColor: '{colors.graphite}'
@@ -208,11 +225,13 @@ components:
     padding: '8px 0'
 ---
 
-# Design System: highnet-rag
+# Design System: Highnet Safe LLM Tools
 
 ## Overview
 
 **Creative North Star: "The Engineer's Computation Pad"**
+
+Highnet Safe LLM Tools is one pad holding two products: **RAG** (`/rag/`), a question worked out into a cited answer, and **Scope** (`/scope/`), a message worked out into one of four actions. A landing page at `/` introduces both and shows how they fit together. Both products use the same sheets, step track, margin notes and answer line; neither has a look of its own.
 
 Each query is worked out like a calculation on pale-green engineering paper. The question is written at the top of the sheet, every pipeline stage is one numbered step below it, and the answer is the last line, marked with an `=` in the number margin. Graphite ink carries every fact and number. Blue pencil, the draughtsman's non-photo blue, is the one voice of annotation and action: "Why this step?" notes, the running step, links, focus and the Run button. Red means a failure and nothing else.
 
@@ -223,15 +242,15 @@ Motion is sparse and has two authored moments: steps are written into the pad as
 **Key Characteristics:**
 
 - One family, Recursive, in three voices set by its axes: prose, pencil and data.
-- A single accent, blue pencil; a separate data palette reserved for retrieval series.
+- A single accent, blue pencil; a separate data palette for RAG's retrieval series and, under class names, Scope's four classes.
 - Flat paper: 1px rules, 2px and 4px corners, no shadows anywhere.
-- Solid rules for edges, dashed rules for the working inside a sheet and for steps not yet written.
+- Solid rules for edges and for lists set on bare paper, dashed rules for the working inside a sheet and for steps not yet written.
 - Step numbers hang in a margin; the running step is marked there, not on the sheet.
-- Every state is an SVG mark plus a word, never colour alone.
+- Every state and every class is an SVG mark plus a word, never colour alone; an ink always travels with the same shape.
 
 ## Colors
 
-Neutral paper and graphite with one pencil accent, three semantic inks and a data palette kept for charts and ranked series. Each role is a CSS custom property on `:root`; the `.dark` class overrides the same property with its lamp value, recorded here with a `lamp-` prefix. Tailwind and shadcn names (`primary`, `card`, `border`, `input`, `ring`, `chart-1..5`) alias these roles and never carry their own values.
+Neutral paper and graphite with one pencil accent, three semantic inks and a data palette kept for charts, ranked series and Scope's classes. Each role is a CSS custom property on `:root`; the `.dark` class overrides the same property with its lamp value, recorded here with a `lamp-` prefix. Tailwind and shadcn names (`primary`, `card`, `border`, `input`, `ring`, `chart-1..5`, `class-*`) alias these roles and never carry their own values.
 
 ### Primary
 
@@ -258,13 +277,26 @@ Neutral paper and graphite with one pencil accent, three semantic inks and a dat
 
 One colour per retrieval series, for rank columns, chart series and badges: **BM25 Umber** (`data-bm25`), **Vector Blue** (`data-vector`), **Fused Violet** (`data-fused`), **Rerank Green** (`data-rerank`) and **Everything Else** (`data-neutral`). Each series also has a marker shape: a square for BM25, a circle for vector, a diamond for fused, a triangle for reranked. A rank badge is the coloured marker followed by the rank in graphite, with a screen-reader label naming the series, so colour is never the only cue. The fusion step shows the BM25 and vector rankings side by side from `lg` (stacked below), then the fused list with each passage's rank in both inputs, its RRF score over the two contributions, and a blue-pencil rule, always drawn, where the top-k cut falls. Candidates below the cut fold behind a pencil toggle under that rule; when opened, their rows and rank badges are muted (the marker shapes stay).
 
+### Classes (Scope)
+
+Scope sorts every message into one of four classes, and each class reuses one of the data inks with that ink's own marker shape. In `globals.css` the class inks are aliases, not new values: `--class-in: var(--data-rerank)`, `--class-adjacent: var(--data-vector)`, `--class-out: var(--data-bm25)`, `--class-injection: var(--data-fused)`, so they follow the lamp values automatically.
+
+- **In scope** (`class-in` = Rerank Green): a triangle.
+- **Adjacent** (`class-adjacent` = Vector Blue): a circle.
+- **Off scope** (`class-out` = BM25 Umber): a square.
+- **Injection** (`class-injection` = Fused Violet): a diamond.
+
+A class is drawn by `ClassMark` (a 12px SVG, 10px small, 14px large) and is always followed by its word (`ClassTag`; the short forms "in", "adj.", "out", "inj." keep the full name for screen readers). Scope's four actions wear the shape of the class they serve: Answer = in, Answer briefly = adjacent, Redirect = off scope, Block = injection. The same marks appear on the landing page and in the Scope verdict on RAG's first step. On the scope map each prompt is its class shape at 75% opacity; the distribution bar is one ruled track with a segment per class, its values written beside it with shape and word.
+
 ### Named Rules
 
-**The One Pencil Rule.** Blue pencil is the only accent. When something needs emphasis, use weight, scale, position or Recursive's casual axis before adding a colour. Code excerpts follow the same rule: keywords, built-ins and literals are blue pencil at 600, titles are graphite at 600, strings and numbers switch to the casual mono voice, comments are muted graphite in the pencil slant. The data palette is reserved for retrieval series and never tints code.
+**The One Pencil Rule.** Blue pencil is the only accent. When something needs emphasis, use weight, scale, position or Recursive's casual axis before adding a colour. Code excerpts follow the same rule: keywords, built-ins and literals are blue pencil at 600, titles are graphite at 600, strings and numbers switch to the casual mono voice, comments are muted graphite in the pencil slant. The data palette is reserved for RAG's retrieval series and Scope's classes, and never tints code or chrome.
 
 **The Red Means Wrong Rule.** Red appears only for failure. Never use it for brand, highlights or "important".
 
 **The Lamp Rule.** The dark theme changes values, never roles. Every new colour is added to both `:root` and `.dark` under the same name.
+
+**The One Ink, One Shape Rule.** Each data ink has exactly one shape, on both products: green triangle, blue circle, umber square, violet diamond. A Scope class takes an existing pair and never a new colour; the class tokens alias the data inks so the pair cannot drift. Never draw an ink in another shape, and never show a class or series by colour alone.
 
 ## Typography
 
@@ -276,14 +308,14 @@ One colour per retrieval series, for rank columns, chart series and badges: **BM
 
 ### Hierarchy
 
-- **Display** (650, clamp 2rem to 3.5rem, 1.04, -0.02em, balanced): the pipeline page's one headline, in the hero. Nothing else uses it.
-- **Sheet title** (650, clamp 1.5rem to 2.25rem, 1.1, -0.01em, balanced): the question at the top of the sheet, preceded by "Sheet 1 ·" in the muted data voice.
+- **Display** (650, clamp 2rem to 3.5rem, 1.04, -0.02em, balanced): a page's one h1 headline, used three times on the site: the landing page, the RAG hero and the Scope hero. Nothing else uses it.
+- **Sheet title** (650, clamp 1.5rem to 2.25rem, 1.1, -0.01em, balanced): the question or message at the top of the sheet, preceded by "Sheet N ·" in the muted data voice; each product numbers its own sheets 1 to 4. On the landing page it sets the product names and the section titles.
 - **Step heading** (600, 1.125rem, 1.375): a step's title. Pending and skipped steps drop to 500 at 1rem in muted graphite; the compact phone row uses 1rem.
 - **Answer** (400, 1.125rem, 1.625, max 68ch): the result line in the answer sheet.
 - **Body** (400, 1rem, 1.625, max 68ch, pretty wrapping): explanations and passages.
 - **Small** (400, 0.875rem, 1.5): notices, settings, supporting text.
 - **Margin note** (450, 0.9375rem, 1.5, pencil voice, blue pencil): the "Why this step?" note.
-- **Data** (400, 0.875rem, 1.5, data voice): scores, distances, IDs, settings values, the site name.
+- **Data** (400, 0.875rem, 1.5, data voice): scores, distances, IDs, settings values, the site name (semibold, 1rem in the header) and the product switcher.
 - **Label** (500, 0.75rem, 1.25, +0.04em, data voice, sentence case): section headings such as "The working", status words and table column heads.
 - **Code** (400, 0.75rem, 1.625, data voice): Python excerpts under each step.
 
@@ -295,7 +327,7 @@ One colour per retrieval series, for rank columns, chart series and badges: **BM
 
 ## Layout
 
-The page is one centred column capped at 72rem, with 16px side padding on phones and 32px from `md`. The body is flat paper. The header holds the site name (a link home), the tagline from `lg` (except on the pipeline page, whose hero headline already says it), the four pages and the theme switch; when space runs out the links wrap under the name instead of overlapping it. From `md` it stays at the top while the page scrolls, on paper, and draws its 1px `rule` underneath only once the page has moved under it (no shadow). On phones it scrolls away with the page, because wrapped to two rows it would take too much of a small screen; `scroll-padding-top` keeps linked steps clear of it from `md`. The footer sits above a solid rule: a site map (every page), the project links, and the site's name with the corpus attribution the licence requires; the two link lists sit side by side even on phones. Spacing follows Tailwind's 4px steps: sheets are padded 16px by 20px, steps are 8px apart on phones and 16px from `md`, and the question block and the working are 32px apart (40px from `md`).
+The page is one centred column capped at 72rem, with 16px side padding on phones and 32px from `md`; product pages open 16px below the header (48px from `md`), the landing page 24px (64px from `md`). The body is flat paper. The header and footer are shared by every page (see Site header and footer). Spacing follows Tailwind's 4px steps: sheets are padded 16px by 20px, steps are 8px apart on phones and 16px from `md`, and the question block and the working are 32px apart (40px from `md`).
 
 Every step and the answer share one three-track grid, so numbers, sheets and notes line up down the page:
 
@@ -315,13 +347,13 @@ The pad is flat and has no shadows. A sheet sits on the paper through a 1px rule
 
 ## Shapes
 
-Paper corners: 2px on controls and notices, 4px on sheets, and none on the pad, tables and passage lists. Nothing is pill-shaped or circular except SVG status marks. Every line is 1px: solid for a sheet's edge and for the section rules under headings and above the footer; dashed for the working inside a sheet (dividers between details, the settings strip, rank-table rows, passage lists, code captions) and for the outline of a step that has not been written yet. Focus is a 2px blue-pencil outline, offset 2px (0px on inputs, where the border also turns blue pencil).
+Paper corners: 2px on controls, notices and the landing's worked-question sheets, 4px on sheets, and none on the pad, tables and passage lists. Nothing is pill-shaped or circular except SVG status marks. Every line is 1px: solid for a sheet's edge, for the section rules under headings and above the footer, and between the items of a list of statements set on bare paper (the landing principles, Scope's "What we hold to"); dashed for the working inside a sheet (dividers between details, the settings strip, rank-table and eval-table rows, passage and prompt lists, code captions, the Scope verdict on RAG step 01) and for the outline of anything not written yet (pending steps, the "built once" boxes of a diagram). Focus is a 2px blue-pencil outline, offset 2px (0px on inputs, where the border also turns blue pencil).
 
 The running step is marked in the number margin, not on the sheet: its number turns blue pencil and a 2px blue-pencil rule hangs from the number down the full height of the step.
 
 ### Named Rules
 
-**The Dashed Is Inside Rule.** A solid rule bounds a thing; a dashed rule divides the working inside it or outlines something still to come.
+**The Dashed Is Inside Rule.** A solid rule bounds a thing or divides a list of statements on bare paper; a dashed rule divides the working inside a sheet (rows of a table or record) or outlines something still to come.
 
 **The Margin Carries the Mark Rule.** Step state that needs a line lives in the number margin. Never add a thick coloured stripe to a sheet's edge.
 
@@ -335,7 +367,7 @@ Plain paper controls: 14px medium sans, 2px corners, 8px icon gap, 16px SVG icon
 - **Primary:** blue-pencil fill with paper text, for Run. Hover mixes 18% graphite into the fill; pressed nudges down 1px; disabled is a grid-green fill with muted text.
 - **Quiet:** raised paper with a 1px input rule and graphite text, for Stop and the top-k steppers. Hover lays a blue wash; pressed (`aria-pressed`) adds a blue-pencil border and text on the wash.
 - **Ghost:** muted text on nothing; hover lays a blue wash and darkens the text. Used for the theme toggle.
-- **Pencil:** a text action in the pencil voice and blue pencil with a dotted underline that turns solid on hover. Used for suggested questions, retry, and "show code", "show passage" and "under the hood" disclosures.
+- **Pencil:** a text action in the pencil voice and blue pencil with a dotted underline that turns solid on hover. Used for suggested questions, retry, and "show code", "show passage" and "under the hood" disclosures. Links between pages take the same look (pencil voice, 14px, at least 40px tall, a 14px arrow after the words).
 - **Focus:** 2px blue-pencil outline, offset 2px, on every variant.
 
 ### Inputs / Fields
@@ -346,7 +378,7 @@ Plain paper controls: 14px medium sans, 2px corners, 8px icon gap, 16px SVG icon
 
 ### Typography
 
-A single `Typography` primitive carries the ramp as variants (`sheetTitle`, `stepHeading`, `body`, `small`, `marginNote`, `data`, `label`) with default elements (h1, h3, p, p, p, span, span) and colour variants `default`, `muted`, `pencil`, `destructive`, `warning` and `success`. New text uses a variant before any one-off class.
+A single `Typography` primitive carries the ramp as variants (`display`, `sheetTitle`, `stepHeading`, `body`, `small`, `marginNote`, `data`, `label`) with default elements (h1, h1, h3, p, p, p, span, span) and colour variants `default`, `muted`, `pencil`, `destructive`, `warning` and `success`. New text uses a variant before any one-off class.
 
 ### Step Sheet (signature)
 
@@ -382,6 +414,14 @@ A square plot framed by dashed top and bottom rules, never a filled box. Every c
 
 Agentic runs draw seven steps. The plan step sets Claude's plan in the pencil voice (it is the model thinking aloud), the planned queries as numbered chips (3a, 3b, …) with 1px dashed outlines, then model and caps as facts and the agent's instructions behind a pencil toggle. "Search, step by step" opens with two meters, searches and agent tokens against their caps, then one sub-sheet per tool call separated by dashed rules, never nested boxes: the blue-pencil sub-label and tool name, the query as a dashed chip, the step's readout and status mark, Claude's note in pencil, the passages that search kept, and its own stages folded behind a pencil toggle. Answers, stops at a cap (amber), tool errors and tool-less turns each read as one plain line. On phones the whole sheet folds to "N searches · M passages".
 
+### Product Switcher
+
+The two products as one ruled pair of links in the header: a 2px-cornered strip of raised paper with a 1px input rule, a 1px rule between the two, each link 36px tall with 12px padding in the data voice and muted graphite. The current product sits on the blue wash in blue pencil at 600, so it reads by weight as well as colour; on the landing page neither is current. Hover lays the blue wash. Focus draws the 2px blue-pencil outline round the whole strip. It is built like the segmented control Scope's settings use.
+
+### Class Mark and Distribution Bar
+
+See Classes (Scope) under Colors. A class mark is never shown without its word nearby. The distribution bar is 12px tall, ruled in the input rule over a quiet fill, segments in class order separated by 1px raised-paper gaps; it is hidden from assistive tech because the values printed beside it carry the same numbers.
+
 ### Code Excerpt
 
 Opened by a pencil action with a code icon. Each excerpt has a caption over a dashed rule (title in small sans, `file:start–end` link in muted data) and a scrolling block at 0.75rem in the data voice, coloured by the One Pencil Rule.
@@ -408,34 +448,84 @@ Opened by a pencil action with a code icon. Each excerpt has a caption over a da
 - **Don't** turn the paper metaphor into a costume: no torn edges, coffee stains, spiral bindings or a second, handwriting family.
 - **Don't** set labels in all caps or put a small label above a heading as decoration.
 
-## Evals report (`/evals`)
+## RAG evals report (`/rag/evals/`)
 
 Sheet 2 of the same pad: the sheet title "Sheet 2 · How well does it work?", a lede, and a run record on a dashed rule (date, corpus build, the models the run actually called, cost). Each question the evals answer is a raised sheet with its blue-pencil note in the margin from `lg` and above the working below it. Retrieval results are one small table per chunk size (modes down the side with their series markers, reranker off and on across): a thin bar in graphite (off) or rerank green (on) with the value in the data voice. The visitor's own setting, linked from an answer, sits on blue wash with a pencil "your settings". A section the run did not measure is a dashed box that says so and why, never an empty chart.
 
-## Hero (`/`)
+## RAG hero (`/rag/`)
 
-The pipeline page opens with a hero in two columns from `lg` (5:7): on the left the one Display headline, "Watch a RAG system work out an answer, step by step.", then the definition of RAG as a term and its definition (the term in the data voice, its expansion muted, the definition in body graphite), a short muted intro, and two actions: the primary "Try a question" (jumps to the sheet) and a pencil "Browse the corpus". On the right, the pipeline diagram is the hero's only picture, bounded by a 1px solid rule with 4px corners on bare paper. The hero keeps extra space below it (16px, 40px from `md`, on top of the page rhythm) so it reads as its own section before Sheet 1. Phones stack the two, so the diagram lands one scroll down. There is no image, eyebrow or metric strip; the real pipeline is the picture.
+The RAG pipeline page opens with a hero in two columns from `lg` (5:7): on the left the one Display headline, "Watch a RAG system work out an answer, step by step.", then the definition of RAG as a term and its definition (the term in the data voice, its expansion muted, the definition in body graphite), a short muted intro, and two actions: the primary "Try a question" (jumps to the sheet) and a pencil "Browse the corpus". On the right, the pipeline diagram is the hero's only picture, bounded by a 1px solid rule with 4px corners on bare paper. The hero keeps extra space below it (16px, 40px from `md`, on top of the page rhythm) so it reads as its own section before Sheet 1. Phones stack the two, so the diagram lands one scroll down. There is no image, eyebrow or metric strip; the real pipeline is the picture.
 
-## Share card
+## Share cards
 
-`/og.png` is drawn at build time for link previews: the light pad, the site name in the data voice, the hero headline, and the eleven steps as ruled boxes joined by chevrons, numbered in the data voice and ending in "= Answer" with a blue-pencil "=". It is set in Recursive (static 400 and 700 instances of the prose and MONO cuts, vendored under `web/assets/fonts` with their OFL licence), and its colours are read from `globals.css`, so it never drifts from the tokens.
+Three cards are drawn at build time for link previews, from one renderer: `/og.png` for the site (the site name, its tagline, the two products as "RAG: question to cited answer" and "Scope: message to action", ending in "Every step on the page"), `/rag/og.png` (the RAG hero headline and its eleven steps ending in "= Answer") and `/scope/og.png` (Scope's tagline and its eleven steps ending in its result, set compact). Each is the light pad, the name in the data voice, the headline, and the steps as ruled boxes joined by chevrons, numbered in the data voice, ending in a blue-pencil "=". It is set in Recursive (static 400 and 700 instances of the prose and MONO cuts, vendored under `web/assets/fonts` with their OFL licence), and its colours are read from `globals.css`, so it never drifts from the tokens.
 
 ## Pipeline diagram
 
-In the hero's right column (see Hero), a figure draws the whole system in two labelled rows: what was built once ahead of time (dashed boxes, not interactive), then every step a question goes through, as small boxes joined by chevrons, numbered like the steps below and linked to them. BM25 and vector search stack as one pair because they run side by side; the row ends in an "= Answer" box outlined like the answer sheet. The boxes follow the run: dashed while waiting or skipped, raised paper once done, blue pencil while running, a red edge on failure. With the agent on, the row follows the agentic order. Below `lg` the "Built once, ahead of time" row, which is context rather than something to click, folds behind a pencil toggle, so on phones the steps a question takes come first.
+In the RAG hero's right column (see RAG hero), a figure draws the whole system in two labelled rows: what was built once ahead of time (dashed boxes, not interactive), then every step a question goes through, as small boxes joined by chevrons, numbered like the steps below and linked to them. BM25 and vector search stack as one pair because they run side by side; the row ends in an "= Answer" box outlined like the answer sheet. The boxes follow the run: dashed while waiting or skipped, raised paper once done, blue pencil while running, a red edge on failure. With the agent on, the row follows the agentic order. Below `lg` the "Built once, ahead of time" row, which is context rather than something to click, folds behind a pencil toggle, so on phones the steps a question takes come first.
 
 ## Formulas
 
 Each step sheet carries its step as one line of relational algebra in a dashed box labelled "As a formula", under the step's paragraph. Readers are assumed to know relational algebra: standard operators are plain text, while the relations, the extended operators (τ, λ, γ), the domain functions (score, cos, rrf, relevance) and the values are underlined blue-pencil terms. Tapping or hovering a term writes its definition on the line below the formula, in place, so it works the same on a phone; nothing floats. Under the pipeline diagram a folded "The same pipeline, as formulas" lists these building blocks as small ruled blocks, grouped as relations, extended operators, functions and values, and ends with the whole run as one composition read right to left.
 
-## Corpus page (`/corpus`)
+## RAG corpus page (`/rag/corpus/`)
 
 Sheet 3 of the pad. A chunk-size switch and the article list (a native select on phones, a scrolling list from `lg`), then the chosen article on a raised sheet: its text with each chunk's start marked by its id in a small blue-pencil box, and any text held by two chunks at once on blue wash. The note above the text says which is true for this article and size: it never promises an overlap that is not there.
 
-## Coverage page (`/coverage`)
+## RAG coverage page (`/rag/coverage/`)
 
 Sheet 4 of the pad, "Is every line tested?", built like the evals report: a lede, then a record on dashed rules (tests per suite, the 100% rule, when CI checks it). Each package (the API, the eval runner, this website) is a raised sheet with its note in the margin: its source root and tool in the data voice, then lines and branches as a share with its counts and a thin graphite bar. A pencil fold, "All N files", opens a dense table of every file with its lines and branches as "covered of total" (a dash where a file has no branches). Anything short of 100% carries an amber warning mark and the words "below 100%", never colour alone, and shares are never rounded up. Every number comes from `web/lib/generated/coverage.json`, which CI rewrites from its own test run and fails if it differs.
 
 ## Question picker (replay)
 
 With live questions off, the question box becomes "Pick a question": two groups under label headings, "One article" and "Two articles: switch the agent on", each a grid of quiet buttons (one column on phones, two from `sm`) whose pressed state is the blue wash with blue-pencil text. Groups longer than four fold to three behind a pencil "N more" toggle, and a folded question that is selected keeps its group open. A note-tone notice under the title says the runs are recordings, when they were made, and that nothing is spent. Changing a setting replays at once, so the stale-settings note never shows.
+
+## Site header and footer
+
+Every page shares one header and one footer. The header is a single flex row from `md`: the site name, "Highnet Safe LLM Tools", in the data voice at 600 (a link to `/`, laying the blue wash on hover), the product switcher, the current product's four pages pushed right, and the theme toggle last. On phones the order changes: the name and the theme toggle share the first row, and a full-width break sends the switcher and the page links to the second. The landing page shows only the name, the switcher and the toggle. The current page link is graphite at 600 with a 2px blue-pencil underline; the others are muted and lay the blue wash on hover. There is no tagline in the header. From `md` it stays at the top while the page scrolls, on paper, and draws its 1px `rule` underneath only once the page has moved under it (no shadow); on phones it scrolls away, because two rows would take too much of a small screen. `scroll-padding-top` keeps linked steps clear of it from `md`.
+
+The footer sits above a solid rule, 64px below the page. From `sm` it is four columns: RAG's pages, Scope's pages, the project (Overview, the source on GitHub, highnet.at), each under a muted label heading with blue-pencil links, then, right-aligned, the site name in the data voice, its tagline, the corpus attribution the licence requires and the note that Scope's prompts were drafted by Claude and checked by script. On phones the two product lists sit side by side, the project list below them, and the name block spans the full width.
+
+## Landing page (`/`)
+
+The site's opening page says what the site is before either product. It opens with the Display headline, "Safe LLM systems, worked out step by step.", and a one-paragraph intro at 1.125rem, capped at 56rem, with no picture, eyebrow or metric strip.
+
+**Product sheets.** Each product is one section under a solid top rule, two columns from `lg` (5:7): on the left the product name as a sheet title, its tagline as a step heading, a muted lede, its takeaway in the pencil voice ("The answer is only as good as what was retrieved.", "Refusing a good message is a failure too."), the primary "Open …" button and a pencil link to that product's evals. On the right is the product's real step chain, read from the same step lists the product pages use: each step a small raised-paper box with a 1px rule, 2px corners and its two-digit number in the muted data voice, joined by muted chevrons and wrapping freely. The chain ends in an outlined result box, 1px graphite at 70% like the answer sheet, with a blue-pencil "=": "Cited answer" for RAG, the four actions with their class marks, split by muted slashes, for Scope.
+
+**How they fit together.** A sheet title and a muted lede, then two worked questions side by side from `lg`, each on raised paper with a 1px rule and 2px corners: the question in the data voice, a step-heading title, a muted paragraph, then three numbered lines between solid rules, each with its mark in a 2rem margin in the data voice and a muted label: **01 Scope** (the recorded Scope verdict, its class mark and fused confidence, then what the LLM judge alone said, all read from the exported verdicts), **02 RAG** (what retrieval did) and **= Outcome** (the result at 600). Pencil links under the sheet open that run in Scope or RAG.
+
+**Principles.** A sheet title, then the three convictions both tools argue as body paragraphs in a list capped at 68ch, divided by solid rules with a solid rule above and below: a list of statements on bare paper, not cards. A pencil link leads to the principles on the Scope page.
+
+## Scope pipeline (`/scope/`)
+
+Sheet 1 of Scope, built like the RAG pipeline page.
+
+**Hero.** Two columns from `lg` (5:7): the Display headline, "Watch an AI agent decide whether a message is in scope, step by step.", the term "Scope guard" in the data voice with its expansion muted and its definition in body graphite, a muted intro, the primary "Try a message" (jumps to the sheet) and a pencil "Browse the labeled prompts". On the right the Scope diagram is the only picture, bounded by a 1px solid rule with 4px corners.
+
+**Scope diagram.** "The whole guard on one page": a "Built once, ahead of time" row of dashed, muted boxes (folded behind a pencil toggle below `lg`), then "Every message" as the eleven steps in small numbered boxes joined by chevrons, each linked to its step. The boxes follow the run like the RAG diagram: dashed while pending or skipped, raised paper once done, blue pencil while running, a red edge on failure. The row ends in a box outlined in graphite at 70% with a blue-pencil "=" and the four actions as class tags; once a run decides, the chosen action turns 600 and the others go muted. A muted note says how the signals combine, and a pencil fold, "The same guard, as formulas", lists the formulas in small dashed boxes.
+
+**What we hold to.** Three principles under a step heading with a solid rule beneath it, as a list divided by solid rules: each claim at 600 on the left and its reasoning muted on the right from `md` (2:3), with pencil links where a claim cites a source.
+
+**The sheet.** "Sheet 1 · <message>" as the sheet title, then the note-tone replay notice, the message picker (preset as quiet pressed buttons, then example messages as a grid of quiet buttons, two columns from `sm`), and, under the RAG corpus assistant preset only, "Scope first, then RAG": a raised sheet holding the World Cup and lasagna questions as two rows divided by a dashed rule, each with a pencil replay button and, for the World Cup, a link to the same question in RAG. The settings strip (signals as quiet pressed buttons, conversation context as a segmented control, weights and thresholds as sliders, k as a stepper, all in a dashed-ruled strip that folds to a one-line summary below `sm`) and the scope definition editor (a raised, collapsible sheet listing each topic with a segmented control to move it between classes, rows divided by dashed rules) follow.
+
+**The working.** A label heading over a solid rule, then the eleven steps as the RAG pipeline's own step sheets: the same number margin and margin rule, write-in motion, pencil notes, code excerpts and phone rows. Step bodies reuse the RAG figures: the bar, the distribution bar per signal, the scope map (each labeled prompt as its class shape, the message as a blue-pencil crosshair with a pencil "you" label, its five nearest on the map ringed in graphite), the judge's raw reply in a dashed box, and the thresholds band, a ruled track split into the action bands with the chosen band on the blue wash and a 2px blue-pencil needle at the scope score.
+
+**Result.** The answer line, as in RAG: a blue-pencil "=" in the number margin, then a raised sheet outlined in graphite at 70% with a muted label, the action as a large class tag at 600, the scope score and injection probability in the data voice, and, once the run is done, totals (ms, tokens, $, steps) under a dashed rule.
+
+## Scope verdict on RAG step 01
+
+RAG's first step, "Check the request", carries Scope's recorded verdict on that exact question under its RAG corpus assistant preset, read from the exported verdicts and never typed in. It sits inside the step sheet below a dashed rule: a muted label heading, a small lede, then a two-column definition list (Action with its class mark at 600 in the data voice, fused confidence, what the LLM judge said), a muted line that getting past Scope does not mean the corpus holds the answer (shown unless the action is redirect or block), and a pencil link to the full Scope breakdown. A question with no recorded verdict gets one muted line saying so.
+
+## Scope dataset (`/scope/dataset/`)
+
+Sheet 2 of Scope, "The labeled prompts". A muted lede counts the prompts and presets from the data; a provenance block says, in plain words, that Claude drafted them and a script checked them, then the build id, date and embedding model in muted data. The filters sit in one dashed-ruled strip: preset and class as quiet pressed buttons (each class button is its class tag with its count in muted data), a search input and a native tag select. A polite live line in the data voice counts the matches. The prompts are one list with solid edges and dashed rules between rows: earlier turns under a muted label, the prompt text at 68ch, then a muted data line with the class tag in graphite, topic, language, tags as small dashed chips and the id. Filters live in the URL; forty rows show at a time, with a quiet "show more".
+
+## Scope evals (`/scope/evals/`)
+
+Sheet 3 of Scope, "How well does each signal guard the scope?", built like the RAG evals report: a lede, the run record in the data voice on dashed rules (date, build, models, prompts, k, weights, thresholds, cost), then one raised sheet per question with its pencil notes in the margin from `lg`. The finding is a paragraph phrased from the numbers. The two errors, false refusal and over-compliance, sit side by side per method as the shared measure rows (share, counts and a thin bar). Precision and recall per class and the confusion matrices are small tables with class tags as row and column heads, dashed between rows; a confusion matrix's diagonal sits on the blue wash at 600 and zeros are muted.
+
+**Sweep charts.** "Moving the redirect threshold" is the site's one line chart, drawn once per method: an SVG plot with a solid left and bottom axis, false refusal as a 1.5px solid graphite line and over-compliance as a 1.5px dashed blue-pencil line (so the two differ by pattern as well as colour), the threshold the run used as a dashed rule-coloured vertical, and 0%/100% and 0/1 ticks in 11px muted data. A legend draws both line styles with their names. A pencil fold opens the same numbers as a table. Cost and latency per method and per model close the report as tables with a solid-ruled total row.
+
+## Scope coverage (`/scope/coverage/`)
+
+Sheet 4 of Scope, "Where are the examples thin?". This page is about the dataset's coverage of each preset's map, not test coverage. A preset switch (quiet pressed buttons, kept in the URL), then the scope map at full size (capped at 48rem): every prompt as its class shape, empty grid cells inside the data's hull outlined in dashed amber on a faint amber fill, and prompts the evals misclassified ringed in red check. The legend names each class with its count and each overlay with a sample of its mark. A plain sentence counts the empty cells and a muted caveat follows. "Misclassified in the eval run" is a table of prompt, then label and prediction as two class tags joined by an arrow, each id a dotted pencil link into the dataset; the empty cells' coordinates fold behind a pencil toggle as a table.

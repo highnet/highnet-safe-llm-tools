@@ -6,6 +6,10 @@ from typing import Any, Protocol
 
 import numpy as np
 
+from highnet_core.storage.base import Projection, StateStore
+
+__all__ = ["Projection", "StateStore"]
+
 
 @dataclass(frozen=True)
 class ChunkSet:
@@ -64,22 +68,6 @@ class MapPoint:
     y: float
 
 
-@dataclass(frozen=True)
-class Projection:
-    """PCA fitted at ingest: 2D = (v - mean) @ components.T"""
-
-    mean: np.ndarray
-    components: np.ndarray
-    explained_variance: tuple[float, float]
-
-    # snippet: map_project | Project a vector to 2D
-    def project(self, vector: np.ndarray) -> tuple[float, float]:
-        x, y = (vector - self.mean) @ self.components.T
-        return float(x), float(y)
-
-    # /snippet
-
-
 class CorpusStore(Protocol):
     def meta(self) -> dict[str, str]: ...
     def chunk_sets(self) -> list[ChunkSet]: ...
@@ -98,23 +86,6 @@ class CorpusStore(Protocol):
     def document_text(self, doc_id: int) -> str: ...
     # For the corpus page: every article with its source and length.
     def document_list(self) -> list[Document]: ...
-
-
-class StateStore(Protocol):
-    def record_run(self, run_id: str, ip_hash: str, settings_json: str) -> None: ...
-    def finish_run(self, run_id: str, status: str, ms: int, cost_usd: float) -> None: ...
-    def record_spend(
-        self,
-        run_id: str | None,
-        provider: str,
-        model: str,
-        stage: str,
-        input_tokens: int,
-        output_tokens: int,
-        cost_usd: float,
-    ) -> None: ...
-    def month_spend(self) -> float: ...
-    def runs_since(self, ip_hash: str, seconds: int) -> int: ...
 
 
 @dataclass(frozen=True)

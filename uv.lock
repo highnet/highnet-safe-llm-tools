@@ -9,9 +9,11 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "highnet-core",
     "highnet-rag",
     "highnet-rag-evals",
     "highnet-rag-workspace",
+    "highnet-scope",
 ]
 
 [[package]]
@@ -224,12 +226,37 @@ wheels = [
 ]
 
 [[package]]
+name = "highnet-core"
+version = "0.1.0"
+source = { editable = "core" }
+dependencies = [
+    { name = "anthropic" },
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "numpy" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic", specifier = ">=1.0" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "numpy", specifier = ">=2.0" },
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "pydantic-settings", specifier = ">=2.4" },
+]
+
+[[package]]
 name = "highnet-rag"
 version = "0.1.0"
 source = { editable = "api" }
 dependencies = [
     { name = "anthropic" },
     { name = "fastapi" },
+    { name = "highnet-core" },
+    { name = "highnet-scope" },
     { name = "httpx" },
     { name = "numpy" },
     { name = "pydantic" },
@@ -242,6 +269,8 @@ dependencies = [
 requires-dist = [
     { name = "anthropic", specifier = ">=1.0" },
     { name = "fastapi", specifier = ">=0.115" },
+    { name = "highnet-core", editable = "core" },
+    { name = "highnet-scope", editable = "scope" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.8" },
@@ -255,19 +284,27 @@ name = "highnet-rag-evals"
 version = "0.1.0"
 source = { editable = "evals" }
 dependencies = [
+    { name = "highnet-core" },
     { name = "highnet-rag" },
+    { name = "highnet-scope" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "highnet-rag", editable = "api" }]
+requires-dist = [
+    { name = "highnet-core", editable = "core" },
+    { name = "highnet-rag", editable = "api" },
+    { name = "highnet-scope", editable = "scope" },
+]
 
 [[package]]
 name = "highnet-rag-workspace"
 version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "highnet-core" },
     { name = "highnet-rag" },
     { name = "highnet-rag-evals" },
+    { name = "highnet-scope" },
 ]
 
 [package.dev-dependencies]
@@ -282,8 +319,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "highnet-core", editable = "core" },
     { name = "highnet-rag", editable = "api" },
     { name = "highnet-rag-evals", editable = "evals" },
+    { name = "highnet-scope", editable = "scope" },
 ]
 
 [package.metadata.requires-dev]
@@ -294,6 +333,25 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.24" },
     { name = "pytest-cov", specifier = ">=5.0" },
     { name = "ruff", specifier = ">=0.6" },
+]
+
+[[package]]
+name = "highnet-scope"
+version = "0.1.0"
+source = { editable = "scope" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "highnet-core" },
+    { name = "numpy" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "highnet-core", editable = "core" },
+    { name = "numpy", specifier = ">=2.0" },
+    { name = "pydantic", specifier = ">=2.8" },
 ]
 
 [[package]]

@@ -1,8 +1,8 @@
 import json
 
+from highnet_core.providers.base import ToolAnswer
+from highnet_core.providers.claude import ClaudeJudge
 from highnet_rag.config import Settings
-from highnet_rag.providers.base import ToolAnswer
-from highnet_rag.providers.claude import ClaudeJudge
 from highnet_rag_evals.judge import (
     FakeJudge,
     build_judge,

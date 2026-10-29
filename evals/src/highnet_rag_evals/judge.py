@@ -10,9 +10,9 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from highnet_core.providers.base import Judge, ToolAnswer
+from highnet_core.providers.claude import ClaudeJudge
 from highnet_rag.config import Settings
-from highnet_rag.providers.base import Judge, ToolAnswer
-from highnet_rag.providers.claude import ClaudeJudge
 from highnet_rag.providers.fake import words
 
 JUDGE_SYSTEM = """You grade answers from a retrieval-augmented question-answering system. \

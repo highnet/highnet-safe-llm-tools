@@ -1,7 +1,7 @@
 import { Typography } from '@/components/ui/Typography';
-import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 
-const F = COPY.footer;
+const F = SITE.footer;
 
 type FooterColumnProps = {
   id: string;
@@ -31,26 +31,39 @@ const FooterColumn = ({ id, title, links }: FooterColumnProps) => {
   );
 };
 
-// The site map, the project links and the corpus attribution the licence asks for.
+// The site map (both products), the project links, and the attributions the corpus licence and
+// the drafted dataset ask for.
 const SiteFooter = () => {
   return (
     <footer className="mx-auto w-full max-w-6xl px-4 pt-16 pb-10 md:px-8">
-      <div className="grid grid-cols-2 gap-x-10 gap-y-6 border-t pt-6 sm:grid-cols-[auto_auto_minmax(0,1fr)]">
+      <div className="grid grid-cols-2 gap-x-10 gap-y-6 border-t pt-6 sm:grid-cols-[auto_auto_auto_minmax(0,1fr)]">
         <FooterColumn
-          id="footer-pages"
-          title={F.pages}
-          links={COPY.nav.links.map(({ href, text }) => ({ href, text }))}
+          id="footer-rag"
+          title={SITE.products.rag.name}
+          links={SITE.pages.rag.map(({ href, text }) => ({ href, text }))}
         />
-        <FooterColumn id="footer-project" title={F.project} links={F.projectLinks} />
+        <FooterColumn
+          id="footer-scope"
+          title={SITE.products.scope.name}
+          links={SITE.pages.scope.map(({ href, text }) => ({ href, text }))}
+        />
+        <FooterColumn
+          id="footer-project"
+          title={F.project}
+          links={[{ href: '/', text: F.home }, ...F.projectLinks]}
+        />
         <div className="col-span-2 sm:col-span-1 sm:justify-self-end">
           <Typography variant="data" as="p" className="font-semibold">
-            {COPY.siteName}
+            {SITE.name}
           </Typography>
           <Typography variant="small" color="muted" className="mt-1 max-w-[52ch]">
-            {COPY.tagline}
+            {SITE.tagline}
           </Typography>
           <Typography variant="small" color="muted" className="mt-3 max-w-[52ch]">
             {F.corpus}
+          </Typography>
+          <Typography variant="small" color="muted" className="mt-1 max-w-[52ch]">
+            {F.dataset}
           </Typography>
         </div>
       </div>

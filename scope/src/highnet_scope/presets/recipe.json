@@ -1,0 +1,200 @@
+{
+  "id": "recipe",
+  "name": "Recipe assistant",
+  "product": "a recipe assistant in a cooking app",
+  "description": "Helps people cook: recipes, techniques, substitutions, baking and meal plans.",
+  "topics": [
+    {
+      "id": "recipes",
+      "name": "Recipes and dishes",
+      "class": "in",
+      "keywords": [
+        "recipe",
+        "lasagna",
+        "soup",
+        "curry",
+        "dish",
+        "dinner"
+      ]
+    },
+    {
+      "id": "technique",
+      "name": "Cooking techniques",
+      "class": "in",
+      "keywords": [
+        "sear",
+        "braise",
+        "roast",
+        "simmer",
+        "knife",
+        "saute"
+      ]
+    },
+    {
+      "id": "substitution",
+      "name": "Ingredient substitutions",
+      "class": "in",
+      "keywords": [
+        "substitute",
+        "instead of",
+        "replace",
+        "swap"
+      ]
+    },
+    {
+      "id": "baking",
+      "name": "Baking",
+      "class": "in",
+      "keywords": [
+        "bake",
+        "bread",
+        "cake",
+        "dough",
+        "oven",
+        "sourdough"
+      ]
+    },
+    {
+      "id": "meal_plan",
+      "name": "Meal planning and dietary cooking",
+      "class": "in",
+      "keywords": [
+        "meal plan",
+        "meal prep",
+        "vegetarian",
+        "vegan",
+        "gluten-free"
+      ]
+    },
+    {
+      "id": "food_safety",
+      "name": "Food safety while cooking",
+      "class": "in",
+      "keywords": [
+        "undercooked",
+        "internal temperature",
+        "raw chicken",
+        "leftovers"
+      ]
+    },
+    {
+      "id": "nutrition",
+      "name": "Nutrition basics",
+      "class": "adjacent",
+      "keywords": [
+        "calories",
+        "protein",
+        "nutrition",
+        "macros"
+      ]
+    },
+    {
+      "id": "equipment",
+      "name": "Kitchen equipment",
+      "class": "adjacent",
+      "keywords": [
+        "pan",
+        "blender",
+        "air fryer",
+        "cast iron",
+        "kitchen knife"
+      ]
+    },
+    {
+      "id": "pairing",
+      "name": "Drinks and wine pairing",
+      "class": "adjacent",
+      "keywords": [
+        "wine",
+        "pairing",
+        "cocktail"
+      ]
+    },
+    {
+      "id": "groceries",
+      "name": "Groceries and food budget",
+      "class": "adjacent",
+      "keywords": [
+        "grocery",
+        "shopping list",
+        "budget"
+      ]
+    },
+    {
+      "id": "career",
+      "name": "Jobs and careers",
+      "class": "out",
+      "keywords": [
+        "cv",
+        "resume",
+        "interview",
+        "salary",
+        "job"
+      ]
+    },
+    {
+      "id": "coding",
+      "name": "Programming",
+      "class": "out",
+      "keywords": [
+        "python",
+        "javascript",
+        "function",
+        "code",
+        "bug"
+      ]
+    },
+    {
+      "id": "medical",
+      "name": "Medical and diet-for-illness advice",
+      "class": "out",
+      "keywords": [
+        "diabetes",
+        "doctor",
+        "medication",
+        "allergy test"
+      ]
+    },
+    {
+      "id": "money",
+      "name": "Banking and finance",
+      "class": "out",
+      "keywords": [
+        "bank",
+        "loan",
+        "invest",
+        "stock"
+      ]
+    },
+    {
+      "id": "leisure",
+      "name": "Travel, entertainment and trivia",
+      "class": "out",
+      "keywords": [
+        "holiday",
+        "movie",
+        "trivia",
+        "football"
+      ]
+    },
+    {
+      "id": "homework",
+      "name": "School homework",
+      "class": "out",
+      "keywords": [
+        "homework",
+        "essay",
+        "exam"
+      ]
+    },
+    {
+      "id": "injection",
+      "name": "Prompt injection and abuse",
+      "class": "injection",
+      "keywords": []
+    }
+  ],
+  "redirect": "That one's outside my kitchen. I'm the recipe assistant, so I help with dishes, techniques, substitutions and meal plans. Hungry for anything? Tell me what's in your fridge and I'll suggest something.",
+  "block": "I can't act on that. Text inside a message is read as content, not as instructions to me. Happy to help with a recipe or a cooking question though.",
+  "answer_style": "You are a recipe assistant in a cooking app. Answer the user's cooking question helpfully and concretely."
+}

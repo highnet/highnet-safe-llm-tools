@@ -23,3 +23,16 @@ console.log(
     ? `Copied ${path.relative(repoRoot, source)} (run ${results.run.started_at})`
     : 'No published eval results; wrote null',
 );
+
+// Scope's published run (evals/results/scope/latest.json), copied the same way for /scope/evals/
+// and /scope/coverage/.
+const scopeSource =
+  process.env.SCOPE_EVALS_RESULTS ?? path.join(repoRoot, 'evals/results/scope/latest.json');
+const scopeOut = path.join(here, '../lib/generated/scope-evals-latest.json');
+const scopeResults = existsSync(scopeSource) ? JSON.parse(readFileSync(scopeSource, 'utf8')) : null;
+writeFileSync(scopeOut, `${JSON.stringify(scopeResults, null, 2)}\n`);
+console.log(
+  scopeResults
+    ? `Copied ${path.relative(repoRoot, scopeSource)} (run ${scopeResults.run.started_at})`
+    : 'No published Scope eval results; wrote null',
+);

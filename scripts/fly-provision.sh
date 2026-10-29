@@ -2,10 +2,10 @@
 # Idempotent Fly.io provisioning, run by CI before each deploy with an org token in
 # FLY_API_TOKEN: creates the app and volume if missing and stages the secrets.
 # Env: FLY_API_TOKEN (required), ANTHROPIC_API_KEY, VOYAGE_API_KEY, FLY_ORG (optional:
-# defaults to the token's first org), FLY_APP (default highnet-rag), FLY_REGION (default fra).
+# defaults to the token's first org), FLY_APP (default highnet-safe-llm-tools), FLY_REGION (default fra).
 set -euo pipefail
 
-APP="${FLY_APP:-highnet-rag}"
+APP="${FLY_APP:-highnet-safe-llm-tools}"
 REGION="${FLY_REGION:-fra}"
 ORG="${FLY_ORG:-$(flyctl orgs list --json | jq -r 'keys[0]')}"
 

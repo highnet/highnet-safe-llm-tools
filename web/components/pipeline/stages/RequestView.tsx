@@ -4,10 +4,11 @@ import type { RequestData } from '@/lib/stage-data';
 
 import { RequestFigure } from '../figures/RequestFigure';
 import { Facts } from './Facts';
+import { ScopeVerdictNote } from './ScopeVerdictNote';
 
-type RequestViewProps = { data: RequestData };
+type RequestViewProps = { data: RequestData; questionId?: string };
 
-const RequestView = ({ data }: RequestViewProps) => {
+const RequestView = ({ data, questionId }: RequestViewProps) => {
   const { budget } = data;
   return (
     <div className="space-y-3">
@@ -18,6 +19,7 @@ const RequestView = ({ data }: RequestViewProps) => {
         </Typography>
       )}
       <RequestFigure data={data} />
+      {questionId && !data.error && <ScopeVerdictNote questionId={questionId} />}
       <Facts
         facts={[
           { term: 'Budget tier', value: budget.tier },

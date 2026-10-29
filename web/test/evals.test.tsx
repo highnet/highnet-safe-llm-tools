@@ -5,10 +5,10 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import EvalsPage from '@/app/evals/page';
+import EvalsPage from '@/app/rag/evals/page';
 import { EvalsReport } from '@/components/evals/EvalsReport';
 import { AnswerResult } from '@/components/pipeline/AnswerResult';
-import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { EVALS } from '@/content/evals';
 import {
   detailsUrl,
@@ -68,7 +68,7 @@ describe('evals page', () => {
   });
 
   it('switches the measure and lights up the linked configuration', () => {
-    window.history.replaceState(null, '', '/evals/?mode=hybrid&chunks=medium&rerank=1');
+    window.history.replaceState(null, '', '/rag/evals/?mode=hybrid&chunks=medium&rerank=1');
     const configs = full.retrieval.configs.filter(
       (c) => !(c.mode === 'bm25' && c.chunk_set === 'large' && c.rerank),
     );
@@ -114,7 +114,9 @@ describe('evals page', () => {
     render(<EvalsPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(EVALS.title);
     expect(
-      within(screen.getByRole('navigation', { name: COPY.nav.label })).getByRole('link', {
+      within(
+        screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) }),
+      ).getByRole('link', {
         name: 'Evals',
       }),
     ).toHaveAttribute('aria-current', 'page');
@@ -152,7 +154,7 @@ describe('eval helpers and the link from the pipeline', () => {
       rerank: false,
     });
     expect(evalsHref({ mode: 'bm25', chunkSet: 'small', rerank: false })).toBe(
-      '/evals/?mode=bm25&chunks=small#retrieval',
+      '/rag/evals/?mode=bm25&chunks=small#retrieval',
     );
     expect(evalsHref({ mode: 'bm25', chunkSet: 'small', rerank: true })).toContain('rerank=1');
     expect(runEvalsHref(null)).toBeUndefined();
@@ -171,12 +173,12 @@ describe('eval helpers and the link from the pipeline', () => {
       <AnswerResult
         citations={{ abstained: false, citations: [], blocks: [], unused_chunk_ids: [] }}
         done={null}
-        evalsHref="/evals/?mode=bm25&chunks=small#retrieval"
+        evalsHref="/rag/evals/?mode=bm25&chunks=small#retrieval"
       />,
     );
     expect(screen.getByRole('link', { name: EVALS.fromPipeline })).toHaveAttribute(
       'href',
-      '/evals/?mode=bm25&chunks=small#retrieval',
+      '/rag/evals/?mode=bm25&chunks=small#retrieval',
     );
   });
 });

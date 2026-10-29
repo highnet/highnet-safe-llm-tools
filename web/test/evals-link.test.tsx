@@ -33,6 +33,6 @@ describe('the link from an answer to the evals', () => {
       await new Promise((resolve) => setTimeout(resolve, 20));
     });
     const link = await screen.findByRole('link', { name: EVALS.fromPipeline });
-    expect(link.getAttribute('href')).toMatch(/^\/evals\/\?mode=\w+&chunks=\w+/);
+    expect(link.getAttribute('href')).toMatch(/^\/rag\/evals\/\?mode=\w+&chunks=\w+/);
   });
 });

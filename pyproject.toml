@@ -1,6 +1,6 @@
 # uv workspace root: the API package and the offline evals.
 [tool.uv.workspace]
-members = ["api", "evals"]
+members = ["core", "api", "scope", "evals"]
 
 [tool.uv]
 package = false
@@ -19,10 +19,12 @@ dev = [
 name = "highnet-rag-workspace"
 version = "0.0.0"
 requires-python = ">=3.12"
-dependencies = ["highnet-rag", "highnet-rag-evals"]
+dependencies = ["highnet-core", "highnet-rag", "highnet-scope", "highnet-rag-evals"]
 
 [tool.uv.sources]
+highnet-core = { workspace = true }
 highnet-rag = { workspace = true }
+highnet-scope = { workspace = true }
 highnet-rag-evals = { workspace = true }
 
 [tool.ruff]
@@ -34,23 +36,32 @@ extend-exclude = ["web", ".claude"]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["highnet_rag", "highnet_rag_evals"]
+known-first-party = ["highnet_core", "highnet_rag", "highnet_scope", "highnet_rag_evals", "highnet_scope_evals"]
 
 [tool.pyright]
 typeCheckingMode = "basic"
 pythonVersion = "3.12"
-include = ["api/src", "api/tests", "evals/src", "evals/tests"]
+include = [
+  "core/src", "core/tests", "api/src", "api/tests", "scope/src", "scope/tests", "evals/src",
+  "evals/tests",
+]
 venvPath = "."
 venv = ".venv"
 
 [tool.pytest.ini_options]
-testpaths = ["api/tests", "evals/tests"]
+testpaths = ["core/tests", "api/tests", "scope/tests", "evals/tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 addopts = "--cov --cov-report=term-missing:skip-covered"
 
 [tool.coverage.run]
-source = ["api/src/highnet_rag", "evals/src/highnet_rag_evals"]
+source = [
+  "core/src/highnet_core",
+  "api/src/highnet_rag",
+  "scope/src/highnet_scope",
+  "evals/src/highnet_rag_evals",
+  "evals/src/highnet_scope_evals",
+]
 branch = true
 
 [tool.coverage.report]

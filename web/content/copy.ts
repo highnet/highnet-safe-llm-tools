@@ -1,17 +1,9 @@
 // English UI copy. One catalogue so other languages can be added later.
 
 export const COPY = {
-  siteName: 'highnet-rag',
+  // RAG's own name and tagline; the site's are in content/site.ts.
+  productName: 'RAG',
   tagline: 'Retrieval-augmented generation, worked out step by step.',
-  nav: {
-    label: 'Main',
-    links: [
-      { key: 'pipeline', href: '/', text: 'Pipeline' },
-      { key: 'corpus', href: '/corpus/', text: 'Corpus' },
-      { key: 'evals', href: '/evals/', text: 'Evals' },
-      { key: 'coverage', href: '/coverage/', text: 'Coverage' },
-    ],
-  },
   sheetLabel: 'Sheet 1',
   emptyTitle: 'Ask the corpus a question',
   // The opening of the pipeline page: what you are looking at, before the working starts.
@@ -347,15 +339,6 @@ export const COPY = {
   budgetStopped: (cap: string) =>
     `This month’s ${cap} API budget is used up, so live questions are paused until the 1st (UTC).`,
   theme: { toDark: 'Switch to the dark pad', toLight: 'Switch to the light pad' },
-  footer: {
-    pages: 'Pages',
-    project: 'Project',
-    projectLinks: [
-      { href: 'https://github.com/highnet/highnet-rag', text: 'Source on GitHub' },
-      { href: 'https://highnet.at', text: 'highnet.at' },
-    ],
-    corpus: 'Corpus: SQuAD 2.0 dev set (Rajpurkar et al.), Wikipedia text under CC BY-SA 4.0.',
-  },
   announce: (label: string, title: string, status: string, ms: string) =>
     `Step ${label}, ${title}: ${status} in ${ms}.`,
 } as const;

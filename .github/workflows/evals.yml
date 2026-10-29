@@ -7,6 +7,11 @@ name: Evals
 on:
   workflow_dispatch:
     inputs:
+      product:
+        description: Which product's evals to run (Scope's judge pass costs about $0.78)
+        type: choice
+        options: [rag, scope]
+        default: rag
       limit:
         description: Only the first N questions per golden set (0 = all)
         default: "0"
@@ -22,7 +27,8 @@ concurrency: evals
 
 jobs:
   evals:
-    name: Run evals
+    name: Run RAG evals
+    if: inputs.product == 'rag'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -66,5 +72,38 @@ jobs:
           git add evals/results
           git commit -m "Eval results from run ${{ github.run_id }}" \
             -m "$(tail -n 8 evals-run.log)"
+          git push origin "$branch"
+          echo "Pushed $branch" >> "$GITHUB_STEP_SUMMARY"
+
+  scope-evals:
+    name: Run Scope evals
+    if: inputs.product == 'scope'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+      ANTHROPIC_MAX_RETRIES: "8"
+      VOYAGE_MAX_RETRIES: "8"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --no-dev
+      - name: Smoke test (one prompt per preset)
+        run: |
+          uv run highnet-scope-evals run --db recordings/scope/scope.sqlite --out /tmp/smoke \
+            --cache /tmp/smoke-cache.sqlite --limit 1
+      - name: Run the evals over every labeled prompt
+        run: |
+          uv run highnet-scope-evals run --db recordings/scope/scope.sqlite \
+            --limit "${{ inputs.limit }}" --concurrency 6 | tee scope-evals.log
+      - name: Push the results to a branch
+        run: |
+          branch="evals/scope-run-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add evals/results/scope
+          git commit -m "Scope eval results from run ${{ github.run_id }}" -m "$(tail -n 8 scope-evals.log)"
           git push origin "$branch"
           echo "Pushed $branch" >> "$GITHUB_STEP_SUMMARY"

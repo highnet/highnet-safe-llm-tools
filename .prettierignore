@@ -11,10 +11,18 @@ web/out/
 coverage/
 
 # Python backend is formatted by Ruff, not Prettier.
+core/
 api/
+scope/
 evals/
 .venv/
 uv.lock
 
 # Written by `highnet-rag schema` (Python); CI diffs it byte for byte.
 web/lib/generated/trace.schema.json
+web/lib/generated/scope-trace.schema.json
+web/lib/generated/scope-evals.schema.json
+
+# Written by `highnet-scope export` from the recordings; CI diffs them byte for byte.
+web/public/scope/dataset.json
+web/lib/generated/scope-verdicts.json

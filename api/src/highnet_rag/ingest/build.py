@@ -10,12 +10,12 @@ from pathlib import Path
 
 import numpy as np
 
+from highnet_core.pca import fit_pca, project
+from highnet_core.pricing import cost_usd
+from highnet_core.providers.base import Embedder
 from highnet_rag.config import Settings
 from highnet_rag.ingest.chunk import CHUNK_SPECS, chunk_text
-from highnet_rag.ingest.pca import fit_pca, project
 from highnet_rag.ingest.squad import SQUAD_DEV_URL, Article
-from highnet_rag.pricing import cost_usd
-from highnet_rag.providers.base import Embedder
 from highnet_rag.storage.sqlite import CORPUS_SCHEMA, connect_corpus, vec_table_sql
 
 

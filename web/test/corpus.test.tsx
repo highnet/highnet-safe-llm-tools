@@ -1,9 +1,9 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import CorpusPage from '@/app/corpus/page';
+import CorpusPage from '@/app/rag/corpus/page';
 import { ArticleText } from '@/components/corpus/ArticleText';
-import { COPY } from '@/content/copy';
+import { SITE } from '@/content/site';
 import { CORPUS } from '@/content/corpus';
 import type { CorpusDocument, CorpusDocuments } from '@/lib/api';
 import { chunkSegments } from '@/lib/chunk-segments';
@@ -68,7 +68,9 @@ describe('corpus page', () => {
     window.history.replaceState(null, '', '/corpus/?doc=2&chunks=small');
     render(<CorpusPage />);
     expect(
-      within(screen.getByRole('navigation', { name: COPY.nav.label })).getByRole('link', {
+      within(
+        screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) }),
+      ).getByRole('link', {
         name: 'Corpus',
       }),
     ).toHaveAttribute('aria-current', 'page');

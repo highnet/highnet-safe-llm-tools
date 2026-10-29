@@ -1,6 +1,5 @@
 """FastAPI app: `/api/*` plus the exported Next.js site, from one origin."""
 
-import asyncio
 import json
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -11,30 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from highnet_rag.budget import budget_state, hash_ip
+from highnet_core.budget import budget_state, hash_ip
+from highnet_core.sse import client_ip, event_stream
 from highnet_rag.config import Settings, get_settings
 from highnet_rag.pipeline.classic import new_run_id, run_classic
 from highnet_rag.pipeline.deps import DEFAULT_MODE, SUPPORTED_MODES, Deps, Mode, QueryParams
-from highnet_rag.pipeline.search import Event
 from highnet_rag.providers import Providers, build_providers
 from highnet_rag.recordings import RECORDED_KS, combo_key, replay
 from highnet_rag.storage.base import CorpusStore, RecordingStore
 from highnet_rag.storage.sqlite import SqliteCorpusStore, SqliteRecordingStore, SqliteStateStore
-from highnet_rag.trace import AnswerDelta, RunDone, TraceEvent
-
-SSE_HEADERS = {
-    "Cache-Control": "no-cache, no-transform",
-    "X-Accel-Buffering": "no",
-    "Connection": "keep-alive",
-}
-
-
-def sse(event: str, payload: str) -> str:
-    return f"event: {event}\ndata: {payload}\n\n"
-
-
-def client_ip(request: Request) -> str:
-    return request.headers.get("fly-client-ip") or (request.client.host if request.client else "")
+from highnet_scope.api import build_scope_deps, scope_router
+from highnet_scope.config import ScopeSettings, get_scope_settings
 
 
 def get_deps(request: Request) -> Deps:
@@ -51,6 +37,7 @@ def create_app(
     settings: Settings | None = None,
     providers: Providers | None = None,
     corpus: CorpusStore | None = None,
+    scope_settings: ScopeSettings | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
 
@@ -79,9 +66,16 @@ def create_app(
             if corpus_store is not None
             else None
         )
+        # Scope lives on the same app and machine, with its own SQLite file and the shared
+        # spend ledger. A missing scope.sqlite leaves the RAG API running.
+        app.state.scope, app.state.scope_error = build_scope_deps(
+            scope_settings or get_scope_settings()
+        )
         yield
 
-    app = FastAPI(title="highnet-rag", version="0.1.0", lifespan=lifespan, docs_url="/api/docs")
+    app = FastAPI(
+        title="Highnet Safe LLM Tools API", version="0.2.0", lifespan=lifespan, docs_url="/api/docs"
+    )
     if settings.cors_origin_list or settings.cors_origin_regex:
         app.add_middleware(
             CORSMiddleware,
@@ -93,11 +87,19 @@ def create_app(
     @app.get("/api/health")
     def health(request: Request) -> dict[str, object]:
         deps: Deps | None = request.app.state.deps
+        scope = request.app.state.scope
         return {
             "ok": deps is not None,
             "corpus": deps.corpus.meta().get("build_id") if deps else None,
             "error": request.app.state.corpus_error,
+            "scope": scope.store.meta().get("build_id")
+            if (scope := request.app.state.scope)
+            else None,
+            "scope_recorded_at": scope.store.recorded_at() if scope else None,
+            "scope_error": request.app.state.scope_error,
         }
+
+    app.include_router(scope_router())
 
     @app.get("/api/config")
     def config(request: Request, deps: DepsDep) -> dict[str, object]:
@@ -266,40 +268,7 @@ def create_app(
                     404, detail="These settings were not recorded for this question."
                 )
             events = replay(recording, params, deps, ip_hash)
-        return StreamingResponse(
-            stream_run(events), media_type="text/event-stream", headers=SSE_HEADERS
-        )
-
-    async def stream_run(events: AsyncIterator[Event]) -> AsyncIterator[str]:
-        queue: asyncio.Queue[TraceEvent | AnswerDelta | RunDone | None] = asyncio.Queue()
-
-        async def produce() -> None:
-            try:
-                async for item in events:
-                    await queue.put(item)
-            finally:
-                await queue.put(None)
-
-        task = asyncio.create_task(produce())
-        keepalive = settings.sse_keepalive_seconds
-        try:
-            while True:
-                try:
-                    item = await asyncio.wait_for(queue.get(), timeout=keepalive)
-                except TimeoutError:
-                    # Starlette cancels this generator when the client disconnects.
-                    yield ": keep-alive\n\n"
-                    continue
-                if item is None:
-                    break
-                if isinstance(item, TraceEvent):
-                    yield sse("trace", item.model_dump_json())
-                elif isinstance(item, AnswerDelta):
-                    yield sse("answer_delta", item.model_dump_json())
-                else:
-                    yield sse("done", item.model_dump_json())
-        finally:
-            task.cancel()
+        return event_stream(events, settings.sse_keepalive_seconds)
 
     @app.get("/api/evals")
     def evals() -> JSONResponse:

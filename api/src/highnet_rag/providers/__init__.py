@@ -3,11 +3,11 @@
 from dataclasses import dataclass
 from functools import lru_cache
 
+from highnet_core.providers.base import AnswerModel, Embedder, Reranker
+from highnet_core.providers.claude import ClaudeAnswerModel
+from highnet_core.providers.voyage import VoyageClient, VoyageEmbedder, VoyageReranker
 from highnet_rag.config import Settings, get_settings
-from highnet_rag.providers.base import AnswerModel, Embedder, Reranker
-from highnet_rag.providers.claude import ClaudeAnswerModel
 from highnet_rag.providers.fake import FakeAnswerModel, FakeEmbedder, FakeReranker
-from highnet_rag.providers.voyage import VoyageClient, VoyageEmbedder, VoyageReranker
 
 
 @dataclass

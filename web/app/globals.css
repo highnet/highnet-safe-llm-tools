@@ -54,6 +54,11 @@
   --chart-3: var(--data-fused);
   --chart-4: var(--data-rerank);
   --chart-5: var(--data-neutral);
+  /* Scope's four classes reuse the data inks under class names (Lamp Rule: .dark follows). */
+  --class-in: var(--data-rerank);
+  --class-adjacent: var(--data-vector);
+  --class-out: var(--data-bm25);
+  --class-injection: var(--data-fused);
   --radius: 4px;
 
   color-scheme: light;
@@ -107,6 +112,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-class-in: var(--class-in);
+  --color-class-adjacent: var(--class-adjacent);
+  --color-class-out: var(--class-out);
+  --color-class-injection: var(--class-injection);
 
   --font-sans: var(--font-recursive), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-recursive), ui-monospace, SFMono-Regular, monospace;

@@ -7,10 +7,73 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "highnet-rag.vercel.app"
+        }
+      ],
+      "destination": "https://highnet-safe-llm-tools.vercel.app/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/corpus",
+      "destination": "/rag/corpus/",
+      "permanent": true
+    },
+    {
+      "source": "/corpus/",
+      "destination": "/rag/corpus/",
+      "permanent": true
+    },
+    {
+      "source": "/evals",
+      "destination": "/rag/evals/",
+      "permanent": true
+    },
+    {
+      "source": "/evals/",
+      "destination": "/rag/evals/",
+      "permanent": true
+    },
+    {
+      "source": "/coverage",
+      "destination": "/rag/coverage/",
+      "permanent": true
+    },
+    {
+      "source": "/coverage/",
+      "destination": "/rag/coverage/",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "q"
+        }
+      ],
+      "destination": "/rag/",
+      "permanent": true
     }
   ]
 }

@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
-import { FORMAL, KEY } from '@/content/formal';
+import { FORMAL, KEY, type KeyEntry } from '@/content/formal';
 import { type FormulaNode, parseFormula } from '@/lib/formula';
 import { cn } from '@/lib/utils';
 
@@ -21,11 +21,14 @@ type FormulaProps = {
   source: string;
   id: string;
   className?: string;
+  // The symbols to explain; the RAG pipeline's by default.
+  entries?: Record<string, KeyEntry>;
+  hint?: string;
 };
 
 // A formula whose symbols explain themselves. Tapping (or hovering) a symbol writes its meaning
 // on the line below, in place, so it works the same on a phone as with a mouse.
-const Formula = ({ source, id, className }: FormulaProps) => {
+const Formula = ({ source, id, className, entries = KEY, hint = FORMAL.hint }: FormulaProps) => {
   // A tapped symbol stays pinned; hovering previews another and leaving restores the pin.
   const [pinned, setPinned] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -48,7 +51,7 @@ const Formula = ({ source, id, className }: FormulaProps) => {
           size="inline"
           aria-expanded={open}
           aria-controls={definitionId}
-          aria-label={`${node.symbol}: ${KEY[node.symbol].name}`}
+          aria-label={`${node.symbol}: ${entries[node.symbol].name}`}
           onClick={() => setPinned(node.symbol)}
           onMouseEnter={() => setHovered(node.symbol)}
           className="text-[length:inherit]"
@@ -58,11 +61,11 @@ const Formula = ({ source, id, className }: FormulaProps) => {
       );
     });
 
-  const entry = active ? KEY[active] : null;
+  const entry = active ? entries[active] : null;
   return (
     <div className={cn('space-y-1', className)} onMouseLeave={() => setHovered(null)}>
       <p className="voice-data text-sm leading-relaxed break-words">
-        {render(parseFormula(source))}
+        {render(parseFormula(source, entries))}
       </p>
       <p id={definitionId} aria-live="polite" className="min-h-5 text-xs text-muted-foreground">
         {entry ? (
@@ -71,7 +74,7 @@ const Formula = ({ source, id, className }: FormulaProps) => {
             <span className="font-semibold text-foreground">{entry.name}</span>: {entry.meaning}
           </>
         ) : (
-          FORMAL.hint
+          hint
         )}
       </p>
     </div>

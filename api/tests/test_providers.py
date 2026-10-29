@@ -4,9 +4,9 @@ import httpx
 import pytest
 from pydantic import SecretStr
 
+from highnet_core.providers.base import ProviderNotConfiguredError
+from highnet_core.providers.voyage import VoyageClient, VoyageEmbedder, VoyageReranker
 from highnet_rag.config import Settings
-from highnet_rag.providers.base import ProviderNotConfiguredError
-from highnet_rag.providers.voyage import VoyageClient, VoyageEmbedder, VoyageReranker
 
 
 def voyage_with(handler) -> VoyageClient:

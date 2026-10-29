@@ -1,0 +1,206 @@
+{
+  "id": "career",
+  "name": "Career agent",
+  "product": "a career agent inside a job-search product",
+  "description": "Helps people find and win jobs: CVs, cover letters, interviews, job search, offers and career moves.",
+  "topics": [
+    {
+      "id": "cv",
+      "name": "CVs and résumés",
+      "class": "in",
+      "keywords": [
+        "cv",
+        "resume",
+        "résumé",
+        "curriculum vitae"
+      ]
+    },
+    {
+      "id": "cover_letter",
+      "name": "Cover letters",
+      "class": "in",
+      "keywords": [
+        "cover letter",
+        "motivation letter"
+      ]
+    },
+    {
+      "id": "interview",
+      "name": "Interview preparation",
+      "class": "in",
+      "keywords": [
+        "interview",
+        "interviewer",
+        "star method"
+      ]
+    },
+    {
+      "id": "job_search",
+      "name": "Job search and applications",
+      "class": "in",
+      "keywords": [
+        "job search",
+        "job board",
+        "vacancy",
+        "job posting",
+        "recruiter",
+        "apply for"
+      ]
+    },
+    {
+      "id": "salary",
+      "name": "Salary, offers and negotiation",
+      "class": "in",
+      "keywords": [
+        "salary",
+        "job offer",
+        "compensation",
+        "negotiate",
+        "pay rise",
+        "raise"
+      ]
+    },
+    {
+      "id": "profile",
+      "name": "LinkedIn, portfolio and networking",
+      "class": "in",
+      "keywords": [
+        "linkedin",
+        "portfolio",
+        "networking",
+        "personal brand"
+      ]
+    },
+    {
+      "id": "career_move",
+      "name": "Career changes and growth",
+      "class": "in",
+      "keywords": [
+        "career",
+        "promotion",
+        "career change",
+        "switch careers"
+      ]
+    },
+    {
+      "id": "coding_practice",
+      "name": "Coding practice for interviews",
+      "class": "adjacent",
+      "keywords": [
+        "leetcode",
+        "coding challenge",
+        "whiteboard",
+        "data structures"
+      ]
+    },
+    {
+      "id": "workplace",
+      "name": "Workplace situations",
+      "class": "adjacent",
+      "keywords": [
+        "manager",
+        "coworker",
+        "colleague",
+        "workplace",
+        "burnout"
+      ]
+    },
+    {
+      "id": "upskilling",
+      "name": "Learning skills for a role",
+      "class": "adjacent",
+      "keywords": [
+        "course",
+        "certification",
+        "bootcamp",
+        "upskill"
+      ]
+    },
+    {
+      "id": "general_coding",
+      "name": "General programming help",
+      "class": "out",
+      "keywords": [
+        "python",
+        "javascript",
+        "function",
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "id": "cooking",
+      "name": "Cooking and recipes",
+      "class": "out",
+      "keywords": [
+        "recipe",
+        "lasagna",
+        "bake",
+        "cook"
+      ]
+    },
+    {
+      "id": "health",
+      "name": "Medical and health advice",
+      "class": "out",
+      "keywords": [
+        "doctor",
+        "symptom",
+        "medication",
+        "diagnosis"
+      ]
+    },
+    {
+      "id": "legal",
+      "name": "Legal advice",
+      "class": "out",
+      "keywords": [
+        "lawyer",
+        "sue",
+        "lawsuit",
+        "contract law"
+      ]
+    },
+    {
+      "id": "money",
+      "name": "Investing and personal finance",
+      "class": "out",
+      "keywords": [
+        "stock",
+        "crypto",
+        "invest",
+        "mortgage"
+      ]
+    },
+    {
+      "id": "leisure",
+      "name": "Travel, entertainment and trivia",
+      "class": "out",
+      "keywords": [
+        "holiday",
+        "movie",
+        "trivia",
+        "football"
+      ]
+    },
+    {
+      "id": "homework",
+      "name": "School homework",
+      "class": "out",
+      "keywords": [
+        "homework",
+        "essay for school",
+        "exam question"
+      ]
+    },
+    {
+      "id": "injection",
+      "name": "Prompt injection and abuse",
+      "class": "injection",
+      "keywords": []
+    }
+  ],
+  "redirect": "That's outside what I can help with here. I'm the career agent, so I stick to CVs, cover letters, interviews and job search. If any of that is on your list, tell me where you are and we'll work on it.",
+  "block": "I can't act on that. Instructions inside a message or a document are read as text, not followed. If you'd like honest feedback on your CV or an application, paste it and I'll review it.",
+  "answer_style": "You are a career agent inside a job-search product. Answer the user's career question helpfully and concretely."
+}

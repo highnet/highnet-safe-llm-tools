@@ -12,10 +12,14 @@ WORKDIR /app
 
 # Dependencies first (cached), then the package itself.
 COPY pyproject.toml uv.lock .python-version ./
+COPY core/pyproject.toml core/pyproject.toml
 COPY api/pyproject.toml api/pyproject.toml
+COPY scope/pyproject.toml scope/pyproject.toml
 COPY evals/pyproject.toml evals/pyproject.toml
 RUN uv sync --frozen --no-dev --package highnet-rag --no-install-workspace
+COPY core/ core/
 COPY api/ api/
+COPY scope/ scope/
 RUN uv sync --frozen --no-dev --package highnet-rag
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -24,7 +28,8 @@ RUN useradd --create-home --uid 1000 app && chmod +x /usr/local/bin/docker-entry
 ENV PATH=/app/.venv/bin:$PATH \
     CORPUS_DB_PATH=/data/corpus.sqlite \
     STATE_DB_PATH=/data/state.sqlite \
-    RECORDINGS_DB_PATH=/data/recordings.sqlite
+    RECORDINGS_DB_PATH=/data/recordings.sqlite \
+    SCOPE_DB_PATH=/data/scope.sqlite
 EXPOSE 8080
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["uvicorn", "highnet_rag.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]

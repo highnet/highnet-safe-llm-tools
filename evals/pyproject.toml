@@ -4,17 +4,20 @@ version = "0.1.0"
 description = "Offline retrieval and faithfulness evals for highnet-rag."
 requires-python = ">=3.12"
 license = "MIT"
-dependencies = ["highnet-rag"]
+dependencies = ["highnet-core", "highnet-rag", "highnet-scope"]
 
 [project.scripts]
 highnet-rag-evals = "highnet_rag_evals.cli:main"
+highnet-scope-evals = "highnet_scope_evals.cli:main"
 
 [tool.uv.sources]
+highnet-core = { workspace = true }
 highnet-rag = { workspace = true }
+highnet-scope = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/highnet_rag_evals"]
+packages = ["src/highnet_rag_evals", "src/highnet_scope_evals"]

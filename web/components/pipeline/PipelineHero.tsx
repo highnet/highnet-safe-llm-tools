@@ -43,7 +43,7 @@ const PipelineHero = ({ intro, diagram }: PipelineHeroProps) => {
             <ArrowDown aria-hidden />
           </a>
           <Link
-            href="/corpus/"
+            href="/rag/corpus/"
             className="voice-pencil inline-flex min-h-10 items-center gap-1 text-sm text-primary underline decoration-dotted underline-offset-4 hover:decoration-solid"
           >
             {COPY.hero.corpus}

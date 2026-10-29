@@ -3,8 +3,8 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+from highnet_core.budget import budget_state
 from highnet_rag.app import create_app
-from highnet_rag.budget import budget_state
 from highnet_rag.storage.sqlite import SqliteStateStore
 
 from .test_pipeline_errors import ScriptedAnswer, app_with

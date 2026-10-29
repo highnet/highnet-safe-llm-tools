@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   api:
-    name: API (ruff, pyright, pytest with 100% coverage)
+    name: "Python: core, RAG API, Scope, evals (ruff, pyright, pytest with 100% coverage)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,11 +36,20 @@ jobs:
         run: |
           python3 scripts/coverage_report.py python --coverage coverage.json --junit junit.xml
           git diff --exit-code web/lib/generated/coverage.json
-      - name: Trace and eval-results schemas are up to date
+      - name: Trace and eval-results schemas are up to date (both products)
         run: |
           uv run highnet-rag schema
           uv run highnet-rag-evals schema
-          git diff --exit-code web/lib/generated/trace.schema.json web/lib/generated/evals.schema.json
+          uv run highnet-scope schema
+          uv run highnet-scope-evals schema
+          git diff --exit-code web/lib/generated/trace.schema.json web/lib/generated/evals.schema.json \
+            web/lib/generated/scope-trace.schema.json web/lib/generated/scope-evals.schema.json
+      - name: Scope's dataset and RAG verdicts match the committed recordings
+        env:
+          STATE_DB_PATH: /tmp/state.sqlite
+        run: |
+          uv run highnet-scope export --db recordings/scope/scope.sqlite
+          git diff --exit-code web/public/scope/dataset.json web/lib/generated/scope-verdicts.json
 
   web:
     name: Web (lint, types, tests, build, design detector)
@@ -60,10 +69,10 @@ jobs:
         run: |
           npm run gen:snippets
           git diff --exit-code lib/generated/snippets.json
-      - name: The page's eval results match evals/results/latest.json
+      - name: The pages' eval results match evals/results (RAG and Scope)
         run: |
           npm run gen:evals
-          git diff --exit-code lib/generated/evals-latest.json
+          git diff --exit-code lib/generated/evals-latest.json lib/generated/scope-evals-latest.json
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test # Vitest with 100% coverage thresholds
@@ -78,7 +87,7 @@ jobs:
 
   # The web app deploys through Vercel's GitHub integration (project root: web/).
   deploy-api:
-    name: Deploy API to Fly.io
+    name: Deploy the API (both products) to Fly.io
     needs: [api, web]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -101,3 +110,5 @@ jobs:
         env:
           VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
           FORCE_CORPUS: ${{ inputs.rebuild_corpus || false }}
+      - name: Upload Scope's database if the live one differs from the committed one
+        run: scripts/fly-ensure-scope.sh

@@ -62,6 +62,8 @@ __pycache__/
 # local data: built SQLite index and raw corpus stay out of git
 data/
 *.sqlite
+# Scope's built prompts, vectors and recorded model calls: CI uploads this exact file to Fly.
+!recordings/scope/scope.sqlite
 *.sqlite3
 *.db
 *.db-shm

@@ -7,8 +7,8 @@ export const COVERAGE = {
   title: 'Is every line tested?',
   metaTitle: 'Test coverage of every file',
   metaDescription:
-    'Line and branch coverage for every file of highnet-rag (the API, the eval runner and the website), measured by the test suites and checked by CI on every change.',
-  lede: 'Every line and every branch of the API, the eval runner and this website runs under a test, and CI rejects a change that drops below 100%. Comments that hide code from the count are not allowed. The numbers below are the committed test run; CI runs the tests again on every change and fails if they no longer match.',
+    'Line and branch coverage for every file of Highnet Safe LLM Tools (the shared core, both products’ Python packages, the eval runners and the website), measured by the test suites and checked by CI on every change.',
+  lede: 'Every line and every branch of the shared core, the RAG API, Scope, both eval runners and this website runs under a test, and CI rejects a change that drops below 100%. Comments that hide code from the count are not allowed. The numbers below are the committed test run; CI runs the tests again on every change and fails if they no longer match.',
   facts: {
     tests: 'Tests',
     testsValue: (python: number, web: number) => `${count(python)} Python · ${count(web)} web`,
@@ -18,12 +18,24 @@ export const COVERAGE = {
     checkedValue: 'by CI on every push, against a fresh run',
   },
   packages: {
+    core: {
+      title: 'The shared core',
+      note: 'What both products share: the Claude and Voyage clients, pricing, the budget ledger and rate limits, trace events and server-sent events. Clients are faked in tests.',
+    },
+    scope: {
+      title: 'Scope',
+      note: 'The rules, the nearest-neighbour vote, the judge and its validation, fusion, thresholds, the eleven steps, the recorder and the routes, run on fake models and a fake-embedded dataset.',
+    },
+    'scope-evals': {
+      title: 'Scope’s eval runner',
+      note: 'Scoring rules, kNN, the judge and the fused pipeline, the threshold sweep and the cost per method, on fake models.',
+    },
     api: {
-      title: 'The API',
+      title: 'The RAG API',
       note: 'The FastAPI app, every pipeline stage, the providers, the storage and the recorder. Tests swap Claude and Voyage for fakes, so no test calls a paid API.',
     },
     evals: {
-      title: 'The eval runner',
+      title: 'RAG’s eval runner',
       note: 'The golden sets, the runner and its judge, tested the same way with fake models.',
     },
     web: {

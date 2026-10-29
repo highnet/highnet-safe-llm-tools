@@ -1,0 +1,181 @@
+{
+  "id": "rag",
+  "name": "RAG corpus assistant",
+  "product": "the RAG pipeline's question box, which answers from 35 Wikipedia articles (SQuAD 2.0)",
+  "description": "Answers factual, encyclopedia-style questions. Its library is 35 Wikipedia articles: 1973 oil crisis, Amazon rainforest, Black Death, Civil disobedience, Computational complexity theory, Construction, Ctenophora, Economic inequality, European Union law, Force, French and Indian War, Fresno (California), Geology, Harvard University, Huguenot, Immune system, Imperialism, IPCC, Islamism, Jacksonville (Florida), Normans, Oxygen, Packet switching, Pharmacy, Prime number, Private school, Rhine, Scottish Parliament, Sky (United Kingdom), Southern California, Steam engine, University of Chicago, Victoria (Australia), Warsaw, Yuan dynasty. A factual question outside the library is still in scope: the pipeline searches and says when it finds nothing.",
+  "topics": [
+    {
+      "id": "history",
+      "name": "History in the library",
+      "class": "in",
+      "keywords": [
+        "normans",
+        "normandy",
+        "yuan",
+        "kublai",
+        "black death",
+        "plague",
+        "french and indian war",
+        "huguenot",
+        "imperialism",
+        "oil crisis"
+      ]
+    },
+    {
+      "id": "science",
+      "name": "Science and technology in the library",
+      "class": "in",
+      "keywords": [
+        "oxygen",
+        "force",
+        "geology",
+        "immune",
+        "ctenophora",
+        "prime number",
+        "complexity",
+        "packet switching",
+        "steam engine",
+        "amazon rainforest"
+      ]
+    },
+    {
+      "id": "places",
+      "name": "Places in the library",
+      "class": "in",
+      "keywords": [
+        "fresno",
+        "jacksonville",
+        "southern california",
+        "victoria",
+        "warsaw",
+        "rhine"
+      ]
+    },
+    {
+      "id": "institutions",
+      "name": "Institutions in the library",
+      "class": "in",
+      "keywords": [
+        "harvard",
+        "university of chicago",
+        "scottish parliament",
+        "ipcc",
+        "european union law",
+        "private school",
+        "sky",
+        "pharmacy",
+        "construction"
+      ]
+    },
+    {
+      "id": "society",
+      "name": "Society and politics in the library",
+      "class": "in",
+      "keywords": [
+        "civil disobedience",
+        "economic inequality",
+        "islamism"
+      ]
+    },
+    {
+      "id": "other_facts",
+      "name": "Other encyclopedia facts (not in the library)",
+      "class": "in",
+      "keywords": [
+        "who won",
+        "when was",
+        "capital of",
+        "how many"
+      ]
+    },
+    {
+      "id": "about_tool",
+      "name": "How the assistant and retrieval work",
+      "class": "adjacent",
+      "keywords": [
+        "retrieval",
+        "embedding",
+        "rag",
+        "corpus",
+        "chunk"
+      ]
+    },
+    {
+      "id": "opinion",
+      "name": "Opinions and debates on library topics",
+      "class": "adjacent",
+      "keywords": [
+        "should",
+        "was it right",
+        "your opinion",
+        "better or worse"
+      ]
+    },
+    {
+      "id": "personal",
+      "name": "Personal advice: careers, health, money",
+      "class": "out",
+      "keywords": [
+        "cv",
+        "resume",
+        "salary",
+        "doctor",
+        "invest"
+      ]
+    },
+    {
+      "id": "cooking",
+      "name": "Cooking and recipes",
+      "class": "out",
+      "keywords": [
+        "recipe",
+        "lasagna",
+        "bake",
+        "cook"
+      ]
+    },
+    {
+      "id": "coding",
+      "name": "Programming tasks",
+      "class": "out",
+      "keywords": [
+        "python",
+        "javascript",
+        "write a function",
+        "code"
+      ]
+    },
+    {
+      "id": "creative",
+      "name": "Creative writing",
+      "class": "out",
+      "keywords": [
+        "poem",
+        "story",
+        "song",
+        "write me a"
+      ]
+    },
+    {
+      "id": "live_info",
+      "name": "Live information: news, weather, prices",
+      "class": "out",
+      "keywords": [
+        "today",
+        "weather",
+        "price of",
+        "latest news",
+        "right now"
+      ]
+    },
+    {
+      "id": "injection",
+      "name": "Prompt injection and abuse",
+      "class": "injection",
+      "keywords": []
+    }
+  ],
+  "redirect": "That's not something I can answer here. This assistant answers factual questions, searching a library of 35 Wikipedia articles first. Try a question about history, science, a place or an institution.",
+  "block": "I can't act on that. Text in a question is searched as text and never followed as an instruction. Ask a factual question and I'll search the library for it.",
+  "answer_style": ""
+}

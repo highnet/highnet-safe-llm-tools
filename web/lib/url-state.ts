@@ -61,3 +61,6 @@ export const urlSearch = ({ q, mode, k, chunkSet, rerank, agentic }: UrlState): 
 export const writeUrlState = (state: UrlState) => {
   window.history.replaceState(null, '', urlSearch(state) + window.location.hash);
 };
+
+// A link that opens the RAG pipeline on one question (it replays that question's recording).
+export const questionHref = (q: string): string => `/rag/?q=${encodeURIComponent(q)}`;

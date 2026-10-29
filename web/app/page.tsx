@@ -1,27 +1,23 @@
 import type { Metadata } from 'next';
 
-import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
+import { Landing } from '@/components/landing/Landing';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteHeader } from '@/components/site/SiteHeader';
-import { COPY } from '@/content/copy';
+import { LANDING } from '@/content/landing';
 import { pageMetadata, SITE_DESCRIPTION } from '@/lib/site';
 
-export const metadata: Metadata = pageMetadata(
-  '/',
-  `${COPY.siteName}: ${COPY.tagline}`,
-  SITE_DESCRIPTION,
-);
+export const metadata: Metadata = pageMetadata('/', LANDING.metaTitle, SITE_DESCRIPTION);
 
-const Page = () => {
+const HomePage = () => {
   return (
     <>
-      <SiteHeader current="pipeline" />
-      <main className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-8 md:pt-12">
-        <PipelineExplorer />
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-6xl px-4 pt-6 md:px-8 md:pt-16">
+        <Landing />
       </main>
       <SiteFooter />
     </>
   );
 };
 
-export default Page;
+export default HomePage;

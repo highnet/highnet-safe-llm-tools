@@ -37,7 +37,7 @@ export const parseHighlight = (search: string): Highlight | null => {
 export const evalsHref = ({ mode, chunkSet, rerank }: Highlight) => {
   const params = new URLSearchParams({ mode, chunks: chunkSet });
   if (rerank) params.set('rerank', '1');
-  return `/evals/?${params.toString()}#retrieval`;
+  return `/rag/evals/?${params.toString()}#retrieval`;
 };
 
 // A finished run's settings as a link, or nothing while no run is on the page.
@@ -45,4 +45,4 @@ export const runEvalsHref = (run: Highlight | null) => (run ? evalsHref(run) : u
 
 // The dated details file that sits next to latest.json in the repository.
 export const detailsUrl = (startedAt: string) =>
-  `https://github.com/highnet/highnet-rag/blob/main/evals/results/${startedAt.slice(0, 10)}.details.jsonl`;
+  `https://github.com/highnet/highnet-safe-llm-tools/blob/main/evals/results/${startedAt.slice(0, 10)}.details.jsonl`;

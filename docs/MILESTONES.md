@@ -1,6 +1,6 @@
-# highnet-rag — Milestones
+# Highnet Safe LLM Tools — Milestones
 
-There is no deadline; each milestone ships when its acceptance criteria pass. Every milestone ends with:
+There is no deadline; each milestone ships when its acceptance criteria pass. M1–M6 built RAG (as highnet-rag); S1–S4 add Scope and the umbrella site. Every milestone ends with:
 
 - CI green, the API deployed to Fly and the web app to Vercel;
 - a short demo note in the README changelog;
@@ -93,3 +93,49 @@ Acceptance criteria:
 - [x] The `/evals` page renders only numbers present in the JSON, with methodology notes ("what recall@5 means").
 - [x] Full Impeccable finish on every page: critique, audit, polish, a finish-reviewer verdict of `ship`, and DESIGN.md current.
 - [x] Accessibility pass: keyboard-only walkthrough, screen-reader announcement check, AA contrast in both themes (axe-core WCAG 2.2 AA: 0 violations on every page, both themes, 390 and 1440; no horizontal scroll at 320).
+
+## S1 · Highnet Safe LLM Tools: one site, two products
+
+**Demo:** open `/` and see both tools introduced by their real step chains; switch between RAG and Scope in the header; an old link such as `/?q=…&mode=hybrid` or `/evals/` lands on the same page under `/rag/`.
+
+Acceptance criteria:
+
+- [x] The visible brand is Highnet Safe LLM Tools (header, landing page, titles and metadata, share cards, JSON-LD, sitemap, README, docs); "the RAG pipeline" in product descriptions.
+- [x] RAG moves under `/rag/` (pipeline, corpus, evals, coverage); `web/vercel.json` adds permanent 308 redirects from the old paths, and `/` with a `q` parameter goes to `/rag/` with the query kept.
+- [x] A shared landing page; a RAG | Scope switcher in the header; metadata, share cards, sitemap and robots for both products.
+- [x] A shared Python package `highnet-core` (providers, pricing, budget, trace, storage base, SSE, PCA); `highnet_rag` keeps its name and `/api/query`.
+- [x] No RAG regression: retrieval evals before and after on the same corpus file, within the run-to-run noise of the Voyage API.
+- [x] The GitHub repository, the Vercel project and domain, and the Fly app are renamed to `highnet-safe-llm-tools` (owner decision); the README says what the rename touched.
+
+## S2 · Scope: dataset, pipeline and recordings
+
+**Demo:** pick "Write a Fibonacci function in Python" under the career agent: it is redirected; switch the conversation context on ("I have a coding interview tomorrow") and it is answered briefly. Pick the same lasagna question under the career agent and the recipe assistant and get different actions.
+
+Acceptance criteria:
+
+- [x] 1,200 labeled prompts (300 per preset) across in / adjacent / out / injection with hard cases (multilingual, benign injection words, polite and encoded injections, hidden text, extraction, borderlines, context-dependent rows), as JSONL golden files, validated against their preset and labelled Claude-drafted.
+- [x] `highnet-scope ingest` embeds them with `voyage-3.5-lite` and fits a PCA per preset into `scope.sqlite`.
+- [x] Eleven steps, one trace event each, with status, timing, tokens and cost; skips and failures say why.
+- [x] The LLM judge replies in strict JSON validated with Pydantic; an invalid reply fails the step and drops out of the fusion; the message is data inside delimiters.
+- [x] About 20 example messages per preset, including every required case, recorded once with the real models, with and without context; settings, toggles and definition edits recompute at no model cost; an edited rubric skips the judge with the stated reason.
+- [x] Rate limit live on every replay; answers capped hard in tokens and characters; spend through `pricing.py` and the shared ledger.
+- [x] Python tests at 100% line and branch coverage, fake providers only.
+
+## S3 · Scope: the four pages
+
+**Demo:** `/scope/` replays the eleven steps with a figure each; `/scope/dataset/` filters the 1,200 prompts; `/scope/evals/` compares the four methods; `/scope/coverage/` shows where the dataset is thin and where the pipeline was wrong.
+
+Acceptance criteria:
+
+- [x] `/scope/`: the walkthrough, a pipeline diagram, the principles (off scope vs injection, warm redirects and false refusals, architecture over filters with the Dual LLM pattern and CaMeL), and the same pipeline as formulas.
+- [x] `/scope/dataset/`, `/scope/evals/` and `/scope/coverage/` render only numbers from the committed data and results.
+- [x] RAG's first step shows Scope's recorded verdict for its question, linked to the full breakdown; the landing page explains in scope but not in the corpus versus off scope.
+- [x] Phone width: steps fold to one line, no horizontal scroll at 320 px; WCAG 2.2 AA in both themes; reduced motion respected.
+- [x] Web tests at 100%; `impeccable detect` reports zero findings; the finish review has run.
+
+## S4 · Scope: evals
+
+Acceptance criteria:
+
+- [x] `highnet-scope-evals run` scores rules, kNN (leave-one-out), the judge and the fused pipeline: per-class precision and recall, confusion matrices, false refusal and over-compliance rates, a threshold sweep, cost and latency per method; results in `evals/results/scope/`.
+- [ ] Decide whether to change the fusion defaults (open owner item: the judge alone beat the fused default in the first run); measure any change on a held-out split.

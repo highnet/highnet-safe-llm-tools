@@ -1,0 +1,36 @@
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":1,"stage":"request","status":"ok","parent":null,"label":"1","data":{"run_id":"c50ede4d9d30468d9f715aa33168273e","preset":"career","example_id":"career-salary","message":"How do I negotiate my salary offer?","chars":35,"max_chars":2000,"language":"en","language_words":4,"settings":{"use_context":true,"rules":true,"knn":false,"judge":false,"weights":{"rules":0.25,"knn":0.35,"judge":0.4},"thresholds":{"block":0.5,"answer":0.7,"brief":0.4},"k":7,"overrides":{}},"models":{"embed":{"provider":"voyage","model":"voyage-3.5-lite"},"judge":{"provider":"anthropic","model":"claude-haiku-4-5"}},"live":false,"recorded_at":"2026-10-29T14:39:19+00:00","rate_limit":{"remaining_minute":13,"remaining_day":193,"limit_minute":20,"limit_day":200},"budget":{"spent_usd":0.0,"cap_usd":20.0,"remaining_usd":20.0,"degrade_at_usd":16.0,"tier":"normal"}},"ms":3,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":2,"stage":"context","status":"skipped","parent":null,"label":"2","data":{"reason":"This message has no earlier turns."},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":3,"stage":"rules","status":"ok","parent":null,"label":"3","data":{"hits":[{"rule":"keyword","kind":"topic","view":"normalized","match":"salary","weight":1.0,"label":"in","topic":"salary"},{"rule":"keyword","kind":"topic","view":"normalized","match":"negotiate","weight":1.0,"label":"in","topic":"salary"}],"injection_score":0.0,"topic_votes":{"in":2,"adjacent":0,"out":0},"distribution":{"in":1.0,"adjacent":0.0,"out":0.0,"injection":0.0},"abstained":false},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":4,"stage":"embed","status":"skipped","parent":null,"label":"4","data":{"reason":"The kNN signal is switched off, so nothing needs an embedding."},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":5,"stage":"map","status":"skipped","parent":null,"label":"5","data":{"reason":"The kNN signal is switched off, so nothing needs an embedding."},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":6,"stage":"knn","status":"skipped","parent":null,"label":"6","data":{"reason":"The kNN signal is switched off in the settings."},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":7,"stage":"judge","status":"skipped","parent":null,"label":"7","data":{"reason":"The LLM judge is switched off in the settings."},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":8,"stage":"fuse","status":"ok","parent":null,"label":"8","data":{"weights":{"rules":0.25,"knn":0.35,"judge":0.4},"used_weights":{"rules":1.0},"signals":{"rules":{"in":1.0,"adjacent":0.0,"out":0.0,"injection":0.0},"knn":null,"judge":null},"contributions":{"rules":{"in":1.0,"adjacent":0.0,"out":0.0,"injection":0.0}},"distribution":{"in":1.0,"adjacent":0.0,"out":0.0,"injection":0.0},"label":"in","confidence":1.0,"tradeoff":{"per_signal":{"rules":{"ms":0,"cost_usd":0.0},"knn":{"ms":0,"cost_usd":0.0},"judge":{"ms":0,"cost_usd":0.0}},"cumulative":[{"signals":["rules"],"ms":0,"cost_usd":0.0},{"signals":["rules","knn"],"ms":0,"cost_usd":0.0},{"signals":["rules","knn","judge"],"ms":0,"cost_usd":0.0}]}},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":9,"stage":"thresholds","status":"ok","parent":null,"label":"9","data":{"thresholds":{"block":0.5,"answer":0.7,"brief":0.4},"p_injection":0.0,"scope_score":1.0,"action":"answer"},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":10,"stage":"respond","status":"ok","parent":null,"label":"10","data":{"action":"answer","system":"You are a career agent inside a job-search product. Answer the user's career question helpfully and concretely. Keep the answer under 200 words.","max_tokens":300,"max_chars":1500,"provider":"anthropic","model":"claude-haiku-4-5","text":"# How to Negotiate Your Salary Offer\n\n**Do Your Research**\n- Use Glassdoor, PayScale, or LinkedIn Salary to find typical pay for your role, location, and experience level\n- Know your market value before discussing numbers\n\n**Timing Matters**\n- Negotiate *after* receiving a formal offer, not during initial conversations\n- Don't mention salary first—let them anchor if possible\n\n**Make Your Case**\n- Focus on value: your skills, achievements, and what you'll contribute\n- Reference market data: \"Based on industry standards for this role...\"\n- Mention competing offers if relevant (honestly)\n\n**Negotiation Tips**\n- Start 10-15% above their offer (leave room to meet in middle)\n- Ask for the salary range first, rather than stating a number\n- Consider negotiating benefits too: PTO, remote work, signing bonus, professional development\n\n**Stay Professional**\n- Be confident but not aggressive\n- Express genuine enthusiasm for the role\n- Avoid ultimatums\n- Get any final offer in writing\n\n**Know When to Accept**\n- You don't have to negotiate aggressively if the offer meets your needs\n- A reasonable offer + growth opportunity might be better than maximum salary at wrong company\n\nRemember: most employers expect negotiation. A polite, well-reasoned ask rarely hurts your candidacy.","truncated":false,"recorded_at":"2026-10-29T14:33:37+00:00","replayed":true},"ms":4003,"tokens":349,"cost_usd":0.001549}
+
+event: trace
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","seq":11,"stage":"audit","status":"ok","parent":null,"label":"11","data":{"stored":false,"record":{"run_id":"c50ede4d9d30468d9f715aa33168273e","preset":"career","message_sha256":"3dc8c19716589f2d1674a84e42a19b41724ef46aa7bf241bc020c9c6b6ab514a","action":"answer","label":"in","confidence":1.0,"scope_score":1.0,"signals":{"rules":"in"},"rule_hits":[],"rubric":"bc3dbbede044","relabelled_topics":[],"needs_review":false},"review_reasons":[]},"ms":0,"tokens":0,"cost_usd":0.0}
+
+event: done
+data: {"run_id":"c50ede4d9d30468d9f715aa33168273e","status":"ok","ms":3,"tokens":349,"cost_usd":0.001549,"stages":11}
+
