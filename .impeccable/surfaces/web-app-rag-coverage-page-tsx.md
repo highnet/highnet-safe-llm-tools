@@ -1,13 +1,13 @@
 ---
 version: 1
-slug: 'web-app-coverage-page-tsx'
-primary_target: 'web/app/coverage/page.tsx'
+slug: 'web-app-rag-coverage-page-tsx'
+primary_target: 'web/app/rag/coverage/page.tsx'
 related_targets: []
 ---
 
-# Surface: test coverage audit (`/coverage`)
+# Surface: test coverage audit (`/rag/coverage/`)
 
-Scope: Sheet 4 of the pad. Shows how much of the code the test suites run: per package (API, eval runner, website) and per file, lines and branches. Visitor mode: **Read**, with an Operate layer (the per-file fold).
+Scope: Sheet 4 of RAG. (Not to be confused with `/scope/coverage/`, which maps the Scope dataset's coverage.) Shows how much of the code the test suites run: per package (API, eval runner, website) and per file, lines and branches. Visitor mode: **Read**, with an Operate layer (the per-file fold).
 
 - Audience and job: recruiters and developers checking that the project is tested as claimed. The job is to trust "100% coverage" because every count is visible.
 - Action: read the totals; open a package's files to audit any one file.

@@ -1,11 +1,11 @@
 ---
 version: 1
-slug: 'web-app-corpus-page-tsx'
-primary_target: 'web/app/corpus/page.tsx'
+slug: 'web-app-rag-corpus-page-tsx'
+primary_target: 'web/app/rag/corpus/page.tsx'
 related_targets: ['web/components/corpus']
 ---
 
-# Surface: corpus browser (`/corpus`)
+# Surface: corpus browser (`/rag/corpus/`)
 
 Scope: the 35 articles every answer comes from, each shown as the searches see it. Visitor mode: **Read**, with two Operate controls (article, chunk size), both kept in the URL (`?doc=&chunks=`).
 
