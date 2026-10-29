@@ -1,0 +1,186 @@
+{
+  "id": "bank",
+  "name": "Bank support bot",
+  "product": "a customer-support bot for a retail bank",
+  "description": "Helps customers with their own accounts, cards, transfers, fees, online banking and fraud reports. It gives no investment advice.",
+  "topics": [
+    {
+      "id": "cards",
+      "name": "Cards: lost, stolen, PIN, limits",
+      "class": "in",
+      "keywords": [
+        "card",
+        "pin",
+        "debit card",
+        "credit card",
+        "contactless"
+      ]
+    },
+    {
+      "id": "transfers",
+      "name": "Payments and transfers",
+      "class": "in",
+      "keywords": [
+        "transfer",
+        "payment",
+        "iban",
+        "standing order",
+        "direct debit"
+      ]
+    },
+    {
+      "id": "accounts",
+      "name": "Opening, closing and statements",
+      "class": "in",
+      "keywords": [
+        "account",
+        "statement",
+        "open an account",
+        "close my account"
+      ]
+    },
+    {
+      "id": "fees",
+      "name": "Fees and charges",
+      "class": "in",
+      "keywords": [
+        "fee",
+        "charge",
+        "overdraft",
+        "interest charged"
+      ]
+    },
+    {
+      "id": "online",
+      "name": "Online banking and the app",
+      "class": "in",
+      "keywords": [
+        "app",
+        "log in",
+        "login",
+        "password",
+        "two-factor",
+        "online banking"
+      ]
+    },
+    {
+      "id": "fraud",
+      "name": "Fraud and suspicious activity",
+      "class": "in",
+      "keywords": [
+        "fraud",
+        "scam",
+        "suspicious",
+        "phishing",
+        "unauthorised"
+      ]
+    },
+    {
+      "id": "loans",
+      "name": "Existing loans and mortgage payments",
+      "class": "in",
+      "keywords": [
+        "loan",
+        "mortgage payment",
+        "repayment"
+      ]
+    },
+    {
+      "id": "budgeting",
+      "name": "Budgeting and saving tips",
+      "class": "adjacent",
+      "keywords": [
+        "budget",
+        "save money",
+        "savings goal"
+      ]
+    },
+    {
+      "id": "concepts",
+      "name": "Explaining financial concepts",
+      "class": "adjacent",
+      "keywords": [
+        "interest rate",
+        "apr",
+        "credit score",
+        "inflation"
+      ]
+    },
+    {
+      "id": "investing",
+      "name": "Investment picks and trading",
+      "class": "out",
+      "keywords": [
+        "stock",
+        "crypto",
+        "bitcoin",
+        "invest in",
+        "etf"
+      ]
+    },
+    {
+      "id": "cooking",
+      "name": "Cooking and recipes",
+      "class": "out",
+      "keywords": [
+        "recipe",
+        "lasagna",
+        "bake",
+        "cook"
+      ]
+    },
+    {
+      "id": "coding",
+      "name": "Programming",
+      "class": "out",
+      "keywords": [
+        "python",
+        "javascript",
+        "function",
+        "code"
+      ]
+    },
+    {
+      "id": "career",
+      "name": "Jobs and careers",
+      "class": "out",
+      "keywords": [
+        "cv",
+        "resume",
+        "interview",
+        "job"
+      ]
+    },
+    {
+      "id": "leisure",
+      "name": "Travel, entertainment and trivia",
+      "class": "out",
+      "keywords": [
+        "holiday",
+        "movie",
+        "trivia",
+        "football"
+      ]
+    },
+    {
+      "id": "legal_tax",
+      "name": "Legal and tax advice",
+      "class": "out",
+      "keywords": [
+        "lawyer",
+        "tax return",
+        "sue",
+        "inheritance law"
+      ]
+    },
+    {
+      "id": "injection",
+      "name": "Prompt injection and abuse",
+      "class": "injection",
+      "keywords": []
+    }
+  ],
+  "redirect": "I can't help with that one here. I'm the bank's support assistant, so I stick to your accounts, cards, payments and online banking. Is there anything on your account I can sort out for you?",
+  "block": "I can't do that. I only act on your own verified requests, and text inside a message is never treated as an instruction. For anything about your account, I'm here to help.",
+  "answer_style": "You are the customer-support assistant of a retail bank. Answer the customer's banking question helpfully; never ask for full card numbers or passwords."
+}
