@@ -11,21 +11,27 @@ const F = SCOPE.steps.knn;
 
 type KnnViewProps = { data: KnnData };
 
-// The neighbours that voted, most similar first, and the vote they add up to.
+// The vote the neighbours add up to: the step's figure.
+const KnnFigure = ({ data }: KnnViewProps) => {
+  return (
+    <Figure
+      caption={F.caption(data.k)}
+      alt={`${F.vote}: ${Object.entries(data.distribution)
+        .map(([label, share]) => `${label} ${SCOPE.pct(share)}`)
+        .join(', ')}`}
+    >
+      <Typography variant="label" color="muted" as="p" className="mb-1">
+        {F.vote}
+      </Typography>
+      <DistributionBar distribution={data.distribution} />
+    </Figure>
+  );
+};
+
+// The neighbours that voted, most similar first.
 const KnnView = ({ data }: KnnViewProps) => {
   return (
     <div className="space-y-4">
-      <Figure
-        caption={F.caption(data.k)}
-        alt={`${F.vote}: ${Object.entries(data.distribution)
-          .map(([label, share]) => `${label} ${SCOPE.pct(share)}`)
-          .join(', ')}`}
-      >
-        <Typography variant="label" color="muted" as="p" className="mb-1">
-          {F.vote}
-        </Typography>
-        <DistributionBar distribution={data.distribution} />
-      </Figure>
       {data.relabelled_topics.length > 0 && (
         <Typography variant="marginNote">
           {F.relabelledTopics(data.relabelled_topics.join(', '))}
@@ -72,4 +78,4 @@ const KnnView = ({ data }: KnnViewProps) => {
   );
 };
 
-export { KnnView };
+export { KnnFigure, KnnView };

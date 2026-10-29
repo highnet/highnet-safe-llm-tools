@@ -7,7 +7,7 @@ import { SCOPE } from '@/content/scope';
 import { clearDatasetCache } from '@/lib/scope/api';
 import { setView } from '@/lib/view-store';
 
-import { ControlledEventSource } from './helpers';
+import { ControlledEventSource, openDetails } from './helpers';
 import { type Recorded, recording, scopeConfig, stubScopeFetch } from './scope-fixtures';
 
 const S = SCOPE.settings;
@@ -234,6 +234,7 @@ describe('scope explorer runs', () => {
     expect(screen.getByText(SCOPE.editor.judgeSkipped)).toBeInTheDocument();
     expect(screen.getByText(SCOPE.editor.moved(1))).toBeInTheDocument();
     play(recording('edited'));
+    openDetails();
     expect(screen.getAllByText(SCOPE.steps.knn.relabelled).length).toBeGreaterThan(0);
     // Moving it back to where it started is no edit at all.
     fireEvent.click(within(row).getByRole('radio', { name: 'adjacent' }));

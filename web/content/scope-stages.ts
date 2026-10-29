@@ -22,74 +22,112 @@ export const SCOPE_STAGE_ORDER: ScopeStage[] = [
 export const SCOPE_STAGES: Record<ScopeStage, StageCopy> = {
   request: {
     title: 'Check the request',
-    why: 'Before reading the message we check the cheap things: is it too long, which language does it look like, and has this visitor sent too many requests lately. The rate limit is checked live on every replay; nothing else here costs anything. A message that fails a check stops here with the reason.',
+    why: 'First the cheap checks: the message’s length, its language, and how many requests this visitor sent lately. A message that fails one stops here with the reason.',
     detail:
-      'Length is capped so the guard cannot be flooded with a pasted book. The language guess counts common words per language; it labels the run and never refuses a language. The rate limit and the monthly budget come from the same ledger the RAG pipeline uses, keyed by a salted hash of your IP.',
+      'The language guess counts common words; it labels the run and never refuses a language. The rate limit and budget share the RAG pipeline’s ledger, keyed by a salted hash of your IP.',
   },
   context: {
     title: 'Add the conversation',
-    why: 'The same words can mean different things after different turns. “Write a Fibonacci function” is a coding request on its own, but interview practice after “I have a coding interview tomorrow”. When there are earlier turns and context is on, we read the message together with them; switch context off to see the reading change.',
+    why: 'The same words mean different things after different turns, so we read the message together with up to four earlier ones. Switch context off to see the reading change.',
     detail:
-      'Up to four earlier turns are joined before the message, each with its role. That joined text is what gets embedded and what the judge sees inside its conversation tags. Turns are data, exactly like the message: nothing in them is followed as an instruction.',
+      'The joined text is what gets embedded and what the judges see. Turns are data, exactly like the message: nothing in them is followed as an instruction.',
   },
   rules: {
     title: 'Run the rule prefilter',
-    why: 'Fast, free and transparent: regular expressions look for known attack phrasing (“ignore your instructions”, “print your system prompt”, fake system tags) and for hiding tricks. Each rule is searched in four views of the message, so an instruction hidden in base64, zero-width characters, look-alike letters or an HTML comment still shows up. The scope definition’s keywords add a vote for in, adjacent or out. When nothing fires, the rules abstain.',
+    why: 'Fast, free regular expressions look for known attack phrasing and hiding tricks, and the scope definition’s keywords add a vote. When nothing fires, the rules abstain.',
     detail:
-      'Views: raw; normalized (NFKC, zero-width characters removed, Cyrillic and Greek look-alikes folded to Latin, leetspeak read as letters); decoded (base64 and hex runs that decode to readable text, and rot13); hidden (HTML comments and invisibly styled elements). Each hit has a weight, and hits combine as independent evidence: P(injection) = 1 − ∏(1 − weight). Rules are easy to evade with a paraphrase or another language; they exist to catch the lazy attacks for free.',
+      'Each rule is searched in four views: raw, normalized (look-alike letters, zero-width characters, leetspeak), decoded (base64, hex, rot13) and hidden (HTML comments). Hits combine as P(injection) = 1 − ∏(1 − weight); a paraphrase evades them.',
   },
   embed: {
     title: 'Embed the message',
-    why: 'Voyage turns the message (with its conversation, if used) into 1,024 numbers so we can compare it with the labeled examples by meaning rather than by words. This is one of the two paid calls; on this site it was recorded once and is replayed, so the time and cost shown are the recorded ones.',
+    why: 'Voyage turns the message into 1,024 numbers so we can compare it with the labeled examples by meaning. The call was recorded once and is replayed.',
     detail:
-      'Model voyage-3.5-lite, input type “query”, the same settings used to embed the 1,200 labeled prompts at ingest. The vector is replayed from scope.sqlite, keyed by the exact text embedded, so switching context off replays a different recorded embedding.',
+      'Model voyage-3.5-lite, input type “query”, as at ingest. The vector is replayed from scope.sqlite, keyed by the exact text embedded, so context off replays a different embedding.',
   },
   map: {
     title: 'Place it on the map',
-    why: 'The labeled examples are drawn as points, coloured and shaped by their class, and the message lands among them. Close to in-scope points is a good sign; landing in a sparse corner means the examples have little to say. Two axes keep only a few percent of the spread, so read the map as a picture, not as a measurement.',
+    why: 'The labeled examples are drawn by class, and the message lands among them. Two axes keep only a few percent of the spread, so read it as a picture.',
     detail:
-      'PCA fitted per preset at ingest over the preset’s 300 prompt vectors; the message is projected with the same mean and components. The explained variance of each axis is printed under the plot. Distances on the map are not the cosine similarities the vote uses.',
+      'PCA fitted per preset at ingest over its 300 prompt vectors; the message is projected the same way. Map distances are not the cosine similarities the vote uses.',
   },
   knn: {
     title: 'Ask the nearest neighbours',
-    why: 'The k most similar labeled prompts vote with their labels, each vote weighted by its cosine similarity. If you edit the scope definition, the prompts of a moved topic change label and the vote changes with them, without any new embedding.',
+    why: 'The k most similar labeled prompts vote with their labels, weighted by similarity. Edit the scope definition and the vote changes, with no new embedding.',
     detail:
-      'cos(q, x) = q·x / (|q||x|) over the preset’s unit vectors; the top k by similarity vote, weight max(cos, 0). Neighbours whose label your edit changed are marked. In the evals each prompt is scored leave-one-out, so it never votes for itself.',
+      'Weight max(cos, 0) over the preset’s unit vectors. In the evals each prompt is scored leave-one-out, so it never votes for itself.',
   },
   judge: {
     title: 'Ask the LLM judge',
-    why: 'Claude Haiku reads the preset’s rubric and the message, and must reply with one strict JSON object: a label, a confidence and a one-sentence reason. We validate the reply against a schema; if it does not match exactly, the step fails and the judge drops out. The message sits inside tags as data, and the judge is told to classify it, never to obey it.',
+    why: 'Claude Haiku reads the rubric and the message and must reply with one strict JSON object: label, confidence, reason. A reply that fails validation drops the judge out.',
     detail:
-      'The reply is forced to start with “{” (an assistant prefill) and parsed with a Pydantic model that forbids extra keys, allows only the four labels and a confidence from 0 to 1. Tags inside the message that imitate our delimiters are neutralised first. The call was recorded with each preset’s original rubric, so editing the definition skips this step on replay rather than pretending.',
+      'The message sits inside tags as data, and look-alike tags are neutralised first. The call was recorded with each preset’s original rubric, so editing the definition skips this step on replay.',
   },
   decide: {
     title: 'Ask a second judge',
-    why: 'A decision model answers one typed question, which of the four labels fits, and returns a probability for every label instead of writing a reply. So there is no JSON to validate and no self-reported confidence: the probabilities go straight into the fusion. It reads the same scope definition as the LLM judge, and the message is data it scores, never instructions it follows.',
+    why: 'A decision model answers one typed question and returns a probability for every label, so there is no JSON to validate. The probabilities go straight into the fusion.',
     detail:
-      'The question is a “choice” with one criterion per label, built from the preset’s topics; the message and any earlier turns are sent as the state. The probabilities are normalised to sum to 1, and a reply without one for every label fails the step, so the second judge drops out. Like the first judge, it was recorded with each preset’s original definition, so editing the definition skips this step on replay.',
+      'One criterion per label, built from the preset’s topics; a reply missing a label fails the step. Like the first judge, editing the definition skips it on replay.',
   },
   fuse: {
     title: 'Fuse the signals',
-    why: 'Each signal gives a share to each of the four labels. We take their weighted average over the signals that actually ran: a skipped or failed signal drops out and the others are re-weighted. The cost and latency of each signal sit beside it, so you can see what each extra signal buys.',
+    why: 'We take the weighted average of the signals that ran; a skipped or failed one drops out. Each signal’s cost and time sit beside it.',
     detail:
-      'P(label) = Σ wᵢ·Pᵢ(label) / Σ wᵢ over the active signals. The LLM judge’s share puts its confidence on its label and splits the rest evenly; the decision model’s share is its own probabilities. Averaging can dilute one confident signal with two hesitant ones; the evals show where that happens.',
+      'P(label) = Σ wᵢ·Pᵢ(label) / Σ wᵢ over the active signals. Averaging can dilute one confident signal with two hesitant ones; the evals show where.',
   },
   thresholds: {
     title: 'Apply the thresholds',
-    why: 'Two numbers decide the action. If P(injection) reaches the block threshold, the message is blocked. Otherwise a scope score from 0 (off scope) to 1 (in scope), in which adjacent counts half, falls into one of three bands: answer, answer briefly, or redirect. Moving a threshold moves the trade-off between refusing good messages and answering bad ones.',
+    why: 'If P(injection) reaches the block line, the message is blocked. Otherwise a scope score from 0 to 1 falls into answer, answer briefly or redirect.',
     detail:
-      'scope = (P(in) + ½·P(adjacent)) / (P(in) + P(adjacent) + P(out)). Defaults: block at 0.5, answer from 0.7, answer briefly from 0.4, redirect below. The evals page sweeps the redirect threshold and plots both error rates.',
+      'scope = (P(in) + ½·P(adjacent)) / (P(in) + P(adjacent) + P(out)). Defaults: block at 0.5, answer from 0.7, answer briefly from 0.4.',
   },
   respond: {
     title: 'Choose the action and respond',
-    why: 'In scope gets a full answer, adjacent a short one, off scope a warm redirect back to what the product is for, and an injection a calm block. Answers are capped hard in tokens and characters, so the agent cannot be used as a free chatbot. The answers were recorded with the real model; the redirect and block messages are the preset’s own.',
+    why: 'In scope gets a full answer, adjacent a short one, off scope a warm redirect and an injection a calm block. Answers are capped hard so the agent is no free chatbot.',
     detail:
-      'Full answers are capped at 300 output tokens and 1,500 characters, brief ones at 120 tokens and 500 characters. For the RAG corpus assistant, an answer means handing the question to the RAG pipeline, which searches and may still find nothing.',
+      'Full answers: 300 tokens and 1,500 characters; brief ones: 120 and 500. For the RAG corpus assistant, an answer hands the question to the RAG pipeline.',
   },
   audit: {
     title: 'Log it for review',
-    why: 'Every decision leaves a record a person can check later: the action, the signals, the rule hits, which rubric was used and why it might need a second look. Low confidence, disagreeing signals and every block are flagged. On this demo the record is shown, not stored.',
+    why: 'Every decision leaves a record a person can check. Low confidence, disagreeing signals and every block are flagged; here it is shown, not stored.',
     detail:
-      'The message itself is kept only as a SHA-256 hash in the record. A reviewer’s corrections are what grows the labeled set over time, which is how the sparse regions on the coverage map get filled.',
+      'The message is kept only as a SHA-256 hash. A reviewer’s corrections grow the labeled set where the coverage map is thin.',
   },
+};
+
+// One plain sentence per step: what happened in this run. Every value is passed in from the
+// trace (see lib/scope/lead.ts); a skipped step shows its own reason instead.
+export const SCOPE_LEADS = {
+  request: (chars: number, language: string) =>
+    `Checks passed: ${chars.toLocaleString('en')} characters, most likely in ${language}.`,
+  requestUnknown: (chars: number) =>
+    `Checks passed: ${chars.toLocaleString('en')} characters, in a language we could not guess.`,
+  context: (n: number) =>
+    n === 0
+      ? 'There are no earlier turns, so the message is read alone.'
+      : `Read the message together with ${n} earlier ${n === 1 ? 'turn' : 'turns'}.`,
+  rulesAbstained: 'No rule fired, so the rules abstain.',
+  rules: (attacks: number, p: string) =>
+    `${attacks} attack ${attacks === 1 ? 'pattern' : 'patterns'} found; the rules put the chance of an injection at ${p}.`,
+  keywords: (n: number) =>
+    `No attack pattern found; ${n} scope ${n === 1 ? 'keyword' : 'keywords'} matched.`,
+  embed: (dims: number, model: string) =>
+    `Turned the message into ${dims.toLocaleString('en')} numbers with ${model}.`,
+  map: (points: number) =>
+    `The message lands among this preset’s ${points.toLocaleString('en')} labeled prompts.`,
+  knn: (k: number, label: string, share: string) =>
+    `The ${k} most similar labeled prompts vote ${label} (${share}).`,
+  judge: (label: string, confidence: string) =>
+    `The LLM judge says ${label}, with confidence ${confidence}.`,
+  judgeError: 'The judge’s reply failed validation, so it drops out.',
+  decide: (label: string, p: string) => `The second judge says ${label}, with probability ${p}.`,
+  decideError: 'The second judge gave no usable reply, so it drops out.',
+  fuse: (label: string, share: string) => `Together the signals say ${label} (${share}).`,
+  blocked: (p: string, block: string) =>
+    `The chance of an injection, ${p}, reaches the block line at ${block}: block.`,
+  thresholds: (score: string, action: string) =>
+    `The scope score ${score} falls in the “${action}” band.`,
+  respond: (action: string) => `Action: ${action}.`,
+  handoff: (action: string) => `Action: ${action}. The question goes on to the RAG pipeline.`,
+  audit: (reasons: string) => `Logged and flagged for review: ${reasons}.`,
+  auditClean: 'Logged; nothing in this decision needs a second look.',
 };

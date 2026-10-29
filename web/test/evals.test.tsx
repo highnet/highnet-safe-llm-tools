@@ -10,6 +10,7 @@ import { EvalsReport } from '@/components/evals/EvalsReport';
 import { AnswerResult } from '@/components/pipeline/AnswerResult';
 import { SITE } from '@/content/site';
 import { EVALS } from '@/content/evals';
+import { openFolds } from './helpers';
 import {
   detailsUrl,
   evalsHref,
@@ -37,6 +38,18 @@ describe('evals page', () => {
   it('renders a full run: facts, retrieval, answers, compound and cost', () => {
     render(<EvalsReport results={full} />);
     expect(screen.getByText(EVALS.illustrative)).toBeInTheDocument();
+    // The headline is phrased from the graded answers; the rest folds until opened.
+    expect(
+      screen.getByText(
+        EVALS.findingAnswers(
+          EVALS.percent(full.answers!.answerable.evidence_in_context.value),
+          EVALS.percent(full.answers!.answerable.correct.value),
+          full.answers!.answerable.questions,
+        ),
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(EVALS.lede(160, true))).toBeNull();
+    openFolds(EVALS.foldsLabel);
     // The run record names every model with a cost line.
     for (const line of full.cost.by_model)
       expect(screen.getAllByText(new RegExp(line.model)).length).toBeGreaterThan(0);
@@ -61,6 +74,10 @@ describe('evals page', () => {
     render(
       <EvalsReport results={{ ...retrievalOnly, run: { ...full.run, illustrative: false } }} />,
     );
+    expect(
+      screen.getByText(/^The passage holding the answer was in the top 5 for/),
+    ).toBeInTheDocument();
+    openFolds(EVALS.foldsLabel);
     expect(screen.getAllByText(EVALS.notMeasured.label)).toHaveLength(2);
     expect(screen.queryByText(EVALS.illustrative)).not.toBeInTheDocument();
     expect(screen.queryByText(EVALS.cost.details)).not.toBeInTheDocument();
@@ -108,6 +125,7 @@ describe('evals page', () => {
         }}
       />,
     );
+    openFolds(EVALS.foldsLabel);
     const region = screen.getByRole('region', { name: EVALS.answers.title });
     expect(within(region).getAllByText('–').length).toBeGreaterThan(0);
     unmount();
@@ -141,6 +159,7 @@ describe('evals page', () => {
 
   it('shows compound as not measured when a pipeline is missing', () => {
     render(<EvalsReport results={{ ...full, compound: [full.compound![0]] }} />);
+    openFolds(EVALS.foldsLabel);
     expect(screen.getAllByText(EVALS.notMeasured.label)).toHaveLength(1);
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import HomePage from '@/app/page';
@@ -10,6 +10,9 @@ import * as verdictLib from '@/lib/scope-verdicts';
 import { scopeRunHref, verdictForExample, verdictForQuestion } from '@/lib/scope-verdicts';
 import { questionHref } from '@/lib/url-state';
 
+// Everything past the two product cards waits behind one "Read more".
+const readMore = () => fireEvent.click(screen.getByRole('button', { name: LANDING.more }));
+
 describe('landing page', () => {
   it('introduces both products by their real steps and links into each', () => {
     render(<HomePage />);
@@ -19,6 +22,15 @@ describe('landing page', () => {
     for (const link of within(products).getAllByRole('link')) {
       expect(link).not.toHaveAttribute('aria-current');
     }
+    // Two plain cards first: a name, one line and the way in; the step chains are folded.
+    expect(screen.getByText(LANDING.rag.line)).toBeInTheDocument();
+    expect(screen.getByText(LANDING.scope.line)).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: SITE.products.rag.name })).toBeNull();
+    readMore();
+    expect(screen.getByRole('button', { name: LANDING.less })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
     const rag = screen.getByRole('list', { name: SITE.products.rag.name });
     expect(within(rag).getAllByRole('listitem')).toHaveLength(12);
     expect(rag).toHaveTextContent(LANDING.rag.result);
@@ -38,6 +50,7 @@ describe('landing page', () => {
 
   it('shows the recorded Scope verdicts for the two worked questions', () => {
     render(<HomePage />);
+    readMore();
     const worldCup = verdictForExample('rag-world-cup')!;
     expect(
       screen.getAllByText(new RegExp(`fused confidence ${worldCup.confidence.toFixed(2)}`)),
@@ -61,6 +74,7 @@ describe('landing page', () => {
       .spyOn(verdictLib, 'verdictForExample')
       .mockReturnValue({ ...recorded, judge: null });
     render(<HomePage />);
+    readMore();
     expect(screen.getAllByText(LANDING.connect.judgeFailed)).toHaveLength(2);
     spy.mockRestore();
   });
@@ -71,10 +85,12 @@ describe('landing page', () => {
       .spyOn(verdictLib, 'verdictForExample')
       .mockReturnValue({ ...recorded, decide: { label: 'out', confidence: 0.91 } });
     const { unmount } = render(<HomePage />);
+    readMore();
     expect(screen.getAllByText(LANDING.connect.decide('off scope', '0.91'))).toHaveLength(2);
     unmount();
     spy.mockReturnValue({ ...recorded, decide: null });
     render(<HomePage />);
+    readMore();
     expect(screen.queryByText(/The decision model said/)).toBeNull();
     spy.mockRestore();
   });
@@ -84,6 +100,8 @@ describe('landing page without recorded verdicts', () => {
   it('leaves the verdict line out rather than inventing one', () => {
     const spy = vi.spyOn(verdictLib, 'verdictForExample').mockReturnValue(undefined);
     render(<HomePage />);
+    readMore();
+    expect(screen.getByText(LANDING.connect.worldCup.rag)).toBeInTheDocument();
     expect(screen.queryByText(/Recorded Scope verdict/)).toBeNull();
     spy.mockRestore();
   });

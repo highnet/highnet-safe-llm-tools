@@ -5,19 +5,24 @@ export const LANDING = {
   // The hero: the site's one Display headline, then what this is, before any product.
   title: 'Safe LLM systems, worked out step by step.',
   intro:
-    'Two small, open lab tools. Each one takes a single message through a real LLM system and writes out every step it takes before it answers: what was checked, what was searched, what the model was shown and what it cost. Nothing is hidden behind a chat box; every number comes from a recorded run.',
+    'Two small lab tools that take one message through a real LLM system and show every step it takes, with the real numbers.',
   productsTitle: 'The two tools',
+  more: 'Read more: how they work and fit together',
+  less: 'Show less',
+  howTitle: 'How each tool works',
   rag: {
     lede: 'A question goes in; a cited answer comes out. In between: an embedding, keyword and vector search, fusion, reranking, the exact prompt Claude sees, and citations checked against the passages.',
     takeaway: 'The answer is only as good as what was retrieved.',
-    open: 'Open the RAG pipeline',
+    line: 'Ask a question about 35 Wikipedia articles and see how a cited answer is found.',
+    open: 'Try RAG',
     secondary: { href: '/rag/evals/', text: 'How well does retrieval work?' },
     result: 'Cited answer',
   },
   scope: {
     lede: 'A message goes in; one of four actions comes out. In between: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, and an LLM judge whose JSON reply is validated and a decision model that returns a probability per label, fused and run through thresholds.',
     takeaway: 'Refusing a good message is a failure too.',
-    open: 'Open Scope',
+    line: 'Send a message and see whether an AI agent answers it, redirects it or blocks it.',
+    open: 'Try Scope',
     secondary: { href: '/scope/evals/', text: 'False refusals versus attacks that get through' },
     actions: ['Answer', 'Answer briefly', 'Redirect', 'Block'],
   },

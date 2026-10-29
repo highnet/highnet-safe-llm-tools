@@ -6,10 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CorpusMap } from '@/components/pipeline/figures/CorpusMap';
 import { PipelineExplorer } from '@/components/pipeline/PipelineExplorer';
-import { RerankView } from '@/components/pipeline/stages/RerankView';
+import { RerankTable, RerankView } from '@/components/pipeline/stages/RerankView';
+import { STAGE_LEADS } from '@/content/stages';
 import { COPY } from '@/content/copy';
 import { clearMapCache, fetchCorpusMap } from '@/lib/api';
 import type { ContextChunk, RerankData } from '@/lib/stage-data';
+import { stepLead } from '@/lib/step-lead';
 import { stepSummary } from '@/lib/step-summary';
 import { setView } from '@/lib/view-store';
 
@@ -59,7 +61,7 @@ beforeEach(() => setView('steps'));
 
 describe('rerank step', () => {
   it('shows each move, the cut, and the candidates below it on request', () => {
-    render(<RerankView data={rerank()} />);
+    render(<RerankTable data={rerank()} />);
     expect(screen.getByText(T.moved.up(2))).toBeInTheDocument();
     expect(screen.getByText(T.cut(2))).toBeInTheDocument();
     expect(screen.queryByText(T.moved.down(2))).not.toBeInTheDocument();
@@ -81,8 +83,9 @@ describe('rerank step', () => {
       fallback: 'Kept the fuse order.',
     };
     render(<RerankView data={failed as unknown as RerankData} />);
-    expect(screen.getByText('timed out. Kept the fuse order.')).toBeInTheDocument();
+    expect(screen.getByText('timed out.')).toBeInTheDocument();
     expect(stepSummary(ev('rerank', failed, 'warning'))).toBe('Kept the fuse order.');
+    expect(stepLead(ev('rerank', failed, 'warning'))).toBe('Kept the fuse order.');
   });
 
   it('summarises how many of the top-k changed places', () => {
@@ -93,6 +96,11 @@ describe('rerank step', () => {
       results: [{ chunk_id: 1, rank: 1, before_rank: 1, relevance: 1, doc_title: 'N' }],
     });
     expect(stepSummary(ev('rerank', still as never))).toBe('top 1 unchanged');
+    expect(stepLead(ev('rerank', rerank() as never))).toBe(STAGE_LEADS.rerank(2, 1, 'Normans'));
+    expect(stepLead(ev('rerank', still as never))).toBe(STAGE_LEADS.rerank(1, 0, 'N'));
+    expect(stepLead(ev('rerank', rerank({ results: [] }) as never))).toBe(
+      STAGE_LEADS.rerank(0, 0, ''),
+    );
   });
 });
 

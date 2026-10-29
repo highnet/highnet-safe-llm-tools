@@ -9,30 +9,34 @@ import { DistributionBar } from '../DistributionBar';
 
 const F = SCOPE.steps.rules;
 
-type RulesViewProps = { data: RulesData; block: number };
+type RulesViewProps = { data: RulesData };
+
+type RulesFigureProps = { data: RulesData; block: number };
+
+// The injection likelihood the rules add up to, against the block line: the step's figure.
+const RulesFigure = ({ data, block }: RulesFigureProps) => {
+  return (
+    <Figure caption={F.injectionCaption} alt={`${F.injection}: ${SCOPE.pct(data.injection_score)}`}>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-sm">
+        <span className="col-span-2 text-muted-foreground">{F.injection}</span>
+        <Bar
+          max={1}
+          marks={[block]}
+          segments={[{ key: 'p', value: data.injection_score, tone: 'fused' }]}
+        />
+        <span className="voice-data">{SCOPE.pct(data.injection_score)}</span>
+      </div>
+    </Figure>
+  );
+};
 
 // What the rules saw: each injection hit with the view it was found in, the keyword votes from
 // the scope definition, and the share they hand to the fusion (or that they abstained).
-const RulesView = ({ data, block }: RulesViewProps) => {
+const RulesView = ({ data }: RulesViewProps) => {
   const attacks = data.hits.filter((h) => h.kind !== 'topic');
   const keywords = data.hits.filter((h) => h.kind === 'topic');
   return (
     <div className="space-y-4">
-      <Figure
-        caption={F.injectionCaption}
-        alt={`${F.injection}: ${SCOPE.pct(data.injection_score)}`}
-      >
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 text-sm">
-          <span className="col-span-2 text-muted-foreground">{F.injection}</span>
-          <Bar
-            max={1}
-            marks={[block]}
-            segments={[{ key: 'p', value: data.injection_score, tone: 'fused' }]}
-          />
-          <span className="voice-data">{SCOPE.pct(data.injection_score)}</span>
-        </div>
-      </Figure>
-
       <div className="space-y-1.5">
         <Typography variant="label" color="muted" as="h4">
           {F.hits}
@@ -119,4 +123,4 @@ const RulesView = ({ data, block }: RulesViewProps) => {
   );
 };
 
-export { RulesView };
+export { RulesFigure, RulesView };

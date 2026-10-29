@@ -14,3 +14,10 @@ Scope: the published offline eval run, read-only. Visitor mode: **Read**, with o
 - Structure: Sheet 2 of RAG on the same computation pad. A lede and a one-line run record (date, corpus build, models actually called, cost), then one sheet per question the evals answer, each with its blue-pencil note in the margin (inline below `lg`): does the search find the answer (recall@k / MRR per chunk size × mode × reranker), does the answer stick to the passages, does the agent help, and what the run cost.
 - Link-in: an answer on the pipeline page links to `/rag/evals/?mode=&chunks=&rerank=` and the matching cell is marked "your settings" in blue wash.
 - Constraints: static export; tables are real tables with captions and sr-only cell sentences; colour is never the only cue (reranked values use the rerank series colour and sit in their own labelled column).
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- One headline sentence phrased from the numbers, then the retrieval tables. Answers, Two-part questions, Cost and Run details fold under "More from this run". Notes cut to two sentences.
+

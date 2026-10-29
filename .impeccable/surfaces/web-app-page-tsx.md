@@ -25,3 +25,10 @@ STORY: The visitor reads that both tools write out every step, sees each product
 FIRST VIEWPORT: The Display headline "Safe LLM systems, worked out step by step." and the intro paragraph, then the RAG product sheet (name, tagline, lede, pencil takeaway, actions, step chain ending in "= Cited answer").
 
 FORM: engineer's computation pad, as DESIGN.md. Product sheets under solid rules; "How they fit together" as two worked-question sheets on raised paper with numbered lines 01 Scope / 02 RAG / = Outcome; the principles as a solid-ruled list on bare paper.
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- The page is the Display headline, one sentence, and the two products as two plain cards (name, one line, "Try RAG" / "Try Scope"). "How each tool works", "How they fit together" and the principles open under one "Read more". At 390×844 the page went from 5,201px to 1,471px tall.
+

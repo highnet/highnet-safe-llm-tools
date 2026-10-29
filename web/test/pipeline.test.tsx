@@ -10,6 +10,7 @@ import { STAGE_ORDER, STAGES } from '@/content/stages';
 import { setView } from '@/lib/view-store';
 
 import { FakeEventSource } from './fake-event-source';
+import { openDetails } from './helpers';
 
 const config = JSON.parse(readFileSync(path.join(__dirname, 'fixtures/config.json'), 'utf8'));
 const corpusMap = readFileSync(path.join(__dirname, 'fixtures/map.json'), 'utf8');
@@ -56,7 +57,7 @@ describe('pipeline view (smoke)', () => {
     }
   });
 
-  it('renders every trace event as a step with its "Why this step?" and the cited answer', async () => {
+  it('renders every trace event as a step, its "Why this step?" under Details, and the cited answer', async () => {
     render(<PipelineExplorer />);
     const suggestion = await screen.findByRole('button', { name: COPY.suggestions[0] });
     await act(async () => {
@@ -65,6 +66,8 @@ describe('pipeline view (smoke)', () => {
     });
 
     expect(FakeEventSource.lastUrl).toContain('/api/query?');
+    // Each step's note is one Details toggle away; opening it also writes the margin note.
+    openDetails();
     for (const stage of STAGE_ORDER) {
       const step = screen.getByRole('listitem', { name: STAGES[stage].title });
       expect(within(step).queryByText(COPY.status.pending)).not.toBeInTheDocument();

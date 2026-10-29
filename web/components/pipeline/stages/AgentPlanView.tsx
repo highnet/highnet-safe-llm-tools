@@ -21,30 +21,33 @@ type AgentPlanViewProps = { data: AgentPlanData };
 
 const A = COPY.figures.agent;
 
-// The agent's first turn: what it means to do, the searches it wrote, and the rules it runs under.
+type PlannedQueriesProps = { queries: string[] };
+
+// The searches the agent wrote, numbered as they will run: the plan step's figure.
+const PlannedQueries = ({ queries }: PlannedQueriesProps) => {
+  if (queries.length === 0) return null;
+  return (
+    <div className="space-y-1">
+      <Typography variant="label" color="muted" as="p">
+        {A.queries}
+      </Typography>
+      <ol className="space-y-1">
+        {queries.map((query, i) => (
+          <li key={i} className="flex items-baseline gap-3 text-sm">
+            <span className="voice-data text-muted-foreground">3{String.fromCharCode(97 + i)}</span>
+            <span className="voice-data rounded-sm border border-dashed px-2 py-0.5">{query}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+};
+
+// The agent's first turn in detail: what it means to do and the rules it runs under.
 const AgentPlanView = ({ data }: AgentPlanViewProps) => {
   return (
     <div className="space-y-3">
       {data.plan && <Typography variant="marginNote">{data.plan}</Typography>}
-      {data.queries.length > 0 && (
-        <div className="space-y-1">
-          <Typography variant="label" color="muted" as="p">
-            {A.queries}
-          </Typography>
-          <ol className="space-y-1">
-            {data.queries.map((query, i) => (
-              <li key={i} className="flex items-baseline gap-3 text-sm">
-                <span className="voice-data text-muted-foreground">
-                  3{String.fromCharCode(97 + i)}
-                </span>
-                <span className="voice-data rounded-sm border border-dashed px-2 py-0.5">
-                  {query}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
       <Facts
         facts={[
           { term: 'Model', value: `${data.provider} · ${data.model}` },
@@ -81,4 +84,4 @@ const AgentPlanView = ({ data }: AgentPlanViewProps) => {
   );
 };
 
-export { AgentPlanView };
+export { AgentPlanView, PlannedQueries };

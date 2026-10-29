@@ -4,6 +4,7 @@ import { EvalSection } from '@/components/evals/EvalSection';
 import { Bar } from '@/components/pipeline/figures/Bar';
 import { Notice } from '@/components/site/Notice';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/Collapsible';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { Typography } from '@/components/ui/Typography';
 import { COVERAGE } from '@/content/coverage';
 import {
@@ -189,14 +190,21 @@ const CoverageReport = ({ report }: CoverageReportProps) => {
         <Typography color="muted" className="max-w-[68ch]">
           {COVERAGE.lede}
         </Typography>
-        <dl className="voice-data flex flex-wrap gap-x-6 gap-y-2 border-y border-dashed py-3 text-sm">
-          {facts.map(([label, value]) => (
-            <div key={label} className="flex gap-2">
-              <dt className="text-muted-foreground">{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <Disclosure show={COVERAGE.how} hide={COVERAGE.how}>
+          <div className="space-y-3">
+            <Typography variant="small" color="muted" className="max-w-[68ch]">
+              {COVERAGE.howBody}
+            </Typography>
+            <dl className="voice-data flex flex-wrap gap-x-6 gap-y-2 border-y border-dashed py-3 text-sm">
+              {facts.map(([label, value]) => (
+                <div key={label} className="flex gap-2">
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </Disclosure>
       </header>
       <SuiteSections suite={report.python} name="Python" />
       <SuiteSections suite={report.web} name="Web" />

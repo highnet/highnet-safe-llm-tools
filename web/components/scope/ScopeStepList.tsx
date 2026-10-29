@@ -3,11 +3,12 @@ import { SCOPE_STAGE_ORDER, SCOPE_STAGES } from '@/content/scope-stages';
 import { SCOPE_KEY, SCOPE_STEP_FORMULAS } from '@/content/scope';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { scopeSnippets, scopeStatuses } from '@/lib/scope/steps';
+import { scopeLead } from '@/lib/scope/lead';
 import { scopeSummary } from '@/lib/scope/summary';
 import type { JudgeData } from '@/lib/scope/types';
 import type { RunStatus } from '@/lib/use-trace-stream';
 
-import { type ScopeRunContext, ScopeStageBody } from './ScopeStageBody';
+import { type ScopeRunContext, ScopeStageBody, ScopeStageFigure } from './ScopeStageBody';
 
 type ScopeStepListProps = {
   events: ScopeTraceEvent[];
@@ -16,7 +17,7 @@ type ScopeStepListProps = {
 };
 
 // The twelve steps, drawn before the first run and filled in as trace events arrive. Each step
-// is the RAG pipeline's own StepSheet: number in the margin, note beside, code underneath.
+// is the RAG pipeline's own StepSheet: one sentence and one figure, the rest under Details.
 const ScopeStepList = ({ events, runStatus, context }: ScopeStepListProps) => {
   const byStage = new Map(events.map((e) => [e.stage, e]));
   const statusOf = scopeStatuses(SCOPE_STAGE_ORDER, events, runStatus);
@@ -40,6 +41,8 @@ const ScopeStepList = ({ events, runStatus, context }: ScopeStepListProps) => {
             copy={SCOPE_STAGES[stage]}
             status={statusOf(stage)}
             summary={event ? scopeSummary(event) : undefined}
+            lead={event ? scopeLead(event) : undefined}
+            figure={event && <ScopeStageFigure event={event} context={bodyContext} />}
             snippets={scopeSnippets(stage)}
             measure={
               event ? { ms: event.ms, tokens: event.tokens, costUsd: event.cost_usd } : undefined

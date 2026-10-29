@@ -36,6 +36,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 Signature interaction: each step is written into the pad as its SSE event arrives. The step number, then its values, then its blue-pencil note, in about 180ms; with reduced motion it appears instantly.
 
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- Every step: each sheet shows its title and readout, one plain sentence of what happened in this run (`lib/step-lead.ts`, words in `content/stages.ts`) and at most one figure. The "Why this step?" note (shortened to two sentences, plus its technical line), the formula, facts, secondary tables, raw prompt and code sit under one "Details" toggle; from `lg` the note is written in the margin only while Details are open. Citation links (`#chunk-N`) open step 08's details.
+- Hero: the replay intro is one sentence; the replay notice no longer repeats it.
+- Simple view unchanged.
+
 ## Unresolved
 
 - Settled: agentic searches nest inside one "Search, step by step" sheet, numbered 3a, 3b, ... (owner).

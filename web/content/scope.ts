@@ -43,7 +43,7 @@ export const SCOPE = {
     definition:
       'A product agent is built for one job. A scope guard reads each message first and picks one of four actions: answer it, answer it briefly, redirect it warmly back to the job, or block it when it tries to take over the agent.',
     intro:
-      'We run each message through twelve steps: cheap rules, a nearest-neighbour vote over 1,200 labeled prompts, an LLM judge and a second judge, a decision model, fused into one decision you can see the arithmetic of. The runs were recorded once; every setting you change is recomputed from them at no cost.',
+      'Twelve steps, from cheap rules and a vote over 1,200 labeled prompts to two judges, fused into one decision whose arithmetic you can check.',
     action: 'Try a message',
     dataset: 'Browse the labeled prompts',
   },
@@ -64,6 +64,8 @@ export const SCOPE = {
 
   principles: {
     title: 'What we hold to',
+    more: 'Read the reasoning',
+    less: 'Hide the reasoning',
     items: [
       {
         title: 'Off scope and prompt injection are different problems.',
@@ -97,7 +99,7 @@ export const SCOPE = {
   retry: 'Try again',
   stop: 'Stop',
   replayNotice: (date: string) =>
-    `These runs were recorded on ${date} with the real models. Picking a message replays its run; every setting below is recomputed from that recording, so nothing is spent and no model is called.`,
+    `Recorded on ${date} with the real models. Every setting below is recomputed from the recording, so no model is called and nothing is spent.`,
   replayUndated:
     'These runs are recordings: picking a message replays its run and nothing is spent.',
   illustrative:
@@ -306,7 +308,7 @@ export const SCOPE = {
       position: 'Position',
       points: 'Prompts on the map',
       caption: (kept: string) =>
-        `Each mark is one labeled prompt of this preset, drawn by its class. The two axes keep ${kept} of the spread, so neighbours on the map are not always the neighbours the vote uses. Ringed: the five nearest on the map.`,
+        `Each mark is a labeled prompt, drawn by its class; ringed are the five nearest on the map. The axes keep ${kept} of the spread, so map neighbours are not always the ones that vote.`,
       axis: (n: number, share: string) => `PC${n} keeps ${share}`,
       alt: (points: number, x: string, y: string) =>
         `Scatter of ${points} labeled prompts by class; the message lands at x ${x}, y ${y}. The table below lists its nearest prompts on the map.`,
@@ -383,7 +385,7 @@ export const SCOPE = {
       injection: 'P(injection)',
       blockAt: (t: string) => `block at ${t}`,
       caption:
-        'The scope score is (P(in) + ½·P(adjacent)) / (P(in) + P(adjacent) + P(out)); the marker shows where this message lands. Injection is checked first, against its own line.',
+        'The marker shows where this message’s scope score lands among the bands. Injection is checked first, against its own line.',
       blocked: 'P(injection) reached the block line, so the bands are not read.',
       alt: (score: string, injection: string, action: string) =>
         `Scope score ${score}, P(injection) ${injection}: ${action}.`,
@@ -452,7 +454,10 @@ export const SCOPE = {
     sheetLabel: 'Sheet 2',
     title: 'The labeled prompts',
     lede: (total: number, presets: number) =>
-      `${total.toLocaleString('en')} prompts, ${presets} presets, four classes. They are the examples the kNN step votes with and the test set the evals score. Each carries a topic from its preset’s scope definition, so moving a topic relabels its prompts.`,
+      `${total.toLocaleString('en')} prompts, ${presets} presets, four classes: the examples the kNN step votes with and the test set the evals score.`,
+    how: 'How this works',
+    howTopics:
+      'Each prompt carries a topic from its preset’s scope definition, so moving a topic relabels its prompts.',
     provenance: 'Drafted by Claude, checked by script.',
     provenanceBody:
       'Claude wrote the prompts to a brief per preset and class; a script checked the counts, labels, topics and duplicates. No person labeled them one by one, so treat individual labels as drafts.',
@@ -505,8 +510,17 @@ export const SCOPE = {
       cost: 'Cost',
       costValue: (usd: number) => `$${usd.toFixed(4)} in total`,
     },
+    foldsLabel: 'More from this run',
+    folds: {
+      finding: 'What else this run found',
+      methods: 'Per method, with counts',
+      classes: 'Per class',
+      sweep: 'Threshold sweep',
+      cost: 'Cost',
+      run: 'Run details',
+    },
     finding: {
-      title: 'What this run found',
+      title: 'What else this run found',
       singleWins: (
         method: string,
         acc: string,
@@ -528,8 +542,9 @@ export const SCOPE = {
     rates: {
       title: 'The two errors, side by side',
       notes: [
-        'False refusal: an in-scope or adjacent prompt that was redirected or blocked. Over-compliance: an off-scope or injection prompt that was answered. A guard can drive either to zero by giving up on the other.',
+        'False refusal: an in-scope or adjacent prompt redirected or blocked. Over-compliance: an off-scope or injection prompt answered. A guard can drive either to zero by giving up on the other.',
       ],
+      countsTitle: 'Each method’s rates, with their counts',
       falseRefusal: 'False refusal',
       overCompliance: 'Over-compliance',
       injectionMissed: 'Injections missed',
@@ -610,7 +625,8 @@ export const SCOPE = {
       'Where Scope’s labeled prompts are thin: the scope map per preset with its sparse regions and the prompts the fused pipeline got wrong.',
     sheetLabel: 'Sheet 4',
     title: 'Where are the examples thin?',
-    lede: 'The kNN vote can only be as good as the examples near a message. Here is each preset’s map at full size, with the cells that hold few or no prompts and the prompts the fused pipeline misclassified in the published eval run.',
+    lede: 'The kNN vote is only as good as the examples near a message. Here is each preset’s map with its empty cells and the prompts the fused pipeline got wrong.',
+    how: 'How this works',
     sparse: (empty: number, inside: number, grid: number) =>
       `We split the map into a ${grid}×${grid} grid. Of the ${inside} cells inside the spread of the prompts (their convex hull), ${empty} hold none: those are marked.`,
     caveat:

@@ -21,3 +21,10 @@ THESIS: The coverage report is a sheet on the same computation pad, not a CI bad
 OWN-WORLD: As DESIGN.md. Reuses the evals report's sheet-with-margin-note, bars and dashed record.
 
 FIRST VIEWPORT: "Sheet 4 · Is every line tested?", the lede, the record (tests, rule, checked), then the first package sheet with its totals.
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- One-sentence lede; the rest of the explanation and the run record (tests, rule, CI) under "How this works"; the package sheets follow at once.
+

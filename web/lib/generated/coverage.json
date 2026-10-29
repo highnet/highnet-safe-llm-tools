@@ -719,19 +719,19 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 232,
+    "tests": 238,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2198,
-            "total": 2198
+            "covered": 2414,
+            "total": 2414
           },
           "branches": {
-            "covered": 1740,
-            "total": 1740
+            "covered": 1881,
+            "total": 1881
           }
         },
         "empty_files": 2,
@@ -970,12 +970,12 @@
           {
             "path": "components/evals/EvalsReport.tsx",
             "lines": {
-              "covered": 7,
-              "total": 7
+              "covered": 12,
+              "total": 12
             },
             "branches": {
-              "covered": 16,
-              "total": 16
+              "covered": 14,
+              "total": 14
             }
           },
           {
@@ -1001,6 +1001,17 @@
             }
           },
           {
+            "path": "components/evals/ReportFolds.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
             "path": "components/evals/RetrievalSection.tsx",
             "lines": {
               "covered": 34,
@@ -1014,12 +1025,12 @@
           {
             "path": "components/evals/RunCostSection.tsx",
             "lines": {
-              "covered": 6,
-              "total": 6
+              "covered": 13,
+              "total": 13
             },
             "branches": {
-              "covered": 4,
-              "total": 4
+              "covered": 6,
+              "total": 6
             }
           },
           {
@@ -1047,8 +1058,8 @@
           {
             "path": "components/landing/Landing.tsx",
             "lines": {
-              "covered": 22,
-              "total": 22
+              "covered": 25,
+              "total": 25
             },
             "branches": {
               "covered": 10,
@@ -1168,12 +1179,12 @@
           {
             "path": "components/pipeline/StageBody.tsx",
             "lines": {
-              "covered": 20,
-              "total": 20
+              "covered": 42,
+              "total": 42
             },
             "branches": {
-              "covered": 20,
-              "total": 20
+              "covered": 50,
+              "total": 50
             }
           },
           {
@@ -1190,30 +1201,30 @@
           {
             "path": "components/pipeline/StepList.tsx",
             "lines": {
-              "covered": 24,
-              "total": 24
+              "covered": 26,
+              "total": 26
             },
             "branches": {
-              "covered": 25,
-              "total": 25
+              "covered": 36,
+              "total": 36
             }
           },
           {
             "path": "components/pipeline/StepSheet.tsx",
             "lines": {
-              "covered": 12,
-              "total": 12
+              "covered": 23,
+              "total": 23
             },
             "branches": {
-              "covered": 43,
-              "total": 43
+              "covered": 48,
+              "total": 48
             }
           },
           {
             "path": "components/pipeline/WhyThisStep.tsx",
             "lines": {
-              "covered": 6,
-              "total": 6
+              "covered": 5,
+              "total": 5
             },
             "branches": {
               "covered": 2,
@@ -1344,8 +1355,8 @@
           {
             "path": "components/pipeline/stages/AgentPlanView.tsx",
             "lines": {
-              "covered": 5,
-              "total": 5
+              "covered": 8,
+              "total": 8
             },
             "branches": {
               "covered": 4,
@@ -1355,12 +1366,12 @@
           {
             "path": "components/pipeline/stages/AgentStepsView.tsx",
             "lines": {
-              "covered": 12,
-              "total": 12
+              "covered": 13,
+              "total": 13
             },
             "branches": {
-              "covered": 21,
-              "total": 21
+              "covered": 19,
+              "total": 19
             }
           },
           {
@@ -1381,8 +1392,8 @@
               "total": 3
             },
             "branches": {
-              "covered": 12,
-              "total": 12
+              "covered": 4,
+              "total": 4
             }
           },
           {
@@ -1392,8 +1403,8 @@
               "total": 4
             },
             "branches": {
-              "covered": 4,
-              "total": 4
+              "covered": 2,
+              "total": 2
             }
           },
           {
@@ -1421,12 +1432,12 @@
           {
             "path": "components/pipeline/stages/FuseView.tsx",
             "lines": {
-              "covered": 14,
-              "total": 14
+              "covered": 18,
+              "total": 18
             },
             "branches": {
-              "covered": 29,
-              "total": 29
+              "covered": 30,
+              "total": 30
             }
           },
           {
@@ -1436,19 +1447,19 @@
               "total": 2
             },
             "branches": {
-              "covered": 10,
-              "total": 10
+              "covered": 8,
+              "total": 8
             }
           },
           {
             "path": "components/pipeline/stages/MapView.tsx",
             "lines": {
-              "covered": 7,
-              "total": 7
+              "covered": 6,
+              "total": 6
             },
             "branches": {
-              "covered": 4,
-              "total": 4
+              "covered": 2,
+              "total": 2
             }
           },
           {
@@ -1458,8 +1469,8 @@
               "total": 4
             },
             "branches": {
-              "covered": 2,
-              "total": 2
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -1491,15 +1502,15 @@
               "total": 3
             },
             "branches": {
-              "covered": 7,
-              "total": 7
+              "covered": 5,
+              "total": 5
             }
           },
           {
             "path": "components/pipeline/stages/RerankView.tsx",
             "lines": {
-              "covered": 18,
-              "total": 18
+              "covered": 20,
+              "total": 20
             },
             "branches": {
               "covered": 30,
@@ -1518,25 +1529,14 @@
             }
           },
           {
-            "path": "components/pipeline/stages/SkippedView.tsx",
-            "lines": {
-              "covered": 2,
-              "total": 2
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
-            }
-          },
-          {
             "path": "components/pipeline/stages/VectorView.tsx",
             "lines": {
               "covered": 3,
               "total": 3
             },
             "branches": {
-              "covered": 2,
-              "total": 2
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -1548,17 +1548,6 @@
             "branches": {
               "covered": 5,
               "total": 5
-            }
-          },
-          {
-            "path": "components/scope/Disclosure.tsx",
-            "lines": {
-              "covered": 5,
-              "total": 5
-            },
-            "branches": {
-              "covered": 6,
-              "total": 6
             }
           },
           {
@@ -1586,12 +1575,12 @@
           {
             "path": "components/scope/Principles.tsx",
             "lines": {
-              "covered": 4,
-              "total": 4
+              "covered": 6,
+              "total": 6
             },
             "branches": {
-              "covered": 2,
-              "total": 2
+              "covered": 4,
+              "total": 4
             }
           },
           {
@@ -1707,12 +1696,12 @@
           {
             "path": "components/scope/ScopeStageBody.tsx",
             "lines": {
-              "covered": 22,
-              "total": 22
+              "covered": 32,
+              "total": 32
             },
             "branches": {
-              "covered": 21,
-              "total": 21
+              "covered": 32,
+              "total": 32
             }
           },
           {
@@ -1722,8 +1711,8 @@
               "total": 8
             },
             "branches": {
-              "covered": 6,
-              "total": 6
+              "covered": 10,
+              "total": 10
             }
           },
           {
@@ -1751,8 +1740,8 @@
           {
             "path": "components/scope/evals/ScopeEvalsReport.tsx",
             "lines": {
-              "covered": 54,
-              "total": 54
+              "covered": 73,
+              "total": 73
             },
             "branches": {
               "covered": 27,
@@ -1784,12 +1773,12 @@
           {
             "path": "components/scope/steps/ContextView.tsx",
             "lines": {
-              "covered": 10,
-              "total": 10
+              "covered": 11,
+              "total": 11
             },
             "branches": {
-              "covered": 9,
-              "total": 9
+              "covered": 10,
+              "total": 10
             }
           },
           {
@@ -1806,8 +1795,8 @@
           {
             "path": "components/scope/steps/EmbedView.tsx",
             "lines": {
-              "covered": 7,
-              "total": 7
+              "covered": 9,
+              "total": 9
             },
             "branches": {
               "covered": 4,
@@ -1817,8 +1806,8 @@
           {
             "path": "components/scope/steps/FuseView.tsx",
             "lines": {
-              "covered": 11,
-              "total": 11
+              "covered": 13,
+              "total": 13
             },
             "branches": {
               "covered": 8,
@@ -1839,8 +1828,8 @@
           {
             "path": "components/scope/steps/KnnView.tsx",
             "lines": {
-              "covered": 5,
-              "total": 5
+              "covered": 7,
+              "total": 7
             },
             "branches": {
               "covered": 4,
@@ -1850,8 +1839,8 @@
           {
             "path": "components/scope/steps/MapView.tsx",
             "lines": {
-              "covered": 18,
-              "total": 18
+              "covered": 19,
+              "total": 19
             },
             "branches": {
               "covered": 6,
@@ -1865,8 +1854,8 @@
               "total": 10
             },
             "branches": {
-              "covered": 4,
-              "total": 4
+              "covered": 2,
+              "total": 2
             }
           },
           {
@@ -1883,8 +1872,8 @@
           {
             "path": "components/scope/steps/RulesView.tsx",
             "lines": {
-              "covered": 8,
-              "total": 8
+              "covered": 10,
+              "total": 10
             },
             "branches": {
               "covered": 6,
@@ -1894,8 +1883,8 @@
           {
             "path": "components/scope/steps/ThresholdsView.tsx",
             "lines": {
-              "covered": 9,
-              "total": 9
+              "covered": 12,
+              "total": 12
             },
             "branches": {
               "covered": 8,
@@ -2024,6 +2013,17 @@
             }
           },
           {
+            "path": "components/ui/Disclosure.tsx",
+            "lines": {
+              "covered": 9,
+              "total": 9
+            },
+            "branches": {
+              "covered": 12,
+              "total": 12
+            }
+          },
+          {
             "path": "components/ui/Input.tsx",
             "lines": {
               "covered": 2,
@@ -2092,8 +2092,8 @@
           {
             "path": "content/evals.ts",
             "lines": {
-              "covered": 18,
-              "total": 18
+              "covered": 20,
+              "total": 20
             },
             "branches": {
               "covered": 30,
@@ -2125,12 +2125,12 @@
           {
             "path": "content/scope-stages.ts",
             "lines": {
-              "covered": 2,
-              "total": 2
+              "covered": 19,
+              "total": 19
             },
             "branches": {
-              "covered": 0,
-              "total": 0
+              "covered": 8,
+              "total": 8
             }
           },
           {
@@ -2169,12 +2169,12 @@
           {
             "path": "content/stages.ts",
             "lines": {
-              "covered": 3,
-              "total": 3
+              "covered": 17,
+              "total": 17
             },
             "branches": {
-              "covered": 0,
-              "total": 0
+              "covered": 12,
+              "total": 12
             }
           },
           {
@@ -2310,6 +2310,17 @@
             }
           },
           {
+            "path": "lib/scope/lead.ts",
+            "lines": {
+              "covered": 36,
+              "total": 36
+            },
+            "branches": {
+              "covered": 37,
+              "total": 37
+            }
+          },
+          {
             "path": "lib/scope/map.ts",
             "lines": {
               "covered": 58,
@@ -2417,6 +2428,17 @@
             "branches": {
               "covered": 2,
               "total": 2
+            }
+          },
+          {
+            "path": "lib/step-lead.ts",
+            "lines": {
+              "covered": 40,
+              "total": 40
+            },
+            "branches": {
+              "covered": 37,
+              "total": 37
             }
           },
           {

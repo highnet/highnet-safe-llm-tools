@@ -1,4 +1,22 @@
+import { fireEvent, screen } from '@testing-library/react';
+
+import { COPY } from '@/content/copy';
 import type { Stage, TraceEvent } from '@/lib/generated/trace';
+
+// Opens every fold of a report (its "More from this run" list), or any named list of folds.
+export const openFolds = (label: string) => {
+  const list = screen.getByRole('list', { name: label });
+  for (const button of list.querySelectorAll('button[aria-expanded="false"]')) {
+    fireEvent.click(button);
+  }
+};
+
+// Opens every closed step's Details toggle on the page, the way a reader would one by one.
+export const openDetails = () => {
+  for (const button of screen.queryAllByRole('button', { name: COPY.details })) {
+    fireEvent.click(button);
+  }
+};
 
 type Status = TraceEvent['status'];
 

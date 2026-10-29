@@ -12,7 +12,6 @@ const RequestView = ({ data, questionId }: RequestViewProps) => {
   const { budget } = data;
   return (
     <div className="space-y-3">
-      {data.error && <Typography color="destructive">{data.error.message}</Typography>}
       {data.recording && (
         <Typography variant="small" color="muted">
           {COPY.replay.recorded(data.recording.recorded_at.slice(0, 10))} {data.recording.note}

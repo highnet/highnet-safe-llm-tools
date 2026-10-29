@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { AnswerResult } from '@/components/pipeline/AnswerResult';
 import { CodeSnippet } from '@/components/pipeline/CodeSnippet';
-import { StageBody } from '@/components/pipeline/StageBody';
+import { StageBody, StageFigure } from '@/components/pipeline/StageBody';
 import { StepList } from '@/components/pipeline/StepList';
 import { StepSheet } from '@/components/pipeline/StepSheet';
 import { Notice } from '@/components/site/Notice';
@@ -15,16 +15,26 @@ import { Button } from '@/components/ui/Button';
 import { COPY } from '@/content/copy';
 import { SITE } from '@/content/site';
 import { SITE_URL } from '@/lib/site';
-import { STAGE_ORDER, STAGES } from '@/content/stages';
+import { STAGE_LEADS, STAGE_ORDER, STAGES } from '@/content/stages';
 import { snippetsFor } from '@/lib/snippets';
+import { stepLead } from '@/lib/step-lead';
 
-import { ev } from './helpers';
+import { ev, openDetails } from './helpers';
 
 vi.mock('next/font/google', () => ({ Recursive: () => ({ variable: 'font-recursive' }) }));
 
 const context = { chunks: new Map(), cited: new Set<number>(), streamedAnswer: '' };
-const body = (event: ReturnType<typeof ev>) =>
-  render(<StageBody event={event} context={context} />);
+// A step's figure and the details behind its toggle, rendered together.
+const body = (
+  event: ReturnType<typeof ev>,
+  ctx: Parameters<typeof StageBody>[0]['context'] = context,
+) =>
+  render(
+    <>
+      <StageFigure event={event} context={ctx} />
+      <StageBody event={event} context={ctx} />
+    </>,
+  );
 
 describe('keyword search and fusion', () => {
   const hit = (chunk_id: number, rank: number, doc_title = 'Normans') => ({
@@ -100,33 +110,28 @@ describe('keyword search and fusion', () => {
         },
       ],
     });
-    render(
-      <StageBody
-        event={fuse}
-        context={{
-          ...context,
-          bm25: {
-            fts_query: '"x"',
-            words: [],
-            terms: [],
-            chunk_set: 'medium',
-            searched: 2,
-            depth: 2,
-            results: [
-              { ...hit(2, 1, 'Oxygen'), score: 3 },
-              { ...hit(1, 2), score: 2 },
-            ],
-          },
-          vector: {
-            metric: 'cosine',
-            chunk_set: 'medium',
-            searched: 2,
-            depth: 2,
-            results: [{ ...hit(1, 1), distance: 0.1 }],
-          },
-        }}
-      />,
-    );
+    body(fuse, {
+      ...context,
+      bm25: {
+        fts_query: '"x"',
+        words: [],
+        terms: [],
+        chunk_set: 'medium',
+        searched: 2,
+        depth: 2,
+        results: [
+          { ...hit(2, 1, 'Oxygen'), score: 3 },
+          { ...hit(1, 2), score: 2 },
+        ],
+      },
+      vector: {
+        metric: 'cosine',
+        chunk_set: 'medium',
+        searched: 2,
+        depth: 2,
+        results: [{ ...hit(1, 1), distance: 0.1 }],
+      },
+    });
     expect(screen.getByText(COPY.stageText.inputBm25)).toBeInTheDocument();
     expect(screen.getByText(COPY.stageText.inputVector)).toBeInTheDocument();
     expect(screen.getByText('0.0161 + 0.0164')).toBeInTheDocument();
@@ -147,13 +152,17 @@ describe('keyword search and fusion', () => {
 });
 
 describe('stage bodies', () => {
-  it('shows skip reasons and error messages', () => {
-    body(ev('bm25', { reason: 'Arrives in milestone 2.' }, 'skipped'));
-    expect(screen.getByText('Arrives in milestone 2.')).toBeInTheDocument();
-    body(
-      ev('embed_query', { error: { type: 'X', message: 'VOYAGE_API_KEY is not set.' } }, 'error'),
+  it('leads with skip reasons and error messages, and repeats neither below', () => {
+    const skipped = ev('bm25', { reason: 'Arrives in milestone 2.' }, 'skipped');
+    expect(stepLead(skipped)).toBe('Arrives in milestone 2.');
+    expect(body(skipped).container).toBeEmptyDOMElement();
+    const failed = ev(
+      'embed_query',
+      { error: { type: 'X', message: 'VOYAGE_API_KEY is not set.' } },
+      'error',
     );
-    expect(screen.getByText('VOYAGE_API_KEY is not set.')).toBeInTheDocument();
+    expect(stepLead(failed)).toBe('VOYAGE_API_KEY is not set.');
+    expect(body(failed).container).toBeEmptyDOMElement();
   });
 
   it('renders the request, including a refusal', () => {
@@ -169,7 +178,7 @@ describe('stage bodies', () => {
         'error',
       ),
     );
-    expect(screen.getByText('Budget used up.')).toBeInTheDocument();
+    expect(screen.queryByText('Budget used up.')).toBeNull();
     expect(screen.getByText('20/20')).toBeInTheDocument();
     expect(
       screen.getByRole('img', { name: /20 of 20 this minute, 195 of 200 today/ }),
@@ -190,8 +199,9 @@ describe('stage bodies', () => {
     expect(screen.getAllByText('-0.250').length).toBeGreaterThan(0);
     body(ev('map_project', { x: 1, y: 2, explained_variance: [0.1, 0.05], neighbours_2d: [3] }));
     expect(screen.getByText(/15\.0%/)).toBeInTheDocument();
-    body(ev('map_project', { error: { type: 'L', message: 'No PCA stored' } }, 'warning'));
-    expect(screen.getByText('No PCA stored')).toBeInTheDocument();
+    const noMap = ev('map_project', { error: { type: 'L', message: 'No PCA stored' } }, 'warning');
+    expect(stepLead(noMap)).toBe('No PCA stored');
+    expect(body(noMap).container).toBeEmptyDOMElement();
     body(
       ev('vector', {
         metric: 'cosine',
@@ -221,11 +231,11 @@ describe('stage bodies', () => {
         'error',
       ),
     );
-    expect(screen.getByText('Could overspend.')).toBeInTheDocument();
+    expect(screen.queryByText('Could overspend.')).toBeNull();
     fireEvent.click(screen.getByText(COPY.showPrompt));
     expect(screen.getByText(/"max_tokens": 10/)).toBeInTheDocument();
-    body(ev('generate', { error: { type: 'R', message: 'stream dropped' } }, 'error'));
-    expect(screen.getByText('stream dropped')).toBeInTheDocument();
+    const dropped = ev('generate', { error: { type: 'R', message: 'stream dropped' } }, 'error');
+    expect(stepLead(dropped)).toBe('stream dropped');
     body(
       ev('generate', {
         provider: 'p',
@@ -240,15 +250,26 @@ describe('stage bodies', () => {
   });
 
   it('renders citation outcomes', () => {
-    body(ev('citations', { abstained: true, citations: [], blocks: [], unused_chunk_ids: [] }));
-    expect(screen.getByText(COPY.abstained)).toBeInTheDocument();
-    body(ev('citations', { abstained: false, citations: [], blocks: [], unused_chunk_ids: [1] }));
-    expect(screen.getByText(COPY.noCitations)).toBeInTheDocument();
+    const abstained = ev('citations', {
+      abstained: true,
+      citations: [],
+      blocks: [],
+      unused_chunk_ids: [],
+    });
+    expect(stepLead(abstained)).toBe(STAGE_LEADS.abstained);
+    const uncited = ev('citations', {
+      abstained: false,
+      citations: [],
+      blocks: [],
+      unused_chunk_ids: [1],
+    });
+    expect(stepLead(uncited)).toBe(STAGE_LEADS.noCitations);
+    body(uncited);
     expect(screen.getByText(COPY.unused(1))).toBeInTheDocument();
   });
 
   it('renders nothing for stages without a view', () => {
-    const { container } = body(ev('agent_step', {}));
+    const { container } = body(ev('agent_step', {}, 'warning'));
     expect(container).toBeEmptyDOMElement();
   });
 });
@@ -265,6 +286,7 @@ describe('step sheets on phones', () => {
           status="error"
           summary="Closest: Normans"
           snippets={snippetsFor('vector')}
+          lead="The search failed."
           measure={{ ms: 4, tokens: 0, costUsd: 0 }}
         >
           <p>details</p>
@@ -273,16 +295,21 @@ describe('step sheets on phones', () => {
     );
     const row = screen.getByRole('button', { name: /Vector search/ });
     expect(within(row).getByText('Closest: Normans')).toBeInTheDocument();
-    expect(screen.queryByText('details')).not.toBeInTheDocument();
+    expect(screen.queryByText('The search failed.')).not.toBeInTheDocument();
     fireEvent.click(row);
+    // Open, the row shows its lead; the rest waits behind Details.
+    expect(screen.getByText('The search failed.')).toHaveClass('text-destructive');
+    expect(screen.queryByText('details')).not.toBeInTheDocument();
+    openDetails();
     expect(screen.getByText('details')).toBeInTheDocument();
+    expect(screen.getByText(STAGES.vector.why)).toBeInTheDocument();
     fireEvent.click(screen.getByText(/Show the code/));
     expect(screen.getAllByText(/search\.py:\d+–\d+/).length).toBeGreaterThan(0);
     fireEvent.click(row);
     expect(screen.queryByText('details')).not.toBeInTheDocument();
   });
 
-  it('let you read why a step exists before any run', () => {
+  it('open their details only once a step has run', () => {
     globalThis.__wide = false;
     render(
       <ol>
@@ -297,8 +324,12 @@ describe('step sheets on phones', () => {
         />
       </ol>,
     );
+    // A waiting step has nothing to open yet; a skipped one says why it exists under Details.
     fireEvent.click(screen.getByRole('button', { name: /Check the request/ }));
-    expect(screen.getAllByText(STAGES.request.why).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: COPY.details })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Keyword search/ }));
+    openDetails();
+    expect(screen.getByText(STAGES.bm25.why)).toBeInTheDocument();
   });
 
   it('show the running step and the streaming answer', () => {

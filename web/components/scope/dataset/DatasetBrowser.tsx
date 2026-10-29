@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { Notice } from '@/components/site/Notice';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { Typography } from '@/components/ui/Typography';
 import { SCOPE } from '@/content/scope';
 import { type Dataset, type Label, LABELS } from '@/lib/scope/types';
@@ -238,21 +239,23 @@ const DatasetBrowser = () => {
         {state.status === 'ready' && (
           <>
             <Typography color="muted" className="max-w-[68ch]">
-              {D.lede(total, Object.keys(state.data.presets).length)}
+              {D.lede(total, Object.keys(state.data.presets).length)}{' '}
+              <span className="font-semibold text-foreground">{D.provenance}</span>
             </Typography>
-            <div className="max-w-[68ch] space-y-1">
-              <Typography className="font-semibold">{D.provenance}</Typography>
-              <Typography variant="small" color="muted">
-                {D.provenanceBody}
-              </Typography>
-              <Typography variant="data" color="muted" as="p" className="text-xs">
-                {D.build(
-                  state.data.build.build_id,
-                  state.data.build.built_at.slice(0, 10),
-                  state.data.build.embed_model,
-                )}
-              </Typography>
-            </div>
+            <Disclosure show={D.how} hide={D.how}>
+              <div className="max-w-[68ch] space-y-1">
+                <Typography variant="small" color="muted">
+                  {D.provenanceBody} {D.howTopics}
+                </Typography>
+                <Typography variant="data" color="muted" as="p" className="text-xs">
+                  {D.build(
+                    state.data.build.build_id,
+                    state.data.build.built_at.slice(0, 10),
+                    state.data.build.embed_model,
+                  )}
+                </Typography>
+              </div>
+            </Disclosure>
           </>
         )}
       </header>

@@ -9,30 +9,33 @@ const F = SCOPE.steps.embed;
 type EmbedViewProps = { data: EmbedData };
 
 // The first coordinates of the message vector as bars above and below a zero line.
-const EmbedView = ({ data }: EmbedViewProps) => {
+const EmbedFigure = ({ data }: EmbedViewProps) => {
   const values = data.vector_preview;
   const scale = Math.max(...values.map(Math.abs), 1e-9);
   return (
+    <Figure
+      caption={F.caption(values.length, data.dims)}
+      alt={F.alt(values.map((v) => v.toFixed(4)).join(', '))}
+    >
+      <div className="flex h-16 items-stretch gap-1.5 border-y border-dashed py-1">
+        {values.map((value, i) => (
+          <div key={i} className="relative flex-1">
+            <div className="absolute inset-x-0 top-1/2 h-px bg-input" />
+            <div
+              className={cn('absolute inset-x-1 bg-chart-1', value >= 0 ? 'bottom-1/2' : 'top-1/2')}
+              style={{ height: `${(Math.abs(value) / scale) * 50}%` }}
+            />
+          </div>
+        ))}
+      </div>
+    </Figure>
+  );
+};
+
+// The embedding's facts: model, length, when it was recorded and the exact text embedded.
+const EmbedView = ({ data }: EmbedViewProps) => {
+  return (
     <div className="space-y-3">
-      <Figure
-        caption={F.caption(values.length, data.dims)}
-        alt={F.alt(values.map((v) => v.toFixed(4)).join(', '))}
-      >
-        <div className="flex h-16 items-stretch gap-1.5 border-y border-dashed py-1">
-          {values.map((value, i) => (
-            <div key={i} className="relative flex-1">
-              <div className="absolute inset-x-0 top-1/2 h-px bg-input" />
-              <div
-                className={cn(
-                  'absolute inset-x-1 bg-chart-1',
-                  value >= 0 ? 'bottom-1/2' : 'top-1/2',
-                )}
-                style={{ height: `${(Math.abs(value) / scale) * 50}%` }}
-              />
-            </div>
-          ))}
-        </div>
-      </Figure>
       <Facts
         facts={[
           { term: F.model, value: `${data.model} · ${SCOPE.summary.embed(data.dims)}` },
@@ -45,4 +48,4 @@ const EmbedView = ({ data }: EmbedViewProps) => {
   );
 };
 
-export { EmbedView };
+export { EmbedFigure, EmbedView };

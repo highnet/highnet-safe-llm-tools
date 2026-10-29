@@ -10,10 +10,23 @@ export const EVALS = {
   metaDescription:
     'Recall, MRR, faithfulness and abstention for the RAG pipeline, measured offline over golden question sets with real models.',
 
+  // The headline, phrased from the numbers: what the run found, in one sentence.
+  findingAnswers: (evidence: string, correct: string, questions: number) =>
+    `At the default settings, the passage with the answer reached the model for ${evidence} of ${questions} answerable questions, and ${correct} were answered correctly.`,
+  findingRetrieval: (low: string, high: string, questions: number, weakest: string) =>
+    `The passage holding the answer was in the top 5 for ${low} to ${high} of ${questions} questions, depending on the settings; weakest: ${weakest}.`,
+  foldsLabel: 'More from this run',
+  folds: {
+    answers: 'Answers',
+    compound: 'Two-part questions',
+    cost: 'Cost',
+    run: 'Run details',
+  },
   lede: (questions: number, graded: boolean) =>
     graded
       ? `We put ${questions.toLocaleString('en')} questions with known answers through the real pipeline and graded what came out. Every number on this page comes from that one run; none is typed in by hand.`
       : `We searched for the answers to ${questions.toLocaleString('en')} questions whose answers we know exactly, through every search setting the pipeline offers. Every number on this page comes from that one run; none is typed in by hand.`,
+  runTitle: 'The run',
   runFacts: {
     date: 'Run',
     corpus: 'Corpus build',
@@ -31,9 +44,9 @@ export const EVALS = {
   retrieval: {
     title: 'Does the search find the answer?',
     note: (questions: number) =>
-      `For each of ${questions} answerable questions we know exactly where the answer sits in its article. recall@5 is the share of questions where a passage containing that answer was among the top 5 retrieved. The model can only answer from what it is given, so this caps everything that follows.`,
+      `recall@5: the share of ${questions} answerable questions whose answer-holding passage was among the top 5 retrieved. The model answers only from what it is given, so this caps everything after.`,
     mrrNote:
-      'MRR (mean reciprocal rank) rewards finding the answer early: 1 when it is the top passage, ½ when second, ⅓ when third, and 0 when it is not in the top 10.',
+      'MRR rewards finding it early: 1 for the top passage, ½ for second, 0 outside the top 10.',
     metricLabel: 'Measure',
     metric: (key: string) => (key === 'mrr' ? 'MRR' : `recall@${key}`),
     metricPrefix: 'recall',
@@ -65,7 +78,7 @@ export const EVALS = {
     title: 'Does the answer stick to the passages?',
     config: (mode: string, chunkSet: string, k: number, rerank: boolean) =>
       `Every question ran end to end with the default settings: ${(MODE_NAMES[mode] ?? mode).toLowerCase()} search, ${chunkSet} chunks, top ${k}, reranker ${rerank ? 'on' : 'off'}.`,
-    note: 'A judge model reads the question, the passages sent, and the answer sentence by sentence. It marks each sentence as supported by the passages or not, and the answer as correct or not against the known answer. A second, stronger model grades the first; it can still be wrong, so treat these as estimates.',
+    note: 'A judge model, stronger than the one that answers, marks each answer sentence as backed by the passages or not, and the answer as correct or not. It can still be wrong, so treat these as estimates.',
     answerable: (n: number) => `The ${n} answerable questions`,
     unanswerable: (n: number) => `The ${n} questions the corpus cannot answer`,
     evidence: 'The passage with the answer was sent',

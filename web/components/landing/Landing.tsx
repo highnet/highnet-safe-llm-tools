@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { type ReactNode } from 'react';
 
 import { buttonVariants } from '@/components/ui/Button';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { type ClassLabel, ClassMark } from '@/components/ui/ClassMark';
 import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
@@ -45,43 +46,61 @@ const StepChain = ({ steps, label, end }: StepChainProps) => {
   );
 };
 
+type ProductCardProps = {
+  id: 'rag' | 'scope';
+  line: string;
+  open: string;
+};
+
+// A product on the opening screen: its name, one line of what it does, and the way in.
+const ProductCard = ({ id, line, open }: ProductCardProps) => {
+  const product = SITE.products[id];
+  return (
+    <li
+      aria-labelledby={`product-${id}`}
+      className="flex flex-col items-start gap-3 rounded-md border bg-card px-5 py-4 md:px-6 md:py-5"
+    >
+      <Typography variant="sheetTitle" as="h3" id={`product-${id}`}>
+        {product.name}
+      </Typography>
+      <Typography className="max-w-[48ch] flex-1">{line}</Typography>
+      <Link href={product.href} className={buttonVariants({ variant: 'primary' })}>
+        {open}
+        <ArrowRight aria-hidden />
+      </Link>
+    </li>
+  );
+};
+
 type ProductSheetProps = {
   id: 'rag' | 'scope';
   lede: string;
   takeaway: string;
-  open: string;
   secondary: { href: string; text: string };
   figure: ReactNode;
 };
 
-const ProductSheet = ({ id, lede, takeaway, open, secondary, figure }: ProductSheetProps) => {
+// A product in more depth, behind "Read more": what happens in between, its takeaway, and its
+// real step chain.
+const ProductSheet = ({ id, lede, takeaway, secondary, figure }: ProductSheetProps) => {
   const product = SITE.products[id];
   return (
     <article
-      aria-labelledby={`product-${id}`}
+      aria-labelledby={`how-${id}`}
       className="grid gap-x-12 gap-y-5 border-t pt-6 md:pt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
     >
       <div className="space-y-3">
-        <Typography variant="sheetTitle" as="h3" id={`product-${id}`}>
+        <Typography variant="stepHeading" as="h3" id={`how-${id}`}>
           {product.name}
-        </Typography>
-        <Typography variant="stepHeading" as="p">
-          {product.tagline}
         </Typography>
         <Typography color="muted">{lede}</Typography>
         <Typography variant="marginNote">{takeaway}</Typography>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
-          <Link href={product.href} className={buttonVariants({ variant: 'primary' })}>
-            {open}
-            <ArrowRight aria-hidden />
-          </Link>
-          <Link
-            href={secondary.href}
-            className="voice-pencil inline-flex min-h-10 items-center gap-1 text-sm text-primary underline decoration-dotted underline-offset-4 hover:decoration-solid"
-          >
-            {secondary.text}
-          </Link>
-        </div>
+        <Link
+          href={secondary.href}
+          className="voice-pencil inline-flex min-h-10 items-center gap-1 text-sm text-primary underline decoration-dotted underline-offset-4 hover:decoration-solid"
+        >
+          {secondary.text}
+        </Link>
       </div>
       <div className="self-center">{figure}</div>
     </article>
@@ -205,127 +224,142 @@ const WorkedQuestion = ({
   );
 };
 
-// The shared opening page: what the site is, the two tools as their real step chains, how they
-// fit together on two recorded questions, and the argument both tools make.
+// The shared opening page: what the site is in one sentence, then the two tools as two plain
+// cards with the way in. How each works, how they fit together and the argument both make wait
+// behind one "Read more".
 const Landing = () => {
   const c = LANDING.connect;
   return (
     <>
-      <section aria-labelledby="landing-title" className="max-w-4xl space-y-5 pb-10 md:pb-16">
+      <section aria-labelledby="landing-title" className="max-w-4xl space-y-5 pb-8 md:pb-12">
         <Typography variant="display" id="landing-title">
           {LANDING.title}
         </Typography>
-        <Typography className="text-lg">{LANDING.intro}</Typography>
+        <Typography className="max-w-[60ch] text-lg">{LANDING.intro}</Typography>
       </section>
 
-      <section aria-labelledby="products-title" className="space-y-8 md:space-y-12">
+      <section aria-labelledby="products-title">
         <Typography variant="label" as="h2" id="products-title" className="sr-only">
           {LANDING.productsTitle}
         </Typography>
-        <ProductSheet
-          id="rag"
-          lede={LANDING.rag.lede}
-          takeaway={LANDING.rag.takeaway}
-          open={LANDING.rag.open}
-          secondary={LANDING.rag.secondary}
-          figure={
-            <StepChain
-              label={SITE.products.rag.name}
-              steps={STAGE_ORDER.map((s) => STAGES[s].title)}
-              end={
-                <span className="inline-flex items-center gap-2 rounded-sm border border-foreground/70 bg-card px-2.5 py-1 text-sm font-semibold">
-                  <span aria-hidden className="voice-data text-primary">
-                    =
-                  </span>
-                  {LANDING.rag.result}
-                </span>
-              }
-            />
-          }
-        />
-        <ProductSheet
-          id="scope"
-          lede={LANDING.scope.lede}
-          takeaway={LANDING.scope.takeaway}
-          open={LANDING.scope.open}
-          secondary={LANDING.scope.secondary}
-          figure={
-            <StepChain
-              label={SITE.products.scope.name}
-              steps={SCOPE_STAGE_ORDER.map((s) => SCOPE_STAGES[s].title)}
-              end={
-                <span className="inline-flex flex-wrap items-center gap-1.5 rounded-sm border border-foreground/70 bg-card px-2.5 py-1 text-sm font-semibold">
-                  <span aria-hidden className="voice-data text-primary">
-                    =
-                  </span>
-                  {ACTIONS.map((a, i) => (
-                    <span key={a} className="inline-flex items-center gap-1.5">
-                      {i > 0 && (
-                        <span aria-hidden className="text-muted-foreground">
-                          /
-                        </span>
-                      )}
-                      <ClassMark label={SCOPE_ACTIONS[a].label} size="sm" />
-                      {LANDING.scope.actions[i]}
-                    </span>
-                  ))}
-                </span>
-              }
-            />
-          }
-        />
-      </section>
-
-      <section aria-labelledby="connect-title" className="mt-16 space-y-4 md:mt-24">
-        <Typography variant="sheetTitle" as="h2" id="connect-title">
-          {c.title}
-        </Typography>
-        <Typography color="muted">{c.lede}</Typography>
-        <div className="grid gap-x-12 gap-y-6 pt-2 lg:grid-cols-2">
-          <WorkedQuestion
-            question={c.worldCup.question}
-            title={c.worldCup.title}
-            body={c.worldCup.body}
-            verdict={verdictForExample('rag-world-cup')}
-            rag={c.worldCup.rag}
-            outcome={c.worldCup.outcome}
-            links={[
-              { href: scopeRunHref('rag-world-cup'), text: c.worldCup.scopeLink },
-              { href: questionHref(c.worldCup.question), text: c.worldCup.ragLink },
-            ]}
-          />
-          <WorkedQuestion
-            question={c.lasagna.question}
-            title={c.lasagna.title}
-            body={c.lasagna.body}
-            verdict={verdictForExample('rag-lasagna')}
-            rag={c.lasagna.rag}
-            outcome={c.lasagna.outcome}
-            links={[{ href: scopeRunHref('rag-lasagna'), text: c.lasagna.scopeLink }]}
-          />
-        </div>
-      </section>
-
-      <section aria-labelledby="principles-title" className="mt-16 space-y-4 md:mt-24">
-        <Typography variant="sheetTitle" as="h2" id="principles-title">
-          {LANDING.principlesTitle}
-        </Typography>
-        <ul className="max-w-[68ch] divide-y border-y">
-          {LANDING.principles.map((p) => (
-            <li key={p} className="py-3">
-              <Typography>{p}</Typography>
-            </li>
-          ))}
+        <ul className="grid gap-4 md:grid-cols-2 md:gap-6">
+          <ProductCard id="rag" line={LANDING.rag.line} open={LANDING.rag.open} />
+          <ProductCard id="scope" line={LANDING.scope.line} open={LANDING.scope.open} />
         </ul>
-        <Link
-          href="/scope/#principles"
-          className="voice-pencil inline-flex min-h-10 items-center gap-1 text-sm text-primary underline decoration-dotted underline-offset-4 hover:decoration-solid"
-        >
-          {LANDING.principlesLink}
-          <ArrowRight aria-hidden className="size-3.5" />
-        </Link>
-        <p className="sr-only">{COPY.tagline}</p>
       </section>
+
+      <Disclosure show={LANDING.more} hide={LANDING.less} className="mt-10 md:mt-14">
+        <div className="space-y-16 md:space-y-24">
+          <section aria-labelledby="how-title" className="space-y-8 md:space-y-12">
+            <Typography variant="sheetTitle" as="h2" id="how-title">
+              {LANDING.howTitle}
+            </Typography>
+            <ProductSheet
+              id="rag"
+              lede={LANDING.rag.lede}
+              takeaway={LANDING.rag.takeaway}
+              secondary={LANDING.rag.secondary}
+              figure={
+                <StepChain
+                  label={SITE.products.rag.name}
+                  steps={STAGE_ORDER.map((s) => STAGES[s].title)}
+                  end={
+                    <span className="inline-flex items-center gap-2 rounded-sm border border-foreground/70 bg-card px-2.5 py-1 text-sm font-semibold">
+                      <span aria-hidden className="voice-data text-primary">
+                        =
+                      </span>
+                      {LANDING.rag.result}
+                    </span>
+                  }
+                />
+              }
+            />
+            <ProductSheet
+              id="scope"
+              lede={LANDING.scope.lede}
+              takeaway={LANDING.scope.takeaway}
+              secondary={LANDING.scope.secondary}
+              figure={
+                <StepChain
+                  label={SITE.products.scope.name}
+                  steps={SCOPE_STAGE_ORDER.map((s) => SCOPE_STAGES[s].title)}
+                  end={
+                    <span className="inline-flex flex-wrap items-center gap-1.5 rounded-sm border border-foreground/70 bg-card px-2.5 py-1 text-sm font-semibold">
+                      <span aria-hidden className="voice-data text-primary">
+                        =
+                      </span>
+                      {ACTIONS.map((a, i) => (
+                        <span key={a} className="inline-flex items-center gap-1.5">
+                          {i > 0 && (
+                            <span aria-hidden className="text-muted-foreground">
+                              /
+                            </span>
+                          )}
+                          <ClassMark label={SCOPE_ACTIONS[a].label} size="sm" />
+                          {LANDING.scope.actions[i]}
+                        </span>
+                      ))}
+                    </span>
+                  }
+                />
+              }
+            />
+          </section>
+
+          <section aria-labelledby="connect-title" className="space-y-4">
+            <Typography variant="sheetTitle" as="h2" id="connect-title">
+              {c.title}
+            </Typography>
+            <Typography color="muted" className="max-w-[68ch]">
+              {c.lede}
+            </Typography>
+            <div className="grid gap-x-12 gap-y-6 pt-2 lg:grid-cols-2">
+              <WorkedQuestion
+                question={c.worldCup.question}
+                title={c.worldCup.title}
+                body={c.worldCup.body}
+                verdict={verdictForExample('rag-world-cup')}
+                rag={c.worldCup.rag}
+                outcome={c.worldCup.outcome}
+                links={[
+                  { href: scopeRunHref('rag-world-cup'), text: c.worldCup.scopeLink },
+                  { href: questionHref(c.worldCup.question), text: c.worldCup.ragLink },
+                ]}
+              />
+              <WorkedQuestion
+                question={c.lasagna.question}
+                title={c.lasagna.title}
+                body={c.lasagna.body}
+                verdict={verdictForExample('rag-lasagna')}
+                rag={c.lasagna.rag}
+                outcome={c.lasagna.outcome}
+                links={[{ href: scopeRunHref('rag-lasagna'), text: c.lasagna.scopeLink }]}
+              />
+            </div>
+          </section>
+
+          <section aria-labelledby="principles-title" className="space-y-4">
+            <Typography variant="sheetTitle" as="h2" id="principles-title">
+              {LANDING.principlesTitle}
+            </Typography>
+            <ul className="max-w-[68ch] divide-y border-y">
+              {LANDING.principles.map((p) => (
+                <li key={p} className="py-3">
+                  <Typography>{p}</Typography>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/scope/#principles"
+              className="voice-pencil inline-flex min-h-10 items-center gap-1 text-sm text-primary underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              {LANDING.principlesLink}
+              <ArrowRight aria-hidden className="size-3.5" />
+            </Link>
+          </section>
+        </div>
+      </Disclosure>
+      <p className="sr-only">{COPY.tagline}</p>
     </>
   );
 };

@@ -1,7 +1,6 @@
 import { Bar } from '@/components/pipeline/figures/Bar';
 import { Figure } from '@/components/pipeline/figures/Figure';
 import { Facts } from '@/components/pipeline/stages/Facts';
-import { Typography } from '@/components/ui/Typography';
 import { SCOPE } from '@/content/scope';
 import type { RequestData } from '@/lib/scope/types';
 
@@ -21,7 +20,6 @@ const RequestView = ({ data }: RequestViewProps) => {
   ];
   return (
     <div className="space-y-3">
-      {data.error && <Typography color="destructive">{data.error.message}</Typography>}
       <Figure
         caption={F.caption}
         alt={F.alt(

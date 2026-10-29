@@ -21,7 +21,7 @@ import type {
 
 const S = SCOPE.summary;
 
-const top = (d: Distribution): Label =>
+export const topLabel = (d: Distribution): Label =>
   (Object.keys(d) as Label[]).reduce((a, b) => (d[b] > d[a] ? b : a));
 
 // The one-line result each step shows when folded on a phone.
@@ -47,7 +47,7 @@ export const scopeSummary = (event: ScopeTraceEvent): string => {
     }
     case 'knn': {
       const d = (data as KnnData).distribution;
-      const label = top(d);
+      const label = topLabel(d);
       return S.knn(SCOPE.labels[label], SCOPE.pct(d[label], 0));
     }
     case 'judge': {

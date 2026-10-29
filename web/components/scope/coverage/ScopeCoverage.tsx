@@ -13,7 +13,7 @@ import type { Dataset } from '@/lib/scope/types';
 import { useDataset } from '@/lib/scope/use-dataset';
 
 import { ClassTag } from '../ClassTag';
-import { Disclosure } from '../Disclosure';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { ScopeMap } from '../ScopeMap';
 
 const C = SCOPE.coverage;
@@ -71,7 +71,6 @@ const CoverageView = ({ data, results }: CoverageViewProps) => {
 
       <div className="max-w-[68ch] space-y-2">
         <Typography>{C.sparse(grid.empty.length, grid.inside.length, GRID)}</Typography>
-        <Typography color="muted">{C.caveat}</Typography>
       </div>
 
       <section aria-labelledby="missed-title" className="space-y-2">
@@ -176,6 +175,11 @@ const ScopeCoverage = ({ results }: ScopeCoverageProps) => {
         <Typography color="muted" className="max-w-[68ch]">
           {C.lede}
         </Typography>
+        <Disclosure show={C.how} hide={C.how}>
+          <Typography variant="small" color="muted" className="max-w-[68ch]">
+            {C.caveat}
+          </Typography>
+        </Disclosure>
       </header>
       {state.status === 'loading' && <Notice tone="note">{D.loading}</Notice>}
       {state.status === 'error' && (

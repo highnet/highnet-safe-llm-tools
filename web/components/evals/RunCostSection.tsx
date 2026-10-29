@@ -14,32 +14,12 @@ type RunCostSectionProps = {
   results: HighnetRagEvalResults;
 };
 
-// Where the questions came from and what the run cost, call by call, model by model.
+// What the run cost, call by call, model by model.
 const RunCostSection = ({ results }: RunCostSectionProps) => {
-  const { golden, cost, run } = results;
+  const { cost, run } = results;
   return (
-    <EvalSection id="run" title={K.title} notes={[]}>
-      <Typography variant="label" color="muted" as="h3">
-        {S.title}
-      </Typography>
-      <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
-        {golden.map((set) => (
-          <div key={set.name}>
-            <dt className="voice-data font-semibold">{set.name}</dt>
-            <dd className="text-muted-foreground">
-              {S[set.name]}
-              <br />
-              <span className="voice-data">
-                {set.questions
-                  ? `${set.questions} · ${S.counts(set.answerable, set.unanswerable)}`
-                  : S.pending}
-              </span>
-            </dd>
-          </div>
-        ))}
-      </dl>
-
-      <div className="mt-5 relative overflow-x-auto">
+    <EvalSection id="cost" title={K.title} notes={[]}>
+      <div className="relative overflow-x-auto">
         <table className="voice-data w-full border-collapse text-sm">
           <caption className="pb-1 text-left font-sans text-xs text-muted-foreground">
             {K.caption}
@@ -101,4 +81,57 @@ const RunCostSection = ({ results }: RunCostSectionProps) => {
   );
 };
 
-export { RunCostSection };
+const F = EVALS.runFacts;
+
+// The run record: what was run, when, against which corpus build, and where the questions came
+// from. The models listed are the ones the run actually called, straight from its cost lines.
+const RunDetailsSection = ({ results }: RunCostSectionProps) => {
+  const { golden } = results;
+  const questions = golden.reduce((n, set) => n + set.questions, 0);
+  const facts: [string, string][] = [
+    [F.date, results.run.started_at.slice(0, 10)],
+    [F.corpus, results.run.corpus_build_id],
+    [F.models, results.cost.by_model.map((line) => line.model).join(', ')],
+    [F.cost, `${formatUsd(results.cost.total_usd)}, ${F.costNote}`],
+  ];
+  return (
+    <EvalSection id="run" title={EVALS.runTitle} notes={[]}>
+      <Typography color="muted" className="max-w-[68ch]">
+        {results.answers
+          ? EVALS.lede(questions, true)
+          : EVALS.lede(results.retrieval.questions, false)}
+      </Typography>
+      <dl className="voice-data mt-3 flex flex-wrap gap-x-6 gap-y-2 border-y border-dashed py-3 text-sm">
+        {facts.map(([label, value]) => (
+          <div key={label} className="flex gap-2">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-4">
+        <Typography variant="label" color="muted" as="h3">
+          {S.title}
+        </Typography>
+        <dl className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+          {golden.map((set) => (
+            <div key={set.name}>
+              <dt className="voice-data font-semibold">{set.name}</dt>
+              <dd className="text-muted-foreground">
+                {S[set.name]}
+                <br />
+                <span className="voice-data">
+                  {set.questions
+                    ? `${set.questions} · ${S.counts(set.answerable, set.unanswerable)}`
+                    : S.pending}
+                </span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </EvalSection>
+  );
+};
+
+export { RunCostSection, RunDetailsSection };

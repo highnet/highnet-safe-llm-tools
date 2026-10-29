@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Notice } from '@/components/site/Notice';
 import { Button } from '@/components/ui/Button';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { Typography } from '@/components/ui/Typography';
 import { CORPUS } from '@/content/corpus';
 import {
@@ -110,6 +111,11 @@ const CorpusBrowser = () => {
         <Typography color="muted" className="max-w-[68ch]">
           {CORPUS.lede}
         </Typography>
+        <Disclosure show={CORPUS.how} hide={CORPUS.how}>
+          <Typography variant="small" color="muted" className="max-w-[68ch]">
+            {CORPUS.howBody}
+          </Typography>
+        </Disclosure>
       </header>
 
       {list.status === 'loading' && <Notice tone="note">{CORPUS.loading}</Notice>}

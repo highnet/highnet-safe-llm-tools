@@ -11,7 +11,7 @@ import { AGENT_STAGE_ORDER, STAGES } from '@/content/stages';
 import type { TraceEvent } from '@/lib/generated/trace';
 import { setView } from '@/lib/view-store';
 
-import { ControlledEventSource, ev } from './helpers';
+import { ControlledEventSource, ev, openDetails } from './helpers';
 
 const A = COPY.figures.agent;
 const config = JSON.parse(readFileSync(path.join(__dirname, 'fixtures/config.json'), 'utf8'));
@@ -69,6 +69,8 @@ describe('agentic mode', () => {
     expect(within(sheet).getAllByText(COPY.status.running).length).toBeGreaterThan(0);
     act(() => recorded.slice(4).forEach(([name, data]) => source.emit(name, data)));
     expect(screen.getByText(A.queries)).toBeInTheDocument();
+    expect(within(sheet).getByText(/^Claude ran \d+ search/)).toBeInTheDocument();
+    openDetails();
     expect(within(sheet).getByText('3a')).toBeInTheDocument();
     expect(within(sheet).getAllByText('Harvard University').length).toBeGreaterThan(0);
     expect(within(sheet).getByText(A.answered(8))).toBeInTheDocument();
@@ -120,6 +122,7 @@ describe('agentic mode', () => {
       <StepList order={AGENT_STAGE_ORDER} events={events} runStatus="finished" context={context} />,
     );
     const sheet = screen.getByRole('listitem', { name: STAGES.agent_step.title });
+    openDetails();
     expect(within(sheet).getByText('Unknown tool.')).toBeInTheDocument();
     expect(within(sheet).getByText(A.noTool)).toBeInTheDocument();
     expect(within(sheet).getByText(A.answered(0))).toBeInTheDocument();

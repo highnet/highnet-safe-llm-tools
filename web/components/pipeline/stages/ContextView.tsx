@@ -5,8 +5,6 @@ import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
 import type { ContextData } from '@/lib/stage-data';
 
-import { ContextFigure } from '../figures/ContextFigure';
-
 type ContextViewProps = { data: ContextData; cited: Set<number> };
 
 const ContextView = ({ data, cited }: ContextViewProps) => {
@@ -19,7 +17,6 @@ const ContextView = ({ data, cited }: ContextViewProps) => {
           data.context_tokens_approx.toLocaleString('en'),
         )}
       </Typography>
-      {data.chunks.length > 0 && <ContextFigure data={data} cited={cited} />}
       <ol className="border-t border-dashed">
         {data.chunks.map((chunk) => (
           <li
