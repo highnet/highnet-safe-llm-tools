@@ -1,13 +1,15 @@
-"""Scope: one message through eleven steps, one trace event per step (ARCHITECTURE section 13).
+"""Scope: one message through twelve steps, one trace event per step (ARCHITECTURE section 13).
 
 Rule zero holds here too: if a step runs, it emits a trace event, and a step that does not run
-says why (switched off, nothing to read, rubric changed, budget). On a visit the two model steps
-(embed, judge) and the answer are replayed from recordings; everything else is computed now, so
-weights, thresholds, toggles and an edited scope definition change the run at no model cost.
+says why (switched off, nothing to read, rubric changed, budget). On a visit the three model
+steps (embed, judge, decide) and the answer are replayed from recordings; everything else is
+computed now, so weights, thresholds, toggles and an edited scope definition change the run at
+no model cost.
 """
 
 import asyncio
 import hashlib
+import json
 import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
@@ -20,6 +22,12 @@ from highnet_core.budget import budget_state, rate_state
 from highnet_core.storage.base import StateStore
 from highnet_core.trace import RunDone, StageClock, TraceEvent, Tracer
 from highnet_scope.config import ScopeSettings
+from highnet_scope.decider import (
+    InvalidDecisionError,
+    decision_distribution,
+    decision_questions,
+    decision_state,
+)
 from highnet_scope.fusion import Fused, Signal, Thresholds, Weights, decide, fuse, scope_score
 from highnet_scope.judge import (
     JUDGE_MAX_TOKENS,
@@ -50,6 +58,7 @@ class ScopeParams(BaseModel):
     rules: bool = True
     knn: bool = True
     judge: bool = True
+    decide: bool = True
     weights: Weights = Field(default_factory=Weights)
     thresholds: Thresholds = Field(default_factory=Thresholds)
     k: int = Field(default=DEFAULT_K, ge=1, le=15)
@@ -145,6 +154,7 @@ async def run_scope(
         "models": {
             "embed": {"provider": models.embed_provider, "model": models.embed_model},
             "judge": {"provider": models.text_provider, "model": models.text_model},
+            "decide": {"provider": models.decide_provider, "model": models.decide_model},
         },
         "live": models.live,
         "recorded_at": store.recorded_at() if not models.live else None,
@@ -196,7 +206,12 @@ async def run_scope(
 
     edited = preset.with_classes(params.overrides) if params.overrides else preset
     changed = sorted(t for t, c in params.overrides.items() if preset.topic_class().get(t) != c)
-    signals: dict[Signal, dict[Label, float] | None] = {"rules": None, "knn": None, "judge": None}
+    signals: dict[Signal, dict[Label, float] | None] = {
+        "rules": None,
+        "knn": None,
+        "judge": None,
+        "decide": None,
+    }
     rule_hits: list[str] = []
 
     # 3 · rules: injection patterns in every view of the message, topic keywords.
@@ -366,11 +381,71 @@ async def run_scope(
             )
     # /snippet
 
-    # 8 · fuse: a weighted average over the signals that ran.
+    # snippet: decide | Ask the second judge: a probability for every label
+    # 8 · decide: a decision model answers one typed question; no reply to parse.
+    clock = StageClock()
+    questions = decision_questions(edited)
+    state_in = decision_state(message, used_turns)
+    if not params.decide:
+        yield tracer.skipped("decide", "The second judge is switched off in the settings.")
+    elif changed and not models.live:
+        yield tracer.event(
+            "decide",
+            clock,
+            {"reason": RUBRIC_CHANGED, "relabelled_topics": changed, "questions": questions},
+            status="skipped",
+        )
+    elif models.live and budget.tier != "normal":
+        yield tracer.skipped("decide", "The budget is past 80%, so the second judge is off.")
+    else:
+        decide_data: dict[str, Any] = {"state": state_in, "questions": questions}
+        try:
+            call = await models.decide(state_in, questions)
+        except Exception as exc:
+            decide_data["error"] = {"type": type(exc).__name__, "message": str(exc)}
+            yield tracer.event("decide", clock, decide_data, status="error")
+        else:
+            await pace(call)
+            spend("decide", call)
+            costs.add("decide", call.ms, call.cost_usd)
+            reply = json.loads(call.response)
+            decide_data |= {
+                "provider": call.provider,
+                "model": call.model,
+                "answers": reply["answers"],
+                "reported_cost_usd": reply["reported_cost_usd"],
+                **recorded(call),
+            }
+            try:
+                dist = decision_distribution(reply["answers"])
+            except InvalidDecisionError as exc:
+                decide_data["error"] = {"type": "invalid_decision", "message": str(exc)}
+                status = "error"
+            else:
+                decide_data["distribution"] = signals["decide"] = dist
+                decide_data["choice"] = max(dist, key=lambda k: dist[k])
+                status = "ok"
+            yield tracer.event(
+                "decide",
+                clock,
+                decide_data,
+                status=status,
+                tokens=call.input_tokens + call.output_tokens,
+                cost_usd=call.cost_usd,
+                ms=call.ms,
+            )
+    # /snippet
+
+    # 9 · fuse: a weighted average over the signals that ran.
     clock = StageClock()
     active = {s: d for s, d in signals.items() if getattr(params, s) and d is not None}
     fused: Fused = fuse({s: active.get(s) for s in signals}, params.weights)
-    tiers = [("rules",), ("rules", "knn"), ("rules", "knn", "judge")]
+    tiers = [
+        ("rules",),
+        ("rules", "knn"),
+        ("rules", "knn", "judge"),
+        ("rules", "knn", "judge", "decide"),
+    ]
     yield tracer.event(
         "fuse",
         clock,
@@ -400,7 +475,7 @@ async def run_scope(
         },
     )
 
-    # 9 · thresholds: which band the fused scores fall in.
+    # 10 · thresholds: which band the fused scores fall in.
     clock = StageClock()
     action, score = decide(fused.distribution, params.thresholds)
     yield tracer.event(
@@ -415,7 +490,7 @@ async def run_scope(
     )
 
     # snippet: respond | Choose the action and respond, under a hard length cap
-    # 10 · respond: the action, and what the product says back.
+    # 11 · respond: the action, and what the product says back.
     clock = StageClock()
     respond: dict[str, Any] = {"action": action}
     status = "ok"
@@ -457,7 +532,7 @@ async def run_scope(
     # /snippet
 
     # snippet: audit | The record kept for human review
-    # 11 · audit: what a real deployment would store for a reviewer (shown, not stored here).
+    # 12 · audit: what a real deployment would store for a reviewer (shown, not stored here).
     clock = StageClock()
     agree = {max(d, key=lambda k: d[k]) for d in active.values()}
     review = fused.confidence < 0.6 or len(agree) > 1 or action == "block"

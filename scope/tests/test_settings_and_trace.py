@@ -18,7 +18,7 @@ def test_settings_are_cached_and_the_judge_is_the_default_model() -> None:
 
 
 def test_the_trace_event_only_accepts_scope_stages() -> None:
-    assert len(STAGES) == 11
+    assert len(STAGES) == 12
     event = ScopeTraceEvent(run_id="r", seq=1, stage="judge", label="7", ms=1)
     assert event.stage == "judge"
     with pytest.raises(ValidationError):

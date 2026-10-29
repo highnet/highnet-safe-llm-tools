@@ -8,7 +8,13 @@ from scope_helpers import ScriptedText, scope_settings
 from highnet_core.config import ModelPrice
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_scope.judge import PREFILL
-from highnet_scope.models import FakeTextModel, LiveModels, NotRecordedError, RecordedModels
+from highnet_scope.models import (
+    FakeDecisionModel,
+    FakeTextModel,
+    LiveModels,
+    NotRecordedError,
+    RecordedModels,
+)
 from highnet_scope.store import ScopeStore
 
 MESSAGES = [{"role": "user", "content": "<message>hi</message>"}]
@@ -20,7 +26,7 @@ async def test_live_calls_are_priced_recorded_and_reused(tmp_path: Path) -> None
     )
     store = ScopeStore(tmp_path / "scope.sqlite")
     text = ScriptedText(answer="Hello.")
-    models = LiveModels(store, FakeEmbedder(8), text, settings)
+    models = LiveModels(store, FakeEmbedder(8), text, FakeDecisionModel(), settings)
     assert (models.embed_provider, models.text_model) == ("fake", "fake-scripted")
 
     embedded = await models.embed("negotiate salary")
@@ -37,7 +43,7 @@ async def test_live_calls_are_priced_recorded_and_reused(tmp_path: Path) -> None
     await models.complete("answer", "sys", MESSAGES, 50)
     assert len(models.paid) == 2 and text.calls == 1
 
-    fresh = LiveModels(store, FakeEmbedder(8), text, settings, reuse=False)
+    fresh = LiveModels(store, FakeEmbedder(8), text, FakeDecisionModel(), settings, reuse=False)
     await fresh.embed("negotiate salary")
     await fresh.complete("answer", "sys", MESSAGES, 50)
     assert len(fresh.paid) == 2 and text.calls == 2
@@ -46,11 +52,16 @@ async def test_live_calls_are_priced_recorded_and_reused(tmp_path: Path) -> None
 async def test_recorded_models_replay_only_what_was_recorded(tmp_path: Path) -> None:
     settings = scope_settings(tmp_path)
     store = ScopeStore(tmp_path / "scope.sqlite")
-    live = LiveModels(store, FakeEmbedder(8), FakeTextModel(), settings)
+    live = LiveModels(store, FakeEmbedder(8), FakeTextModel(), FakeDecisionModel(), settings)
     await live.embed("hello")
     await live.complete("judge", "sys", [*MESSAGES, {"role": "assistant", "content": PREFILL}], 9)
 
-    replay = RecordedModels(store, ("fake", FakeEmbedder.model), ("fake", FakeTextModel.model))
+    replay = RecordedModels(
+        store,
+        ("fake", FakeEmbedder.model),
+        ("fake", FakeTextModel.model),
+        ("fake", FakeDecisionModel.model),
+    )
     assert replay.live is False
     assert (await replay.embed("hello")).kind == "embed"
     judged = await replay.complete(

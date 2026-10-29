@@ -6,7 +6,7 @@ from scope_helpers import ScriptedText, scope_settings
 
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_core.storage.state import SqliteStateStore
-from highnet_scope.models import LiveModels
+from highnet_scope.models import FakeDecisionModel, LiveModels
 from highnet_scope.pipeline import ScopeDeps
 from highnet_scope.recorder import RecorderState, context_modes, record_examples
 from highnet_scope.store import Example, ScopeStore
@@ -32,7 +32,7 @@ async def test_failed_runs_are_reported_and_answers_recorded(db_copy: Path, tmp_
     settings = scope_settings(tmp_path, scope_db_path=db_copy)
     store = ScopeStore(db_copy)
     text = ScriptedText(fail=RuntimeError)
-    models = LiveModels(store, FakeEmbedder(64), text, settings)
+    models = LiveModels(store, FakeEmbedder(64), text, FakeDecisionModel(), settings)
     deps = ScopeDeps(settings, store, SqliteStateStore(settings.state_db_path), models)
     examples = [e for e in store.examples() if e.id in ("career-fibonacci", "rag-normandy")]
     logged: list[str] = []

@@ -7,7 +7,7 @@ from highnet_core.config import CoreSettings
 from highnet_core.providers.base import Completion
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_scope.fusion import Thresholds, Weights
-from highnet_scope.models import FakeTextModel, LiveModels
+from highnet_scope.models import FakeDecisionModel, FakeTextModel, LiveModels
 from highnet_scope.presets import Label
 from highnet_scope.store import Prompt, ScopeStore
 from highnet_scope_evals.runner import (
@@ -48,7 +48,9 @@ class PickyJudge:
 
 def evaluator(scope_db: Path, tmp_path: Path, text: Any = None) -> ScopeEvaluator:
     cache = ScopeStore(tmp_path / "cache.sqlite")
-    models = LiveModels(cache, FakeEmbedder(64), text or FakeTextModel(), SETTINGS)
+    models = LiveModels(
+        cache, FakeEmbedder(64), text or FakeTextModel(), FakeDecisionModel(), SETTINGS
+    )
     return ScopeEvaluator(
         ScopeStore(scope_db, readonly=True), models, concurrency=2, log=lambda _: None
     )

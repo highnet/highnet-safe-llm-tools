@@ -13,8 +13,8 @@ from pydantic import BaseModel, Field
 
 from highnet_scope.presets import LABELS, Label
 
-Signal = Literal["rules", "knn", "judge"]
-SIGNALS: tuple[Signal, ...] = ("rules", "knn", "judge")
+Signal = Literal["rules", "knn", "judge", "decide"]
+SIGNALS: tuple[Signal, ...] = ("rules", "knn", "judge", "decide")
 Action = Literal["answer", "answer_briefly", "redirect", "block"]
 ACTION_LABEL: dict[Action, Label] = {
     "answer": "in",
@@ -28,6 +28,8 @@ class Weights(BaseModel):
     rules: float = Field(default=0.25, ge=0, le=1)
     knn: float = Field(default=0.35, ge=0, le=1)
     judge: float = Field(default=0.4, ge=0, le=1)
+    # The second judge counts as much as the first; neither weight was tuned on the evals.
+    decide: float = Field(default=0.4, ge=0, le=1)
 
     def of(self, signal: Signal) -> float:
         return getattr(self, signal)

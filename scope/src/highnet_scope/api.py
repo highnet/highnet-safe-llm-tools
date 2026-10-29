@@ -1,7 +1,7 @@
 """Scope's HTTP routes, mounted on the same FastAPI app as the RAG API (one Fly machine):
 
 - `GET /api/scope/config`: presets, example messages, defaults, models, when it was recorded;
-- `GET /api/scope/run`: one message through the eleven steps, as server-sent events.
+- `GET /api/scope/run`: one message through the twelve steps, as server-sent events.
 """
 
 from typing import Annotated, Any
@@ -11,12 +11,19 @@ from fastapi.responses import StreamingResponse
 
 from highnet_core.budget import budget_state, hash_ip
 from highnet_core.providers.fake import FakeEmbedder
+from highnet_core.providers.gateway import GatewayDecisionModel
 from highnet_core.providers.voyage import VoyageClient, VoyageEmbedder
 from highnet_core.sse import client_ip, event_stream
 from highnet_core.storage.state import SqliteStateStore
 from highnet_scope.config import ScopeSettings
 from highnet_scope.fusion import Thresholds, Weights
-from highnet_scope.models import FakeTextModel, LiveModels, RecordedModels, ScopeModels
+from highnet_scope.models import (
+    FakeDecisionModel,
+    FakeTextModel,
+    LiveModels,
+    RecordedModels,
+    ScopeModels,
+)
 from highnet_scope.pipeline import ScopeDeps, ScopeParams, run_scope
 from highnet_scope.presets import TopicClass, all_presets
 from highnet_scope.store import ScopeStore
@@ -25,19 +32,33 @@ from highnet_scope.store import ScopeStore
 def build_models(settings: ScopeSettings, store: ScopeStore) -> ScopeModels:
     if settings.fake_providers:
         embed, text = ("fake", FakeEmbedder.model), ("fake", FakeTextModel.model)
+        decider = ("fake", FakeDecisionModel.model)
     else:
         embed = ("voyage", settings.voyage_embed_model)
         text = ("anthropic", settings.judge_model)
+        decider = (GatewayDecisionModel.provider, settings.decision_model)
     if not settings.scope_live:
-        return RecordedModels(store, embed, text)
+        return RecordedModels(store, embed, text, decider)
     from highnet_core.providers.claude import ClaudeTextModel
 
     if settings.fake_providers:
-        return LiveModels(store, FakeEmbedder(settings.embed_dims), FakeTextModel(), settings)
+        return LiveModels(
+            store,
+            FakeEmbedder(settings.embed_dims),
+            FakeTextModel(),
+            FakeDecisionModel(),
+            settings,
+        )
     embedder = VoyageEmbedder(
         VoyageClient(settings), settings.voyage_embed_model, settings.embed_dims
     )
-    return LiveModels(store, embedder, ClaudeTextModel(settings, settings.judge_model), settings)
+    return LiveModels(
+        store,
+        embedder,
+        ClaudeTextModel(settings, settings.judge_model),
+        GatewayDecisionModel(settings, settings.decision_model),
+        settings,
+    )
 
 
 def build_scope_deps(settings: ScopeSettings) -> tuple[ScopeDeps | None, str | None]:
@@ -96,6 +117,7 @@ def scope_router() -> APIRouter:
             "models": {
                 "embed": {"provider": models.embed_provider, "model": models.embed_model},
                 "judge": {"provider": models.text_provider, "model": models.text_model},
+                "decide": {"provider": models.decide_provider, "model": models.decide_model},
             },
             "live": models.live,
             "illustrative": deps.settings.fake_providers,
@@ -115,9 +137,11 @@ def scope_router() -> APIRouter:
         rules: bool = True,
         knn: bool = True,
         judge: bool = True,
+        decide: bool = True,
         w_rules: Annotated[float, Query(ge=0, le=1)] = Weights().rules,
         w_knn: Annotated[float, Query(ge=0, le=1)] = Weights().knn,
         w_judge: Annotated[float, Query(ge=0, le=1)] = Weights().judge,
+        w_decide: Annotated[float, Query(ge=0, le=1)] = Weights().decide,
         t_block: Annotated[float, Query(ge=0, le=1)] = Thresholds().block,
         t_answer: Annotated[float, Query(ge=0, le=1)] = Thresholds().answer,
         t_brief: Annotated[float, Query(ge=0, le=1)] = Thresholds().brief,
@@ -135,7 +159,8 @@ def scope_router() -> APIRouter:
             rules=rules,
             knn=knn,
             judge=judge,
-            weights=Weights(rules=w_rules, knn=w_knn, judge=w_judge),
+            decide=decide,
+            weights=Weights(rules=w_rules, knn=w_knn, judge=w_judge, decide=w_decide),
             thresholds=Thresholds(block=t_block, answer=t_answer, brief=t_brief),
             k=k,
             overrides=parse_edit(edit),

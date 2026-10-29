@@ -1,5 +1,5 @@
-"""The two model calls Scope makes (an embedding, and Claude for the judge and the answers), live
-or replayed from `scope.sqlite`.
+"""The model calls Scope makes (an embedding, Claude for the judge and the answers, and a decision
+model for the second judge), live or replayed from `scope.sqlite`.
 
 - `LiveModels` calls the providers, measures each call, prices it with `pricing.py` and records it
   in the store (the recorder, the evals and `SCOPE_LIVE=true` use it).
@@ -15,7 +15,7 @@ import numpy as np
 
 from highnet_core.config import CoreSettings
 from highnet_core.pricing import cost_usd
-from highnet_core.providers.base import Completion, Embedder, TextModel
+from highnet_core.providers.base import Completion, Decision, DecisionModel, Embedder, TextModel
 from highnet_core.providers.fake import approx_tokens
 from highnet_scope.store import Call, ScopeStore, call_key, now
 
@@ -29,12 +29,15 @@ class ScopeModels(Protocol):
     embed_model: str
     text_provider: str
     text_model: str
+    decide_provider: str
+    decide_model: str
     live: bool
 
     async def embed(self, text: str) -> Call: ...
     async def complete(
         self, kind: str, system: str, messages: list[dict[str, Any]], max_tokens: int
     ) -> Call: ...
+    async def decide(self, state: dict[str, Any], questions: dict[str, Any]) -> Call: ...
 
 
 def embed_key(model: str, text: str) -> str:
@@ -47,6 +50,10 @@ def complete_key(
     return call_key(kind, model, system, messages, max_tokens)
 
 
+def decide_key(model: str, state: dict[str, Any], questions: dict[str, Any]) -> str:
+    return call_key("decide", model, state, questions)
+
+
 class LiveModels:
     live = True
 
@@ -55,13 +62,16 @@ class LiveModels:
         store: ScopeStore,
         embedder: Embedder,
         text: TextModel,
+        decider: DecisionModel,
         settings: CoreSettings,
         *,
         reuse: bool = True,
     ) -> None:
         self._store, self.embedder, self._text, self._settings = store, embedder, text, settings
+        self._decider = decider
         self.embed_provider, self.embed_model = embedder.provider, embedder.model
         self.text_provider, self.text_model = text.provider, text.model
+        self.decide_provider, self.decide_model = decider.provider, decider.model
         # Reuse a call already recorded with the same input (a resumed recording pays once).
         self._reuse = reuse
         self.paid: list[Call] = []
@@ -118,14 +128,49 @@ class LiveModels:
         self.paid.append(call)
         return call
 
+    async def decide(self, state: dict[str, Any], questions: dict[str, Any]) -> Call:
+        key = decide_key(self.decide_model, state, questions)
+        if self._reuse and (found := self._store.call(key)):
+            return found
+        started = time.perf_counter()
+        result: Decision = await self._decider.decide(state, questions)
+        ms = round((time.perf_counter() - started) * 1000)
+        call = Call(
+            kind="decide",
+            provider=self.decide_provider,
+            model=self.decide_model,
+            request={"state": state, "questions": questions},
+            response=json.dumps(
+                {"answers": result.answers, "reported_cost_usd": result.reported_cost_usd}
+            ),
+            embedding=None,
+            input_tokens=result.input_tokens,
+            output_tokens=result.output_tokens,
+            ms=ms,
+            cost_usd=cost_usd(
+                self.decide_model, self._settings, result.input_tokens, result.output_tokens
+            ),
+            recorded_at=now(),
+        )
+        self._store.save_call(key, call)
+        self.paid.append(call)
+        return call
+
 
 class RecordedModels:
     live = False
 
-    def __init__(self, store: ScopeStore, embed: tuple[str, str], text: tuple[str, str]) -> None:
+    def __init__(
+        self,
+        store: ScopeStore,
+        embed: tuple[str, str],
+        text: tuple[str, str],
+        decide: tuple[str, str],
+    ) -> None:
         self._store = store
         self.embed_provider, self.embed_model = embed
         self.text_provider, self.text_model = text
+        self.decide_provider, self.decide_model = decide
 
     async def embed(self, text: str) -> Call:
         found = self._store.call(embed_key(self.embed_model, text))
@@ -139,6 +184,12 @@ class RecordedModels:
         found = self._store.call(complete_key(kind, self.text_model, system, messages, max_tokens))
         if found is None:
             raise NotRecordedError(f"No {kind} call was recorded for exactly this input.")
+        return found
+
+    async def decide(self, state: dict[str, Any], questions: dict[str, Any]) -> Call:
+        found = self._store.call(decide_key(self.decide_model, state, questions))
+        if found is None:
+            raise NotRecordedError("No decide call was recorded for exactly this input.")
         return found
 
 
@@ -159,3 +210,21 @@ class FakeTextModel:
         else:
             text = "An illustrative answer from the offline stand-in."
         return Completion(text, "end_turn", approx_tokens(system + prompt), approx_tokens(text))
+
+
+class FakeDecisionModel:
+    """Offline stand-in for the decision model: probabilities from two words. Illustrative only;
+    every event names provider="fake"."""
+
+    provider = "fake"
+    model = "fake-decider"
+
+    async def decide(self, state: Any, questions: dict[str, Any]) -> Decision:
+        text = str(state).lower()
+        if "ignore" in text or "system prompt" in text:
+            probs = {"in": 0.05, "adjacent": 0.05, "out": 0.1, "injection": 0.8}
+        else:
+            probs = {"in": 0.6, "adjacent": 0.2, "out": 0.15, "injection": 0.05}
+        answers = {"label": {"type": "choice", "choice": max(probs, key=probs.__getitem__),
+                             "probabilities": probs}}  # fmt: skip
+        return Decision(answers, approx_tokens(text + str(questions)), 0, 0.0)

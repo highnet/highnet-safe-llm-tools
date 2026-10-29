@@ -1,4 +1,4 @@
-"""Scope's eleven stages. The event models are shared (`highnet_core.trace`); this narrows `stage`
+"""Scope's twelve stages. The event models are shared (`highnet_core.trace`); this narrows `stage`
 so the exported JSON Schema, and the TypeScript types generated from it, list exactly these."""
 
 from typing import Literal
@@ -13,6 +13,7 @@ ScopeStage = Literal[
     "map",
     "knn",
     "judge",
+    "decide",
     "fuse",
     "thresholds",
     "respond",
@@ -26,6 +27,7 @@ STAGES: tuple[ScopeStage, ...] = (
     "map",
     "knn",
     "judge",
+    "decide",
     "fuse",
     "thresholds",
     "respond",

@@ -7,10 +7,11 @@ import pytest
 from scope_helpers import ScriptedText, by_stage, done_of, scope_settings
 
 from highnet_core.config import ModelPrice
+from highnet_core.providers.base import Decision
 from highnet_core.providers.fake import FakeEmbedder
 from highnet_core.storage.state import SqliteStateStore
 from highnet_scope.fusion import Thresholds, Weights
-from highnet_scope.models import LiveModels
+from highnet_scope.models import FakeDecisionModel, LiveModels
 from highnet_scope.pipeline import (
     RUBRIC_CHANGED,
     Costs,
@@ -22,6 +23,7 @@ from highnet_scope.pipeline import (
     clip,
     run_scope,
 )
+from highnet_scope.presets import LABELS as STAGE_LABELS
 from highnet_scope.presets import load_preset
 from highnet_scope.store import ScopeStore
 from highnet_scope.trace import STAGES
@@ -33,17 +35,21 @@ async def run(params: ScopeParams, deps: ScopeDeps, run_id: str | None = None) -
     return [e async for e in run_scope(params, deps, "ip-hash", run_id)]
 
 
-def live_deps(db: Path, tmp: Path, text: Any = None, **settings: Any) -> ScopeDeps:
+def live_deps(
+    db: Path, tmp: Path, text: Any = None, decider: Any = None, **settings: Any
+) -> ScopeDeps:
     s = scope_settings(tmp, scope_db_path=db, **settings)
     store = ScopeStore(db)
-    models = LiveModels(store, FakeEmbedder(64), text or ScriptedText(), s)
+    models = LiveModels(
+        store, FakeEmbedder(64), text or ScriptedText(), decider or FakeDecisionModel(), s
+    )
     return ScopeDeps(s, store, SqliteStateStore(s.state_db_path), models)
 
 
 # --- replayed visits --------------------------------------------------------------------------
 
 
-async def test_a_recorded_example_replays_all_eleven_stages(recorded_deps: ScopeDeps) -> None:
+async def test_a_recorded_example_replays_all_twelve_stages(recorded_deps: ScopeDeps) -> None:
     events = await run(ScopeParams(preset="career", example_id="career-salary"), recorded_deps)
     stages = by_stage(events)
     assert list(stages) == list(STAGES)
@@ -83,7 +89,12 @@ async def test_every_signal_switched_off_falls_to_the_middle_band(
     recorded_deps: ScopeDeps,
 ) -> None:
     params = ScopeParams(
-        preset="career", example_id="career-salary", rules=False, knn=False, judge=False
+        preset="career",
+        example_id="career-salary",
+        rules=False,
+        knn=False,
+        judge=False,
+        decide=False,
     )
     stages = by_stage(await run(params, recorded_deps))
     for stage, reason in (
@@ -351,3 +362,32 @@ def test_helpers() -> None:
         {"role": "user", "content": "hi"},
         {"role": "user", "content": "q"},
     ]
+
+
+class PartialDecider(FakeDecisionModel):
+    """A decision model whose reply lacks a probability for some labels."""
+
+    async def decide(self, state: Any, questions: dict[str, Any]) -> Decision:
+        answers = {"label": {"type": "choice", "choice": "in", "probabilities": {"in": 1.0}}}
+        return Decision(answers, 10, 0, 0.000001)
+
+
+async def test_the_second_judge_runs_and_feeds_the_fusion(db_copy: Path, tmp_path: Path) -> None:
+    events = await run(ScopeParams(preset="career", text=SALARY), live_deps(db_copy, tmp_path))
+    decide = by_stage(events)["decide"]
+    assert decide.status == "ok"
+    assert decide.data["choice"] == "in"
+    assert decide.data["state"] == {"message": SALARY}
+    assert set(decide.data["questions"]["label"]["criteria"]) == set(STAGE_LABELS)
+    assert by_stage(events)["fuse"].data["used_weights"]["decide"] > 0
+
+
+async def test_an_incomplete_decision_drops_the_second_judge(db_copy: Path, tmp_path: Path) -> None:
+    deps = live_deps(db_copy, tmp_path, decider=PartialDecider())
+    # A message the fixture never recorded, so the decision is made now, not reused.
+    events = await run(ScopeParams(preset="career", text="Can you review my portfolio?"), deps)
+    decide = by_stage(events)["decide"]
+    assert decide.status == "error"
+    assert decide.data["error"]["type"] == "invalid_decision"
+    assert decide.data["reported_cost_usd"] == 0.000001
+    assert "decide" not in by_stage(events)["fuse"].data["used_weights"]

@@ -3,7 +3,7 @@
 
 import pytest
 
-PROVIDER_KEYS = ("ANTHROPIC_API_KEY", "VOYAGE_API_KEY")
+PROVIDER_KEYS = ("ANTHROPIC_API_KEY", "VOYAGE_API_KEY", "AI_GATEWAY_API_KEY")
 
 
 @pytest.fixture(autouse=True)

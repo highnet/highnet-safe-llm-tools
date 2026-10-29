@@ -20,6 +20,8 @@ class CoreSettings(BaseSettings):
     # Providers. Keys are optional at startup; the first stage that needs one fails loudly.
     anthropic_api_key: SecretStr | None = None
     voyage_api_key: SecretStr | None = None
+    # Vercel AI Gateway: Scope's second judge, a decision model (typed answers, probabilities).
+    ai_gateway_api_key: SecretStr | None = None
     # Deterministic offline providers (hashed bag-of-words embeddings, extractive "LLM").
     # For local development and tests only; every trace event says provider="fake".
     fake_providers: bool = False
@@ -37,6 +39,10 @@ class CoreSettings(BaseSettings):
     # Retries on 429/5xx. Keep them short for live questions; the corpus build raises both.
     voyage_max_retries: int = 2
     voyage_max_retry_wait_seconds: float = 10.0
+
+    ai_gateway_base_url: str = "https://ai-gateway.vercel.sh/v1"
+    decision_model: str = "typesafe-ai/jev"
+    ai_gateway_max_retries: int = 2
 
     # The spend ledger and the per-IP request log, shared by both products.
     state_db_path: Path = Path("data/state.sqlite")

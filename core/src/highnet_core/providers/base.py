@@ -97,6 +97,18 @@ class Completion:
     output_tokens: int
 
 
+@dataclass
+class Decision:
+    """A decision model's typed answers (one per question), as returned, and what it cost."""
+
+    answers: dict[str, Any]
+    input_tokens: int
+    output_tokens: int
+    # The gateway's own cost figure, kept beside ours (pricing.py) so the two can be compared.
+    reported_cost_usd: float | None = None
+    retries: int = 0
+
+
 class Embedder(Protocol):
     provider: str
     model: str
@@ -156,3 +168,12 @@ class TextModel(Protocol):
     async def complete(
         self, system: str, messages: list[dict[str, Any]], max_tokens: int
     ) -> Completion: ...
+
+
+class DecisionModel(Protocol):
+    """A decision model: typed questions about a piece of state, answered with probabilities."""
+
+    provider: str
+    model: str
+
+    async def decide(self, state: Any, questions: dict[str, Any]) -> Decision: ...
