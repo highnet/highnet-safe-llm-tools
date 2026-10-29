@@ -23,6 +23,9 @@ const results = publishedScopeResults!;
 // An offline run (`highnet-scope-evals run --fake`) with all five methods: its numbers are
 // illustrative and only exercise the page.
 const withDecide = illustrative as ScopeEvalResults;
+const careerMisses = results.misclassified.filter((m) => m.preset === 'career');
+const careerMissed = careerMisses.length;
+const firstCareerMiss = careerMisses[0].id;
 
 beforeEach(() => clearDatasetCache());
 afterEach(() => vi.unstubAllGlobals());
@@ -104,16 +107,18 @@ describe('scope coverage page', () => {
   it('marks sparse cells and misclassified prompts per preset', async () => {
     stubScopeFetch();
     render(<ScopeCoveragePage />);
-    expect(await screen.findByText(C.missed(25))).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: `${C.open}: career-0013` })).toHaveAttribute(
+    expect(await screen.findByText(C.missed(careerMissed))).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: `${C.open}: ${firstCareerMiss}` })).toHaveAttribute(
       'href',
-      '/scope/dataset/?preset=career&q=career-0013',
+      `/scope/dataset/?preset=career&q=${firstCareerMiss}`,
     );
     fireEvent.click(screen.getByRole('button', { name: C.showCells }));
     expect(screen.getByRole('table', { name: C.cellsCaption })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'RAG corpus assistant' }));
     expect(window.location.search).toBe('?preset=rag');
-    expect(screen.getByText(C.missed(46))).toBeInTheDocument();
+    expect(
+      screen.getByText(C.missed(results.misclassified.filter((m) => m.preset === 'rag').length)),
+    ).toBeInTheDocument();
   });
 
   it('works without a published run and when a preset has no misses', async () => {
@@ -135,7 +140,7 @@ describe('scope coverage page', () => {
     expect(await screen.findByText(/offline/)).toBeInTheDocument();
     stubScopeFetch();
     fireEvent.click(screen.getByRole('button', { name: D.retry }));
-    expect(await screen.findByText(C.missed(25))).toBeInTheDocument();
+    expect(await screen.findByText(C.missed(careerMissed))).toBeInTheDocument();
   });
 });
 
@@ -149,11 +154,14 @@ describe('scope bridge', () => {
 describe('scope evals page', () => {
   it('renders every number from the published run', () => {
     render(<ScopeEvalsPage />);
-    expect(screen.getByText('$0.7796 in total')).toBeInTheDocument();
-    expect(screen.getByText(/the LLM judge alone beats the default fused pipeline/)).toBeVisible();
-    expect(screen.getByText(E.finding.why)).toBeInTheDocument();
+    expect(screen.getByText(E.record.costValue(results.total_usd))).toBeInTheDocument();
+    // In the published run the fused pipeline beats every single signal, so no "why" follows.
+    expect(
+      screen.getByText(E.finding.fusedWins('96.2%', 'the decision model', '95.1%')),
+    ).toBeVisible();
+    expect(screen.queryByText(E.finding.why)).not.toBeInTheDocument();
     const confusion = screen.getByRole('table', { name: /Fused: label/ });
-    expect(within(confusion).getByText('386')).toBeInTheDocument();
+    expect(within(confusion).getByText('401')).toBeInTheDocument();
     expect(screen.getAllByText('14 of 240').length).toBe(1);
     expect(screen.getByText(E.method.abstained('Rules', 514))).toBeInTheDocument();
     expect(screen.getByText(E.method.failed('LLM judge', 20))).toBeInTheDocument();
@@ -185,7 +193,7 @@ describe('scope evals page', () => {
     render(<ScopeEvalsReport results={fusedWins} />);
     expect(screen.getByText(E.illustrative)).toBeInTheDocument();
     expect(
-      screen.getByText(E.finding.fusedWins('99.0%', 'the LLM judge', '93.8%')),
+      screen.getByText(E.finding.fusedWins('99.0%', 'the decision model', '95.1%')),
     ).toBeInTheDocument();
     expect(screen.queryByText(E.finding.why)).not.toBeInTheDocument();
     expect(screen.getAllByText(E.classes.none).length).toBe(8);
