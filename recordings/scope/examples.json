@@ -399,91 +399,106 @@
     "id": "rag-normandy",
     "preset": "rag",
     "text": "In what country is Normandy located?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "normandy"
   },
   {
     "id": "rag-fresno",
     "preset": "rag",
     "text": "What does the name Fresno mean in Spanish?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "fresno"
   },
   {
     "id": "rag-yuan",
     "preset": "rag",
     "text": "Who started the Yuan dynasty?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "yuan"
   },
   {
     "id": "rag-harvard-presidents",
     "preset": "rag",
     "text": "How many U.S. presidents studied at Harvard?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "harvard-presidents"
   },
   {
     "id": "rag-world-cup",
     "preset": "rag",
     "text": "Who won the 2018 FIFA World Cup?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "world-cup"
   },
   {
     "id": "rag-compound-01",
     "preset": "rag",
     "text": "Which was founded first, Harvard University or the University of Chicago?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-01"
   },
   {
     "id": "rag-compound-02",
     "preset": "rag",
     "text": "How many years after the Yuan dynasty was proclaimed did the Black Death reach Europe?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-02"
   },
   {
     "id": "rag-compound-03",
     "preset": "rag",
     "text": "Which came first, Newcomen's atmospheric steam engine or the discovery of oxygen?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-03"
   },
   {
     "id": "rag-compound-04",
     "preset": "rag",
     "text": "Was the IPCC established before or after the new Scottish Parliament first met?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-04"
   },
   {
     "id": "rag-compound-05",
     "preset": "rag",
     "text": "How many years after the Duchy of Normandy began did Kublai Khan establish the Yuan dynasty?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-05"
   },
   {
     "id": "rag-compound-06",
     "preset": "rag",
     "text": "Did the French and Indian War end before or after oxygen was discovered?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-06"
   },
   {
     "id": "rag-compound-07",
     "preset": "rag",
     "text": "How many years after Harvard was founded did the French and Indian War begin?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-07"
   },
   {
     "id": "rag-compound-08",
     "preset": "rag",
     "text": "How many years before the IPCC was established did the 1973 oil crisis begin?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-08"
   },
   {
     "id": "rag-compound-09",
     "preset": "rag",
     "text": "Which happened first: Warsaw becoming capital of the Polish–Lithuanian Commonwealth, or the end of the French Wars of Religion?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-09"
   },
   {
     "id": "rag-compound-10",
     "preset": "rag",
     "text": "Which is older, the University of Chicago or the IPCC, and by how many years?",
-    "note": "One of the RAG pipeline's recorded questions."
+    "note": "One of the RAG pipeline's recorded questions.",
+    "rag_question": "compound-10"
   },
   {
     "id": "rag-lasagna",

@@ -87,6 +87,16 @@ class ToolAnswer:
     output_tokens: int
 
 
+@dataclass
+class Completion:
+    """One plain text completion: the reply text and what it cost."""
+
+    text: str
+    stop_reason: str | None
+    input_tokens: int
+    output_tokens: int
+
+
 class Embedder(Protocol):
     provider: str
     model: str
@@ -135,3 +145,14 @@ class Judge(Protocol):
     model: str
 
     async def call(self, system: str, prompt: str, tool: dict[str, Any]) -> ToolAnswer: ...
+
+
+class TextModel(Protocol):
+    """A plain completion (no tools, no streaming): Scope's judge and its short answers."""
+
+    provider: str
+    model: str
+
+    async def complete(
+        self, system: str, messages: list[dict[str, Any]], max_tokens: int
+    ) -> Completion: ...

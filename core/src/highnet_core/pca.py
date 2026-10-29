@@ -1,5 +1,5 @@
 """Two-component PCA in plain numpy, fitted at ingest; the same transform places each query
-on the corpus map at request time."""
+on a 2D map at request time (the RAG corpus map, the Scope map)."""
 
 import numpy as np
 

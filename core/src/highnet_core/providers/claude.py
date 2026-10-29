@@ -10,6 +10,7 @@ from highnet_core.providers.base import (
     AgentTurn,
     AnswerBlock,
     Citation,
+    Completion,
     FinalAnswer,
     ProviderNotConfiguredError,
     ToolAnswer,
@@ -58,6 +59,30 @@ class ClaudeJudge(_ClaudeClient):
             input_tokens=response.usage.input_tokens,
             output_tokens=response.usage.output_tokens,
         )
+
+
+class ClaudeTextModel(_ClaudeClient):
+    """Scope's judge and answers: one plain call. A final assistant message in
+    `messages` is a prefill the reply continues (the judge starts its reply with "{")."""
+
+    # snippet: judge | The judge call: one plain completion
+    async def complete(
+        self, system: str, messages: list[dict[str, Any]], max_tokens: int
+    ) -> Completion:
+        response = await self._get_client().messages.create(
+            model=self.model,
+            max_tokens=max_tokens,
+            system=system,
+            messages=messages,  # pyright: ignore[reportArgumentType]
+        )
+        return Completion(
+            text="".join(b.text for b in response.content if b.type == "text"),
+            stop_reason=response.stop_reason,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+        )
+
+    # /snippet
 
 
 class ClaudeAnswerModel(_ClaudeClient):
