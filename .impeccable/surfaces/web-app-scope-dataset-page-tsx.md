@@ -21,3 +21,10 @@ THESIS: The dataset is the pad's appendix: every example written out in full wit
 OWN-WORLD: As DESIGN.md. Filters in a dashed-ruled strip of quiet pressed buttons; the prompts as one solid-edged list with dashed rules between rows.
 
 FIRST VIEWPORT: "Sheet 2 · The labeled prompts", the lede with the real counts, the provenance block, then the filters and the first prompts.
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- One-sentence lede ending in "Drafted by Claude, checked by script."; the full provenance, topic relabelling and build line under "How this works"; filters and the list follow.
+

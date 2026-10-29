@@ -32,6 +32,7 @@ const complete: Report = {
 describe('coverage page', () => {
   it('renders every package with its totals, its files and the test counts', () => {
     render(<CoverageReport report={complete} />);
+    fireEvent.click(screen.getByRole('button', { name: COVERAGE.how }));
     expect(screen.getByText(COVERAGE.facts.testsValue(117, 124))).toBeInTheDocument();
     for (const name of ['api', 'evals', 'web']) {
       expect(
@@ -69,6 +70,7 @@ describe('coverage page', () => {
     expect(screen.getByText(COVERAGE.empty(1))).toBeInTheDocument();
     // A suite with no report says so instead of showing zeros.
     expect(screen.getByText(COVERAGE.missing.title)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: COVERAGE.how }));
     expect(screen.getByText(COVERAGE.facts.testsValue(117, 0))).toBeInTheDocument();
   });
 

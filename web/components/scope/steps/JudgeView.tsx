@@ -4,7 +4,7 @@ import { SCOPE } from '@/content/scope';
 import type { JudgeData } from '@/lib/scope/types';
 
 import { ClassTag } from '../ClassTag';
-import { Disclosure } from '../Disclosure';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { DistributionBar } from '../DistributionBar';
 import { Verbatim } from './Verbatim';
 
@@ -41,9 +41,6 @@ const JudgeView = ({ data, status }: JudgeViewProps) => {
   if (status === 'skipped') {
     return (
       <div className="space-y-2">
-        <Typography variant="small" color="muted">
-          {data.reason}
-        </Typography>
         {data.relabelled_topics && data.relabelled_topics.length > 0 && (
           <Typography variant="marginNote">
             {F.relabelled(data.relabelled_topics.join(', '))}

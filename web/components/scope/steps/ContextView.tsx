@@ -30,20 +30,14 @@ type ContextViewProps = { data: ContextData | SkippedData; skipped: boolean };
 
 const ContextView = ({ data, skipped }: ContextViewProps) => {
   if (skipped) {
-    const { reason, turns } = data as SkippedData;
+    const { turns } = data as SkippedData;
+    if (!turns || turns.length === 0) return null;
     return (
       <div className="space-y-2">
-        <Typography variant="small" color="muted">
-          {reason}
+        <Typography variant="label" color="muted" as="p">
+          {F.notRead}
         </Typography>
-        {turns && turns.length > 0 && (
-          <>
-            <Typography variant="label" color="muted" as="p">
-              {F.notRead}
-            </Typography>
-            <Turns turns={turns} muted />
-          </>
-        )}
+        <Turns turns={turns} muted />
       </div>
     );
   }

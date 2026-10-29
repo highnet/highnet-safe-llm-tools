@@ -13,7 +13,7 @@ type FuseViewProps = { data: FuseData };
 
 // Each signal's share per class with its weight, the thin bar under it what it adds to the
 // fusion, then the fused distribution and what each signal cost in this run.
-const FuseView = ({ data }: FuseViewProps) => {
+const FuseFigure = ({ data }: FuseViewProps) => {
   const alt = SIGNALS.map((s) => {
     const used = data.used_weights[s];
     return used === undefined
@@ -21,51 +21,57 @@ const FuseView = ({ data }: FuseViewProps) => {
       : `${SCOPE.signals[s]}: ${F.heads.used} ${used.toFixed(2)}`;
   }).join('; ');
   return (
-    <div className="space-y-4">
-      <Figure caption={F.caption} alt={`${alt}. ${F.fused}: ${SCOPE.labels[data.label]}`}>
-        <ul className="space-y-3">
-          {SIGNALS.map((s) => {
-            const shares = data.signals[s];
-            const used = data.used_weights[s];
-            const contribution = data.contributions[s];
-            return (
-              <li key={s} className="grid gap-x-4 gap-y-1 sm:grid-cols-[8.5rem_minmax(0,1fr)]">
-                <div className="flex items-baseline justify-between gap-2 sm:block">
-                  <Typography variant="small" as="span" className="font-semibold sm:block">
-                    {SCOPE.signals[s]}
-                  </Typography>
-                  <Typography variant="data" color="muted" as="span" className="text-xs sm:block">
-                    {used === undefined
-                      ? F.notRun
-                      : `${F.heads.weight} ${data.weights[s].toFixed(2)} → ${used.toFixed(2)}`}
-                  </Typography>
+    <Figure caption={F.caption} alt={`${alt}. ${F.fused}: ${SCOPE.labels[data.label]}`}>
+      <ul className="space-y-3">
+        {SIGNALS.map((s) => {
+          const shares = data.signals[s];
+          const used = data.used_weights[s];
+          const contribution = data.contributions[s];
+          return (
+            <li key={s} className="grid gap-x-4 gap-y-1 sm:grid-cols-[8.5rem_minmax(0,1fr)]">
+              <div className="flex items-baseline justify-between gap-2 sm:block">
+                <Typography variant="small" as="span" className="font-semibold sm:block">
+                  {SCOPE.signals[s]}
+                </Typography>
+                <Typography variant="data" color="muted" as="span" className="text-xs sm:block">
+                  {used === undefined
+                    ? F.notRun
+                    : `${F.heads.weight} ${data.weights[s].toFixed(2)} → ${used.toFixed(2)}`}
+                </Typography>
+              </div>
+              {shares && contribution ? (
+                <div className="space-y-1">
+                  <DistributionBar distribution={shares} />
+                  <DistributionBar
+                    distribution={contribution}
+                    showValues={false}
+                    className="opacity-70"
+                  />
                 </div>
-                {shares && contribution ? (
-                  <div className="space-y-1">
-                    <DistributionBar distribution={shares} />
-                    <DistributionBar
-                      distribution={contribution}
-                      showValues={false}
-                      className="opacity-70"
-                    />
-                  </div>
-                ) : (
-                  <div aria-hidden className="h-3 self-center border border-dashed" />
-                )}
-              </li>
-            );
-          })}
-          <li className="grid gap-x-4 gap-y-1 border-t border-dashed pt-3 sm:grid-cols-[8.5rem_minmax(0,1fr)]">
-            <div className="flex items-baseline justify-between gap-2 sm:block">
-              <Typography variant="small" as="span" className="font-semibold sm:block">
-                {F.fused}
-              </Typography>
-              <ClassTag label={data.label} className="text-xs sm:flex" />
-            </div>
-            <DistributionBar distribution={data.distribution} />
-          </li>
-        </ul>
-      </Figure>
+              ) : (
+                <div aria-hidden className="h-3 self-center border border-dashed" />
+              )}
+            </li>
+          );
+        })}
+        <li className="grid gap-x-4 gap-y-1 border-t border-dashed pt-3 sm:grid-cols-[8.5rem_minmax(0,1fr)]">
+          <div className="flex items-baseline justify-between gap-2 sm:block">
+            <Typography variant="small" as="span" className="font-semibold sm:block">
+              {F.fused}
+            </Typography>
+            <ClassTag label={data.label} className="text-xs sm:flex" />
+          </div>
+          <DistributionBar distribution={data.distribution} />
+        </li>
+      </ul>
+    </Figure>
+  );
+};
+
+// What each extra signal costs in time and money, in the order they are added.
+const FuseView = ({ data }: FuseViewProps) => {
+  return (
+    <div className="space-y-4">
       <div className="space-y-1">
         <Typography variant="label" color="muted" as="h4">
           {F.tradeoff}
@@ -89,4 +95,4 @@ const FuseView = ({ data }: FuseViewProps) => {
   );
 };
 
-export { FuseView };
+export { FuseFigure, FuseView };

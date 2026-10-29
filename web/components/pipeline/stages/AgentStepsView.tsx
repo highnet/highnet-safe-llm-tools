@@ -17,7 +17,11 @@ import { RankBadge } from './RankBadge';
 
 type AgentStepsViewProps = {
   searches: AgentSearch[];
-  caps?: { max_steps: number; token_cap: number };
+};
+
+type AgentMetersProps = {
+  used: number;
+  caps: { max_steps: number; token_cap: number };
   agentTokens: number;
 };
 
@@ -26,35 +30,34 @@ const A = COPY.figures.agent;
 const sum = (events: AgentSearch['stages'], key: 'ms' | 'tokens' | 'cost_usd') =>
   events.reduce((total, e) => total + e[key], 0);
 
+// Searches and agent tokens against their caps: the search step's figure.
+const AgentMeters = ({ used, caps, agentTokens }: AgentMetersProps) => {
+  return (
+    <Figure
+      caption={A.meterCaption}
+      alt={`${A.searches}: ${used} of ${caps.max_steps}. ${A.tokens}: ${agentTokens} of ${caps.token_cap}.`}
+    >
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 text-sm">
+        <span className="text-muted-foreground">{A.searches}</span>
+        <Bar max={caps.max_steps} marks={[caps.max_steps]} segments={[{ key: 's', value: used }]} />
+        <span className="voice-data text-right">
+          {used}/{caps.max_steps}
+        </span>
+        <span className="text-muted-foreground">{A.tokens}</span>
+        <Bar max={caps.token_cap} segments={[{ key: 't', value: agentTokens }]} />
+        <span className="voice-data text-right">
+          {agentTokens.toLocaleString('en')}/{caps.token_cap.toLocaleString('en')}
+        </span>
+      </div>
+    </Figure>
+  );
+};
+
 // One sub-sheet per tool call, numbered 3a, 3b, …: the query, Claude's note, what came back,
 // and every stage the search ran, folded.
-const AgentStepsView = ({ searches, caps, agentTokens }: AgentStepsViewProps) => {
-  const used = searches.filter((s) => (s.step.data as AgentStepData).tool === 'search').length;
+const AgentStepsView = ({ searches }: AgentStepsViewProps) => {
   return (
     <div className="space-y-4">
-      {caps && (
-        <Figure
-          caption={A.meterCaption}
-          alt={`${A.searches}: ${used} of ${caps.max_steps}. ${A.tokens}: ${agentTokens} of ${caps.token_cap}.`}
-        >
-          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 text-sm">
-            <span className="text-muted-foreground">{A.searches}</span>
-            <Bar
-              max={caps.max_steps}
-              marks={[caps.max_steps]}
-              segments={[{ key: 's', value: used }]}
-            />
-            <span className="voice-data text-right">
-              {used}/{caps.max_steps}
-            </span>
-            <span className="text-muted-foreground">{A.tokens}</span>
-            <Bar max={caps.token_cap} segments={[{ key: 't', value: agentTokens }]} />
-            <span className="voice-data text-right">
-              {agentTokens.toLocaleString('en')}/{caps.token_cap.toLocaleString('en')}
-            </span>
-          </div>
-        </Figure>
-      )}
       <ol className="space-y-3">
         {searches.map(({ step, stages }) => {
           const data = step.data as AgentStepData;
@@ -161,4 +164,4 @@ const AgentStepsView = ({ searches, caps, agentTokens }: AgentStepsViewProps) =>
   );
 };
 
-export { AgentStepsView };
+export { AgentMeters, AgentStepsView };

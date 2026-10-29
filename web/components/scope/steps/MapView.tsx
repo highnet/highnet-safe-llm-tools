@@ -8,24 +8,22 @@ import type { Label, MapData } from '@/lib/scope/types';
 import { useDataset } from '@/lib/scope/use-dataset';
 
 import { ClassTag } from '../ClassTag';
-import { Disclosure } from '../Disclosure';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { ScopeMap } from '../ScopeMap';
 
 const F = SCOPE.steps.map;
 
-type MapViewProps = {
+type MapFigureProps = {
   data: MapData;
   preset: string;
   edit: Record<string, Label>;
 };
 
-// The message among the preset's labeled prompts, with its five nearest on the map ringed.
-// Labels follow the visitor's edit, so a moved topic changes shape here as it does in the vote.
-const MapView = ({ data, preset, edit }: MapViewProps) => {
-  const { state } = useDataset();
-  const query = { x: data.x, y: data.y };
-  const kept = SCOPE.pct(data.explained_variance[0] + data.explained_variance[1]);
-  const facts = (
+type MapViewProps = { data: MapData };
+
+// The map step's details: where the message landed and how many prompts are drawn.
+const MapView = ({ data }: MapViewProps) => {
+  return (
     <Facts
       facts={[
         { term: F.position, value: SCOPE.summary.map(data.x.toFixed(3), data.y.toFixed(3)) },
@@ -33,24 +31,27 @@ const MapView = ({ data, preset, edit }: MapViewProps) => {
       ]}
     />
   );
+};
+
+// The message among the preset's labeled prompts, with its five nearest on the map ringed: the
+// step's figure. Labels follow the visitor's edit, so a moved topic changes shape here as it does
+// in the vote.
+const MapFigure = ({ data, preset, edit }: MapFigureProps) => {
+  const { state } = useDataset();
+  const query = { x: data.x, y: data.y };
+  const kept = SCOPE.pct(data.explained_variance[0] + data.explained_variance[1]);
   if (state.status === 'loading') {
     return (
-      <div className="space-y-3">
-        {facts}
-        <Typography variant="small" color="muted">
-          {F.loading}
-        </Typography>
-      </div>
+      <Typography variant="small" color="muted">
+        {F.loading}
+      </Typography>
     );
   }
   if (state.status === 'error') {
     return (
-      <div className="space-y-3">
-        {facts}
-        <Typography variant="small" color="warning">
-          {F.failed} {state.message}
-        </Typography>
-      </div>
+      <Typography variant="small" color="warning">
+        {F.failed} {state.message}
+      </Typography>
     );
   }
   const set = state.data.presets[preset];
@@ -60,7 +61,6 @@ const MapView = ({ data, preset, edit }: MapViewProps) => {
     .filter((row) => row !== undefined);
   return (
     <div className="space-y-3">
-      {facts}
       <ScopeMap
         rows={set.rows}
         labelOf={labelOf}
@@ -114,4 +114,4 @@ const MapView = ({ data, preset, edit }: MapViewProps) => {
   );
 };
 
-export { MapView };
+export { MapFigure, MapView };

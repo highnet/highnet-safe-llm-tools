@@ -35,24 +35,14 @@ const Move = ({ before, after }: MoveProps) => {
 
 // The reranked list with each passage's old rank and its move. On arrival every row slides
 // from its old place to its new one; with reduced motion the list simply appears in order.
-const RerankView = ({ data }: RerankViewProps) => {
+const RerankTable = ({ data }: RerankViewProps) => {
   const T = COPY.stageText;
   const C = T.columns;
   const [showDropped, setShowDropped] = useState(false);
-  if (data.fallback) {
-    return (
-      <Typography color="warning">
-        {data.error?.message} {data.fallback}
-      </Typography>
-    );
-  }
   const dropped = Math.max(data.results.length - data.kept, 0);
   const rows = showDropped ? data.results : data.results.slice(0, data.kept);
   return (
-    <div className="space-y-3">
-      <Typography variant="small" color="muted">
-        {T.rerank(data.results.length, T.rankings[data.input] ?? data.input)}
-      </Typography>
+    <div className="space-y-2">
       {/* Clip rows that slide in from beyond the visible list. */}
       <div className="overflow-hidden">
         <table className="w-full border-collapse text-sm">
@@ -162,4 +152,17 @@ const RerankView = ({ data }: RerankViewProps) => {
   );
 };
 
-export { RerankView };
+// The details: what was reranked, or why the reranker failed and the earlier order was kept.
+const RerankView = ({ data }: RerankViewProps) => {
+  const T = COPY.stageText;
+  if (data.fallback) {
+    return <Typography color="warning">{data.error?.message}</Typography>;
+  }
+  return (
+    <Typography variant="small" color="muted">
+      {T.rerank(data.results.length, T.rankings[data.input] ?? data.input)}
+    </Typography>
+  );
+};
+
+export { RerankTable, RerankView };

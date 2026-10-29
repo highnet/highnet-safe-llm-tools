@@ -40,7 +40,7 @@ export const COPY = {
   },
   replay: {
     notice: (date: string) =>
-      `Every run here was recorded on ${date} with the real models, one run per question and setting, and is replayed step by step. No model is called and nothing is spent; every number is the recorded one.`,
+      `Recorded on ${date} with the real models, one run per question and setting, and replayed step by step: no model is called, and every number is the recorded one.`,
     noticeIllustrative:
       'Offline mode: these runs were recorded with the offline stand-ins (hashed word vectors and an extractive stand-in for Claude) and are replayed step by step. Scores, tokens and answers are illustrative, not real model output.',
     noticeUndated:
@@ -54,7 +54,7 @@ export const COPY = {
     more: (n: number) => `${n} more`,
     fewer: 'Fewer',
     intro:
-      'One RAG system over 35 Wikipedia articles, with Claude writing the answers. Each question below was run once for every setting with the real models and is replayed step by step, with its real timing, tokens and cost; change a setting to replay that setting’s run.',
+      'One RAG system over 35 Wikipedia articles, with Claude writing the answers. Change a setting below to replay that setting’s run.',
     introIllustrative:
       'One RAG system over 35 Wikipedia articles. Each question below was run once for every setting and is replayed step by step; change a setting to replay that setting’s run.',
     recorded: (date: string) => `Recorded ${date}.`,
@@ -279,7 +279,7 @@ export const COPY = {
       searches: 'Searches',
       tokens: 'Claude tokens',
       meterCaption:
-        'How much of each cap this run used: searches out of the maximum, and Claude’s own tokens (the plan in step 2 included) out of the agent’s token cap. The step’s readout above counts everything this step ran, embeddings included.',
+        'Searches and Claude’s own tokens (the plan included) against the agent’s caps. The readout above counts everything this step ran.',
       query: 'query',
       answered: (n: number) =>
         `Enough evidence: answered from the ${n} ${n === 1 ? 'passage' : 'passages'} found.`,
@@ -302,7 +302,7 @@ export const COPY = {
       showTable: 'Show as a table',
       hideTable: 'Hide the table',
       caption: (kept: string) =>
-        `Every dot is a chunk. Blue dots are the passages retrieved, numbered by rank; the “Detail” inset magnifies the neighbourhood of your question, where ringed dots are its nearest on the map. The two axes keep ${kept} of the spread in the embeddings, so nearby on this map is only roughly nearby in meaning. Point at a dot, or pick a row in the table, to light up its whole article.`,
+        `Each dot is a chunk; blue dots are the retrieved passages by rank, ringed dots the nearest on the map. The axes keep ${kept} of the spread, so near here is only roughly near in meaning. Point at a dot to light up its article.`,
       detail: 'Detail',
       groups: { retrieved: 'Retrieved', nearest: 'Nearest on map' },
       alt: (points: number, retrieved: string) =>
@@ -321,7 +321,8 @@ export const COPY = {
     },
   },
   why: 'Why this step?',
-  underTheHood: 'Under the hood',
+  details: 'Details',
+  hideDetails: 'Hide details',
   showCode: (n: number) => `Show the code (${n} ${n === 1 ? 'excerpt' : 'excerpts'})`,
   hideCode: 'Hide the code',
   expandStep: 'Show details',

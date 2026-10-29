@@ -14,6 +14,7 @@ import { clearDatasetCache } from '@/lib/scope/api';
 import { publishedScopeResults } from '@/lib/scope/evals';
 
 import illustrative from './fixtures/scope/evals-illustrative.json';
+import { openFolds } from './helpers';
 import { stubScopeFetch } from './scope-fixtures';
 
 const D = SCOPE.dataset;
@@ -154,6 +155,7 @@ describe('scope bridge', () => {
 describe('scope evals page', () => {
   it('renders every number from the published run', () => {
     render(<ScopeEvalsPage />);
+    openFolds(E.foldsLabel);
     expect(screen.getByText(E.record.costValue(results.total_usd))).toBeInTheDocument();
     // In the published run the fused pipeline beats every single signal, so no "why" follows.
     expect(
@@ -191,6 +193,7 @@ describe('scope evals page', () => {
       ),
     };
     render(<ScopeEvalsReport results={fusedWins} />);
+    openFolds(E.foldsLabel);
     expect(screen.getByText(E.illustrative)).toBeInTheDocument();
     expect(
       screen.getByText(E.finding.fusedWins('99.0%', 'the decision model', '95.1%')),
@@ -205,6 +208,7 @@ describe('scope evals page', () => {
       methods: withDecide.methods.map((m) => (m.method === 'decide' ? { ...m, failed: 3 } : m)),
     };
     render(<ScopeEvalsReport results={run} />);
+    openFolds(E.foldsLabel);
     const byName = (m: string) => withDecide.methods.find((x) => x.method === m)!;
     // The offline run's best single signal is kNN, and it beats the fused default.
     expect(
@@ -234,6 +238,8 @@ describe('scope evals page', () => {
         }}
       />,
     );
+    openFolds(E.foldsLabel);
+    expect(screen.getByText(/The free signals are far weaker/)).toBeInTheDocument();
     expect(screen.queryByText(/The two judges side by side/)).toBeNull();
   });
 });

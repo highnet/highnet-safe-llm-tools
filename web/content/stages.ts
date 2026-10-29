@@ -36,79 +36,118 @@ export const STAGE_ORDER: Stage[] = [
 export const STAGES: Record<Stage, StageCopy> = {
   request: {
     title: 'Check the request',
-    why: 'Every run calls paid APIs, so before anything else we check two limits: how many questions you have asked recently, and how much of this month’s budget is left. If either is used up we stop here and say why, rather than failing halfway through. Nothing has been searched or sent to a model yet. The bars show how close you are to each limit.',
+    why: 'Every run calls paid APIs, so first we check your recent questions and this month’s budget. If either is used up we stop here and say why.',
     detail:
-      'Limits are counted per hashed IP address. At 80% of the monthly cap the expensive features switch off; at 100% live queries stop until the next month.',
+      'Limits are counted per hashed IP address. At 80% of the monthly cap the expensive features switch off; at 100% live queries stop until next month.',
   },
   embed_query: {
     title: 'Embed the question',
-    why: 'To search by meaning, we first turn your question into an embedding: a long list of numbers that places what it means at a point in space. Every passage in the corpus was turned into a point the same way when the corpus was built, so questions and passages about the same thing land close together. The numbers mean nothing one by one; only their overall direction matters. The bars below show the first few of them.',
+    why: 'We turn the question into an embedding, a list of numbers that places its meaning in space. Passages about the same thing land close by.',
     detail:
-      'The question is embedded as a “query”; every passage was embedded as a “document” when the corpus was built. Only the first 8 dimensions are shown. The vectors are normalised to length 1, so direction is all that matters.',
+      'The question is embedded as a “query”, every passage as a “document”. Only the first 8 dimensions are drawn; vectors have length 1, so only direction matters.',
   },
   map_project: {
     title: 'Place it on the map',
-    why: 'Nobody can picture a space with that many dimensions, so we flatten the space to two with PCA, a projection fitted once on every passage in the corpus, and drop your question onto it. Dots that cluster are passages on similar topics, usually from the same article. The flattening throws most of the information away, so treat the map as a sketch of where your question landed, not as the search itself. The search in the next steps uses every dimension.',
+    why: 'We flatten that space to two dimensions with PCA and drop the question onto it. Treat the map as a sketch: the search uses every dimension.',
     detail:
-      'The percentages say how much of the original spread the two axes keep. When they are low, the 2D picture is a rough sketch: neighbours on the map are not always the passages the search finds.',
+      'The percentages say how much of the spread the two axes keep. When they are low, neighbours on the map are not always the passages the search finds.',
   },
   bm25: {
     title: 'Keyword search (BM25)',
-    why: 'BM25 is classic keyword search: it scores each passage by how many of your question’s words it contains, and counts rare words far more than common ones. It is exact and fast, so names, dates and numbers match reliably. Its blind spot is meaning: “car” never finds “automobile”. Below, see which of your words became search terms and how much each one weighed.',
+    why: 'BM25 scores passages by the question’s words, rare words counting most. It matches names and numbers exactly but misses synonyms.',
     detail:
-      'SQLite FTS5 with the Porter stemmer, filtered to the selected chunk size. We drop stop words and quote each remaining term, so your text is never read as query syntax. Scores are shown higher-is-better.',
+      'SQLite FTS5 with the Porter stemmer, filtered to the chosen chunk size. Stop words are dropped and each term quoted, so your text is never read as query syntax.',
   },
   vector: {
     title: 'Vector search',
-    why: 'Vector search compares your question’s embedding with every passage embedding and keeps the closest ones. It finds passages that say the same thing in different words, which keyword search misses. In exchange it can drift towards passages that are merely on the same topic, and it blurs exact names and numbers. The distances below show how close the best matches really are.',
+    why: 'Vector search keeps the passages whose embeddings sit closest to the question’s. It finds paraphrases, but can drift to passages merely on the same topic.',
     detail:
-      'Cosine distance: 0 means the same direction, 1 means unrelated. sqlite-vec compares against every chunk of the selected size exactly; there is no approximate index.',
+      'Cosine distance: 0 is the same direction, 1 unrelated. sqlite-vec compares against every chunk of the chosen size exactly; there is no approximate index.',
   },
   fuse: {
     title: 'Fuse the rankings',
-    why: 'Hybrid search runs both searches and merges their rankings, so each covers the other’s blind spots. We merge by rank, not by score: a passage near the top of both lists beats one that only a single search liked. That way BM25 scores and vector distances never have to be put on the same scale. Follow a passage’s rank in each input list to see why it ended up where it did.',
+    why: 'Hybrid search merges both rankings by rank, not score, so a passage near the top of both lists wins.',
     detail:
-      'Reciprocal rank fusion: each list contributes 1 / (60 + rank) to a passage’s score. Only ranks count, so BM25 scores and cosine distances never need to be put on one scale. Each search fetches twice top-k so fusion has candidates to promote.',
+      'Reciprocal rank fusion: each list adds 1 / (60 + rank) to a passage’s score. Each search fetches twice top-k so fusion has candidates to promote.',
   },
   rerank: {
     title: 'Rerank',
-    why: 'The searches so far score the question and each passage separately. A reranker reads the question and a passage together, which is slower but usually judges relevance better. We give it the top candidates and let it reorder them. Watch which passages move up or down, and whether the top of the list changes at all. It is off by default because it adds time and cost to every question.',
+    why: 'A reranker reads the question and each passage together, which is slower but judges relevance better. It is off by default because it adds time and cost.',
     detail: 'Voyage rerank-2.5-lite, applied to the candidates from the search steps.',
   },
   select_context: {
     title: 'Choose the context',
-    why: 'Only the top passages go to the model. They are the only facts it is allowed to use, so if the answer is not among them the model cannot find it. This is where most RAG answers are won or lost: a wrong answer usually means a wrong passage here, not a weak model. The figure shows how much of the context each passage takes up.',
+    why: 'Only the top passages reach the model, and they are the only facts it may use. A wrong answer usually means a wrong passage here.',
     detail:
-      'Token counts here are estimates (words × 4/3). The exact count, as the model sees it, follows in the next step.',
+      'Token counts here are estimates (words × 4/3). The exact count follows in the next step.',
   },
   prompt: {
     title: 'Write the prompt',
-    why: 'We now write the exact request the model receives: our instructions, the passages as numbered documents it can cite, and your question. Nothing else is sent, and the whole thing is shown below. Before sending, we count its tokens and work out the most the answer could cost. If that could go over the budget, we refuse to send it.',
+    why: 'This is the exact request the model receives: our instructions, the numbered passages and your question. If its worst-case cost could break the budget, we do not send it.',
     detail:
-      'The token count comes from the provider’s token-counting endpoint. The worst-case cost assumes the answer uses every allowed output token; if that could exceed the remaining budget, we refuse the call.',
+      'The token count comes from the provider’s counting endpoint. The worst case assumes the answer uses every allowed output token.',
   },
   generate: {
     title: 'Generate the answer',
-    why: 'The model writes its answer from the passages alone, citing them as it goes, and the text streams in as it is written. It has been told to say so when the passages don’t contain the answer, rather than guess from memory. The cost comes from the token counts the API reports for this call. Most of it is usually input: the passages we just sent.',
-    detail:
-      'Cost uses the input and output token counts the API reports for this call, not an estimate.',
+    why: 'The model answers from the passages alone, citing them, and says so when they don’t hold the answer.',
+    detail: 'Cost uses the token counts the API reports for this call, not an estimate.',
   },
   citations: {
     title: 'Check the citations',
-    why: 'We map every citation back to the passage it came from, so you can check each claim against its evidence. A sentence without a citation is the model’s own glue or conclusion, and deserves a closer look. Passages that were sent but never cited are listed too: they cost tokens without helping this answer. If nothing was cited and the model didn’t decline to answer, we flag it.',
+    why: 'We map each citation back to its passage so every claim can be checked. A sentence without one is the model’s own glue.',
     detail:
-      'Passages that were retrieved but never cited are listed too: they cost tokens without helping the answer.',
+      'Passages sent but never cited are listed too: they cost tokens without helping this answer.',
   },
   agent_plan: {
     title: 'Plan the searches',
-    why: 'Some questions join two facts from different articles, and one search rarely finds both. In agentic mode Claude reads the question first, says how it will split it, and writes a short search for each part. It works through two tools: search, which runs the full retrieval pipeline with your settings, and answer, which says the passages are enough. Its instructions and the limits on searches and tokens are shown below.',
+    why: 'Some questions join facts from two articles. In agentic mode Claude splits the question first and writes one search per part.',
     detail:
-      'The agent works through tool calls: search runs the whole retrieval pipeline with your settings, answer says the passages are enough. Its instructions and the caps on searches and tokens are shown here.',
+      'The agent works through two tools: search runs the whole retrieval pipeline with your settings, answer says the passages are enough.',
   },
   agent_step: {
     title: 'Search, step by step',
-    why: 'Each search is a complete retrieval run of its own, numbered 3a, 3b and so on, with its own stages, tokens and cost. After each round Claude reads what came back and decides whether to search again or answer. The loop has hard limits on searches and tokens, and if it hits one it stops and says which. Open a search to see what it found.',
+    why: 'Each search is a full retrieval run, numbered 3a, 3b and so on. After each one Claude decides to search again or answer.',
     detail:
-      'Every search is numbered (3a, 3b, …) and keeps its own stages, tokens and cost. The loop stops when Claude calls answer, or at the first cap it would cross, and says which.',
+      'The loop stops when Claude calls answer, or at the first cap on searches or tokens it would cross, and says which.',
   },
+};
+
+// One plain sentence per step: what happened in this run. Every value is passed in from the
+// trace (see lib/step-lead.ts); a skipped or failed step shows its own reason instead.
+export const STAGE_LEADS = {
+  request: (left: number, limit: number, tier: string) =>
+    `Checks passed: ${left} of ${limit} questions left this minute, and the budget is ${tier}.`,
+  embed: (dims: number, model: string) =>
+    `Turned the question into ${dims.toLocaleString('en')} numbers with ${model}.`,
+  map: (kept: string) =>
+    `The question lands among the corpus passages; this flat map keeps ${kept} of the spread.`,
+  bm25: (n: number, title: string, score: string) =>
+    `Found ${n} passages by keyword; the best was from “${title}” (score ${score}).`,
+  bm25None: 'No passage shares a search word with the question.',
+  vector: (n: number, title: string, distance: string) =>
+    `Found ${n} passages by meaning; the closest was from “${title}” (distance ${distance}).`,
+  vectorNone: 'Vector search returned no passages.',
+  fuse: (kept: number, both: number, title: string) =>
+    `Kept the top ${kept}, ${both} found by both searches; first is “${title}”.`,
+  fuseNone: 'Neither search found a passage to fuse.',
+  rerank: (kept: number, moved: number, title: string) =>
+    moved === 0
+      ? `The reranker left the top ${kept} in place; first is still “${title}”.`
+      : `The reranker moved ${moved} of the top ${kept}; first is now “${title}”.`,
+  context: (n: number, tokens: string) =>
+    n === 0
+      ? 'No passages to send, so the model has nothing to answer from.'
+      : `Sent the top ${n} passages to the model, about ${tokens} tokens.`,
+  prompt: (tokens: string, worstCase: string) =>
+    `The prompt is ${tokens} tokens; at most this answer could cost ${worstCase}.`,
+  generate: (model: string, tokens: string, cost: string) =>
+    `${model} wrote a ${tokens}-token answer; this call cost ${cost}.`,
+  abstained: 'The model found no answer in the passages and said so, citing nothing.',
+  noCitations: 'The answer cites no passage, so check it closely.',
+  citations: (n: number, unused: number) =>
+    `${n} ${n === 1 ? 'citation points' : 'citations point'} back to the passages; ${unused} sent ${unused === 1 ? 'was' : 'were'} never cited.`,
+  plan: (n: number) =>
+    n === 1 ? 'Claude planned 1 search.' : `Claude split the question into ${n} searches.`,
+  searched: (n: number, found: number) =>
+    `Claude ran ${n} ${n === 1 ? 'search' : 'searches'} and kept ${found} passages.`,
 };

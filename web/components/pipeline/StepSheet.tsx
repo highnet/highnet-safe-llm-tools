@@ -1,11 +1,13 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/Collapsible';
 import { Formula } from '@/components/formal/Formula';
+import { Disclosure } from '@/components/ui/Disclosure';
 import { Typography } from '@/components/ui/Typography';
+import { COPY } from '@/content/copy';
 import { FORMAL, type KeyEntry } from '@/content/formal';
 import type { StageCopy } from '@/content/stages';
 import { pad2 } from '@/lib/format';
@@ -31,13 +33,27 @@ type StepSheetProps = {
   copy: StageCopy;
   status: StepStatus;
   summary?: string;
+  // One plain sentence of what happened in this run, and at most one figure: shown by default.
+  lead?: string;
+  figure?: ReactNode;
   snippets: Snippet[];
+  // Links into the details (such as #chunk-12) open them, so the linked row exists to scroll to.
+  opensOn?: RegExp;
   measure?: { ms: number; tokens: number; costUsd: number };
+  // Everything else (facts, tables, raw prompts) waits behind the step's one Details toggle.
   children?: ReactNode;
 };
 
-// One numbered step of the calculation: number in the margin, the working on a sheet, and
-// the blue-pencil note beside it. On phones each step folds to one line so the page stays short.
+const LEAD_TONE: Partial<Record<StepStatus, 'destructive' | 'warning' | 'muted'>> = {
+  error: 'destructive',
+  warning: 'warning',
+  skipped: 'muted',
+};
+
+// One numbered step of the calculation: number in the margin, then a sheet that says in one
+// sentence what happened, with at most one figure. Everything else (the note, the formula, the
+// facts and the code) opens under one Details toggle; from lg the note is written in the margin.
+// On phones each step also folds to one line so the page stays short.
 const StepSheet = ({
   anchor,
   formula,
@@ -46,19 +62,36 @@ const StepSheet = ({
   copy,
   status,
   summary,
+  lead,
+  figure,
   snippets,
+  opensOn,
   measure,
   children,
 }: StepSheetProps) => {
   const wide = useMediaQuery(WIDE);
   const [open, setOpen] = useState(false);
+  const [details, setDetails] = useState(false);
+
+  useEffect(() => {
+    if (!opensOn) return;
+    const follow = () => {
+      const hash = window.location.hash;
+      if (!opensOn.test(hash)) return;
+      setOpen(true);
+      setDetails(true);
+      // The row is drawn on the next frame; then scroll it into view as the link meant.
+      requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView());
+    };
+    window.addEventListener('hashchange', follow);
+    return () => window.removeEventListener('hashchange', follow);
+  }, [opensOn]);
   const quiet = status === 'pending' || status === 'skipped';
   const headingId = `step-${number}-title`;
 
   const readout = measure && status !== 'skipped' && (
     <Readout ms={measure.ms} tokens={measure.tokens} costUsd={measure.costUsd} />
   );
-  const note = <WhyThisStep copy={copy} layout="inline" className="lg:hidden" />;
   const formal = formula && (
     <div className="rounded-sm border border-dashed px-3 pt-2 pb-1">
       <Typography variant="label" color="muted" as="p">
@@ -67,13 +100,31 @@ const StepSheet = ({
       <Formula source={formula} id={`${anchor}-formula`} entries={formulaKey} className="mt-1" />
     </div>
   );
-  const details = (
-    <>
-      {children && <div className="mt-3">{children}</div>}
-      <div className="mt-3 border-t border-dashed pt-2">
-        <CodeSnippet snippets={snippets} />
-      </div>
-    </>
+  const body = (
+    <div className="space-y-3">
+      {lead && (
+        <Typography color={LEAD_TONE[status]} className="max-w-[68ch]">
+          {lead}
+        </Typography>
+      )}
+      {figure}
+      <Disclosure
+        show={COPY.details}
+        hide={COPY.hideDetails}
+        open={details}
+        onOpenChange={setDetails}
+        className="border-t border-dashed pt-1"
+      >
+        <div className="space-y-3">
+          <WhyThisStep copy={copy} layout="inline" className="lg:hidden" />
+          {formal}
+          {children}
+          <div className="border-t border-dashed pt-2">
+            <CodeSnippet snippets={snippets} />
+          </div>
+        </div>
+      </Disclosure>
+    </div>
   );
 
   return (
@@ -118,13 +169,7 @@ const StepSheet = ({
               <StatusMark status={status} />
             </div>
           </header>
-          {status !== 'pending' && (
-            <>
-              <div className="mt-2">{note}</div>
-              {formal && <div className="mt-3">{formal}</div>}
-              {details}
-            </>
-          )}
+          {status !== 'pending' && <div className="mt-2">{body}</div>}
         </article>
       ) : (
         <Collapsible
@@ -146,7 +191,8 @@ const StepSheet = ({
               >
                 {copy.title}
               </Typography>
-              {summary && (
+              {/* Open, the lead sentence below says the same thing in words. */}
+              {summary && !open && (
                 <span className="voice-data line-clamp-2 block text-xs text-muted-foreground">
                   {summary}
                 </span>
@@ -162,16 +208,14 @@ const StepSheet = ({
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 px-3 pb-3">
-            {note}
-            {formal}
             {readout}
-            {status !== 'pending' && details}
+            {status !== 'pending' && body}
           </CollapsibleContent>
         </Collapsible>
       )}
 
-      {/* Beside a waiting step the note would stretch an empty sheet; it lands with the step. */}
-      {status !== 'pending' && (
+      {/* The note is written in the margin only while the step's details are open. */}
+      {wide && status !== 'pending' && details && (
         <WhyThisStep
           copy={copy}
           layout="margin"

@@ -1,7 +1,11 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ScopeStageBody, type ScopeRunContext } from '@/components/scope/ScopeStageBody';
+import {
+  ScopeStageBody,
+  ScopeStageFigure,
+  type ScopeRunContext,
+} from '@/components/scope/ScopeStageBody';
 import { ScopeStepList } from '@/components/scope/ScopeStepList';
 import { ScopeMap } from '@/components/scope/ScopeMap';
 import { FORMAL } from '@/content/formal';
@@ -9,14 +13,23 @@ import { SCOPE, SCOPE_KEY } from '@/content/scope';
 import { SCOPE_STAGE_ORDER } from '@/content/scope-stages';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { clearDatasetCache } from '@/lib/scope/api';
+import { scopeLead } from '@/lib/scope/lead';
 
+import { openDetails } from './helpers';
 import { dataset, recording, stage, stubScopeFetch } from './scope-fixtures';
 
 const S = SCOPE.steps;
 const context: ScopeRunContext = { preset: 'career', message: 'Hi', block: 0.5, edit: {} };
 
+// A step's figure, its details and, above them, its lead sentence: the sheet's three parts.
 const body = (event: ScopeTraceEvent, ctx: Partial<ScopeRunContext> = {}) =>
-  render(<ScopeStageBody event={event} context={{ ...context, ...ctx }} />);
+  render(
+    <>
+      <p>{scopeLead(event)}</p>
+      <ScopeStageFigure event={event} context={{ ...context, ...ctx }} />
+      <ScopeStageBody event={event} context={{ ...context, ...ctx }} />
+    </>,
+  );
 
 beforeEach(() => {
   clearDatasetCache();
@@ -361,6 +374,8 @@ describe('scope step list', () => {
     globalThis.__wide = true;
     const { events } = recording('decide');
     render(<ScopeStepList events={events} runStatus="finished" context={context} />);
+    expect(screen.queryByText(FORMAL.label)).toBeNull();
+    openDetails();
     expect(screen.getAllByText(FORMAL.label)).toHaveLength(SCOPE_STAGE_ORDER.length);
     const [message] = screen.getAllByRole('button', { name: `m: ${SCOPE_KEY.m.name}` });
     fireEvent.click(message);
@@ -371,6 +386,7 @@ describe('scope step list', () => {
     globalThis.__wide = true;
     const { events } = recording('decide');
     render(<ScopeStepList events={events} runStatus="finished" context={context} />);
+    openDetails();
     expect(screen.getByText(S.decide.agree('in scope'))).toBeInTheDocument();
   });
 

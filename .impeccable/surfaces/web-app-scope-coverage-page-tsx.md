@@ -20,3 +20,10 @@ THESIS: The coverage page is the pad's map laid flat at full size, with the empt
 OWN-WORLD: As DESIGN.md. Reuses the scope map, class marks, quiet pressed buttons and pencil folds.
 
 FIRST VIEWPORT: "Sheet 4 · Where are the examples thin?", the lede, the preset switch and the top of the map.
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- Two-sentence lede; the map caveat moved under "How this works"; the map follows at once.
+

@@ -9,7 +9,7 @@ import { COPY } from '@/content/copy';
 import type { DemoQuestion } from '@/lib/api';
 import { setView } from '@/lib/view-store';
 
-import { ControlledEventSource, ev } from './helpers';
+import { ControlledEventSource, ev, openDetails } from './helpers';
 
 const R = COPY.replay;
 const base = JSON.parse(readFileSync(path.join(__dirname, 'fixtures/config.json'), 'utf8'));
@@ -103,6 +103,7 @@ describe('replayed questions', () => {
         stages: 1,
       });
     });
+    openDetails();
     expect(screen.getByText(`${R.recorded('2026-09-28')} Replayed.`)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: COPY.settings.fewer }));
     expect(url().searchParams.get('k')).toBe('3');

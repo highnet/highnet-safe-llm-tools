@@ -21,3 +21,10 @@ THESIS: The Scope evals are Sheet 3 of the same pad: the counts behind each rate
 OWN-WORLD: As DESIGN.md. Reuses the RAG evals report's sheets, measure rows and dashed record; adds the class tags as table heads and the sweep line charts.
 
 FIRST VIEWPORT: "Sheet 3 · How well does each signal guard the scope?", the lede, the run record, then "What this run found".
+
+## Distilled (owner, 2026-10-29)
+
+Owner feedback: "The whole thing is too dense with information, no one will read it." Direction chosen by the owner, no interview: progressive disclosure, one idea per step or section. Nothing was deleted and every number is still read from the trace or the eval JSON; it moved behind pencil disclosures (`components/ui/Disclosure`, closed by default, `aria-expanded`, never persisted).
+
+- The headline finding as one sentence, then one comparison table (false refusal, over-compliance, accuracy per method). What else this run found, Per method with counts, Per class, Threshold sweep, Cost and Run details fold under "More from this run".
+

@@ -1,4 +1,3 @@
-import { Typography } from '@/components/ui/Typography';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import type {
   AuditData,
@@ -13,22 +12,21 @@ import type {
   RequestData,
   RespondData,
   RulesData,
-  SkippedData,
   ThresholdsData,
 } from '@/lib/scope/types';
 
 import { AuditView } from './steps/AuditView';
 import { ContextView } from './steps/ContextView';
 import { DecideView } from './steps/DecideView';
-import { EmbedView } from './steps/EmbedView';
-import { FuseView } from './steps/FuseView';
+import { EmbedFigure, EmbedView } from './steps/EmbedView';
+import { FuseFigure, FuseView } from './steps/FuseView';
 import { JudgeView } from './steps/JudgeView';
-import { KnnView } from './steps/KnnView';
-import { MapView } from './steps/MapView';
+import { KnnFigure, KnnView } from './steps/KnnView';
+import { MapFigure, MapView } from './steps/MapView';
 import { RequestView } from './steps/RequestView';
 import { RespondView } from './steps/RespondView';
-import { RulesView } from './steps/RulesView';
-import { ThresholdsView } from './steps/ThresholdsView';
+import { RulesFigure, RulesView } from './steps/RulesView';
+import { ThresholdsFigure, ThresholdsView } from './steps/ThresholdsView';
 
 export type ScopeRunContext = {
   preset: string;
@@ -44,17 +42,37 @@ type ScopeStageBodyProps = {
   context: ScopeRunContext;
 };
 
-// Each step's payload is cast from `event.data`; the shapes are in lib/scope/types.ts.
+// The one figure a step shows before its Details are opened, or nothing when the lead sentence
+// says it all. Each step's payload is cast from `event.data`; the shapes are in lib/scope/types.ts.
+const ScopeStageFigure = ({ event, context }: ScopeStageBodyProps) => {
+  if (event.status === 'skipped' || event.status === 'error') return null;
+  const data = event.data;
+  switch (event.stage) {
+    case 'rules':
+      return <RulesFigure data={data as RulesData} block={context.block} />;
+    case 'embed':
+      return <EmbedFigure data={data as EmbedData} />;
+    case 'map':
+      return <MapFigure data={data as MapData} preset={context.preset} edit={context.edit} />;
+    case 'knn':
+      return <KnnFigure data={data as KnnData} />;
+    case 'fuse':
+      return <FuseFigure data={data as FuseData} />;
+    case 'thresholds':
+      return <ThresholdsFigure data={data as ThresholdsData} />;
+    default:
+      return null;
+  }
+};
+
+// Everything else a step recorded, behind its Details toggle. A skipped step's reason and a
+// failed step's error are its lead sentence, so they are not repeated here.
 const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
   const data = event.data;
   const { stage, status } = event;
-  // Context and both judges explain their own skips (the turns not read, the rubric changed).
+  // Context and both judges show more on a skip (the turns not read, the rubric they were asked).
   if (status === 'skipped' && stage !== 'context' && stage !== 'judge' && stage !== 'decide') {
-    return (
-      <Typography variant="small" color="muted">
-        {(data as SkippedData).reason}
-      </Typography>
-    );
+    return null;
   }
   switch (stage) {
     case 'request':
@@ -75,20 +93,14 @@ const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
     default:
       break;
   }
-  if (status === 'error') {
-    return (
-      <Typography color="destructive">
-        {(data as { error: { message: string } }).error.message}
-      </Typography>
-    );
-  }
+  if (status === 'error') return null;
   switch (stage) {
     case 'rules':
-      return <RulesView data={data as RulesData} block={context.block} />;
+      return <RulesView data={data as RulesData} />;
     case 'embed':
       return <EmbedView data={data as EmbedData} />;
     case 'map':
-      return <MapView data={data as MapData} preset={context.preset} edit={context.edit} />;
+      return <MapView data={data as MapData} />;
     case 'knn':
       return <KnnView data={data as KnnData} />;
     case 'fuse':
@@ -102,4 +114,4 @@ const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
   }
 };
 
-export { ScopeStageBody };
+export { ScopeStageBody, ScopeStageFigure };
