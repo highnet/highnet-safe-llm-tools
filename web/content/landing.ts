@@ -26,8 +26,10 @@ export const LANDING = {
     lede: 'A question meets Scope before it meets retrieval. RAG’s first step shows the Scope verdict recorded for that exact question under the RAG corpus assistant preset, and links to the full breakdown. Two questions show why the two checks are different.',
     worldCup: {
       question: 'Who won the 2018 FIFA World Cup?',
-      title: 'In scope, but not in the corpus',
-      body: 'A factual question is what this assistant is for, so Scope lets it through. Retrieval then finds nothing about the 2018 World Cup in the 35 articles, and the RAG pipeline says so instead of guessing.',
+      title: 'Let through, but not in the corpus',
+      body: 'A factual question is the kind this assistant is for, so the guard should let it through. Retrieval then finds nothing about the 2018 World Cup in the 35 articles, and the RAG pipeline says so instead of guessing.',
+      rag: 'RAG searches the 35 articles, finds no passage about the 2018 World Cup and abstains.',
+      outcome: 'A plain “not in this library” instead of a guess.',
       scopeLink: 'See Scope decide',
       ragLink: 'See RAG abstain',
     },
@@ -35,10 +37,17 @@ export const LANDING = {
       question: 'What’s a good lasagna recipe?',
       title: 'Off scope',
       body: 'A recipe is not what this assistant is for, whatever the library holds. Scope sends a warm redirect back to the kind of question it can answer, before any search runs.',
+      rag: 'RAG never runs: no search, no prompt, no tokens spent.',
+      outcome: 'A warm redirect to the questions this assistant can answer.',
       scopeLink: 'See Scope decide',
     },
     verdict: (action: string, confidence: string) =>
       `Recorded Scope verdict: ${action}, fused confidence ${confidence}.`,
+    judge: (label: string, confidence: string) =>
+      `The LLM judge alone said ${label} (${confidence}).`,
+    judgeFailed: 'The LLM judge’s reply failed validation, so it dropped out.',
+    steps: { scope: 'Scope', rag: 'RAG' },
+    outcome: 'Outcome',
   },
   principlesTitle: 'What the two tools are arguing',
   principles: [

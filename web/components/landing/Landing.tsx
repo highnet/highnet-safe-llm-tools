@@ -3,10 +3,11 @@ import Link from 'next/link';
 import { type ReactNode } from 'react';
 
 import { buttonVariants } from '@/components/ui/Button';
-import { ClassMark } from '@/components/ui/ClassMark';
+import { type ClassLabel, ClassMark } from '@/components/ui/ClassMark';
 import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
 import { LANDING } from '@/content/landing';
+import { SCOPE } from '@/content/scope';
 import { SCOPE_STAGE_ORDER, SCOPE_STAGES } from '@/content/scope-stages';
 import { SCOPE_ACTIONS, type ScopeAction } from '@/content/scope-verdict';
 import { SITE } from '@/content/site';
@@ -87,19 +88,54 @@ const ProductSheet = ({ id, lede, takeaway, open, secondary, figure }: ProductSh
   );
 };
 
-type VerdictLineProps = {
+type VerdictLinesProps = {
   verdict?: ScopeVerdict;
 };
 
-// One recorded Scope verdict, read from the export; nothing here is typed in by hand.
-const VerdictLine = ({ verdict }: VerdictLineProps) => {
+// One recorded Scope verdict and what the judge alone said, read from the export; nothing here
+// is typed in by hand.
+const VerdictLines = ({ verdict }: VerdictLinesProps) => {
   if (!verdict) return null;
   const action = SCOPE_ACTIONS[verdict.action];
+  const judge = verdict.judge;
   return (
-    <Typography variant="data" as="p" className="flex items-center gap-2">
-      <ClassMark label={action.label} />
-      {LANDING.connect.verdict(action.text, formatNumber(verdict.confidence, 2))}
-    </Typography>
+    <>
+      <Typography variant="data" as="p" className="flex items-center gap-2">
+        <ClassMark label={action.label} />
+        {LANDING.connect.verdict(action.text, formatNumber(verdict.confidence, 2))}
+      </Typography>
+      <Typography variant="small" color="muted">
+        {judge
+          ? LANDING.connect.judge(
+              SCOPE.labels[judge.label as ClassLabel],
+              formatNumber(judge.confidence, 2),
+            )
+          : LANDING.connect.judgeFailed}
+      </Typography>
+    </>
+  );
+};
+
+type SheetLineProps = {
+  mark: string;
+  label: string;
+  children: ReactNode;
+};
+
+// One numbered line of a worked sheet: the step's number in the margin, its working beside it.
+const SheetLine = ({ mark, label, children }: SheetLineProps) => {
+  return (
+    <li className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-2 py-3">
+      <span aria-hidden className="voice-data pt-0.5 text-xs text-muted-foreground">
+        {mark}
+      </span>
+      <div className="space-y-1">
+        <Typography variant="label" color="muted" as="p">
+          {label}
+        </Typography>
+        {children}
+      </div>
+    </li>
   );
 };
 
@@ -108,20 +144,42 @@ type WorkedQuestionProps = {
   title: string;
   body: string;
   verdict?: ScopeVerdict;
+  rag: string;
+  outcome: string;
   links: { href: string; text: string }[];
 };
 
-const WorkedQuestion = ({ question, title, body, verdict, links }: WorkedQuestionProps) => {
+// A question worked on its own sheet: Scope's line, RAG's line, then the outcome under a rule.
+const WorkedQuestion = ({
+  question,
+  title,
+  body,
+  verdict,
+  rag,
+  outcome,
+  links,
+}: WorkedQuestionProps) => {
+  const c = LANDING.connect;
   return (
-    <div className="space-y-2 border-t border-dashed pt-4">
+    <div className="space-y-2 rounded-sm border bg-card p-4 md:p-5">
       <Typography variant="data" as="p" className="text-base">
         “{question}”
       </Typography>
       <Typography variant="stepHeading" as="h3">
         {title}
       </Typography>
-      <Typography>{body}</Typography>
-      <VerdictLine verdict={verdict} />
+      <Typography color="muted">{body}</Typography>
+      <ol className="divide-y border-t">
+        <SheetLine mark={pad2(1)} label={c.steps.scope}>
+          <VerdictLines verdict={verdict} />
+        </SheetLine>
+        <SheetLine mark={pad2(2)} label={c.steps.rag}>
+          <Typography>{rag}</Typography>
+        </SheetLine>
+        <SheetLine mark="=" label={c.outcome}>
+          <Typography className="font-semibold">{outcome}</Typography>
+        </SheetLine>
+      </ol>
       <ul className="flex flex-wrap gap-x-5">
         {links.map((link) => (
           <li key={link.href}>
@@ -221,6 +279,8 @@ const Landing = () => {
             title={c.worldCup.title}
             body={c.worldCup.body}
             verdict={verdictForExample('rag-world-cup')}
+            rag={c.worldCup.rag}
+            outcome={c.worldCup.outcome}
             links={[
               { href: scopeRunHref('rag-world-cup'), text: c.worldCup.scopeLink },
               { href: questionHref(c.worldCup.question), text: c.worldCup.ragLink },
@@ -231,6 +291,8 @@ const Landing = () => {
             title={c.lasagna.title}
             body={c.lasagna.body}
             verdict={verdictForExample('rag-lasagna')}
+            rag={c.lasagna.rag}
+            outcome={c.lasagna.outcome}
             links={[{ href: scopeRunHref('rag-lasagna'), text: c.lasagna.scopeLink }]}
           />
         </div>
@@ -240,7 +302,7 @@ const Landing = () => {
         <Typography variant="sheetTitle" as="h2" id="principles-title">
           {LANDING.principlesTitle}
         </Typography>
-        <ul className="max-w-[68ch] divide-y divide-dashed border-y border-dashed">
+        <ul className="max-w-[68ch] divide-y border-y">
           {LANDING.principles.map((p) => (
             <li key={p} className="py-3">
               <Typography>{p}</Typography>

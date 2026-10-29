@@ -48,6 +48,20 @@ describe('landing page', () => {
     expect(bare(href(/See RAG abstain/)!)).toBe(
       bare(questionHref(LANDING.connect.worldCup.question)),
     );
+    // The judge's own label sits under the fused verdict: here it disagreed with the fusion.
+    expect(screen.getAllByText(/The LLM judge alone said off scope \(0\.95\)/)).not.toHaveLength(0);
+    expect(screen.getAllByText(LANDING.connect.worldCup.rag)).toHaveLength(1);
+    expect(screen.getAllByText(LANDING.connect.lasagna.outcome)).toHaveLength(1);
+  });
+
+  it('says so when the judge reply failed validation', () => {
+    const recorded = verdictForExample('rag-lasagna')!;
+    const spy = vi
+      .spyOn(verdictLib, 'verdictForExample')
+      .mockReturnValue({ ...recorded, judge: null });
+    render(<HomePage />);
+    expect(screen.getAllByText(LANDING.connect.judgeFailed)).toHaveLength(2);
+    spy.mockRestore();
   });
 });
 
@@ -80,7 +94,8 @@ describe('scope verdicts and marks', () => {
     );
     const marks = container.querySelectorAll('[data-slot="class-mark"]');
     expect(marks).toHaveLength(4);
-    expect(marks[0].querySelector('circle')).not.toBeNull();
+    expect(marks[0].querySelector('path')).not.toBeNull();
+    expect(marks[1].querySelector('circle')).not.toBeNull();
     expect(marks[2].querySelector('rect')).not.toBeNull();
   });
 });

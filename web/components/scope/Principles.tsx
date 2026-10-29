@@ -6,7 +6,7 @@ import { SCOPE } from '@/content/scope';
 const P = SCOPE.principles;
 
 // Three convictions behind the guard, written down the pad, not as cards: each claim in
-// graphite, its reasoning beside it, dashed rules between.
+// graphite, its reasoning beside it, ruled lines between.
 const Principles = () => {
   return (
     <section aria-labelledby="principles-title" className="space-y-3">
@@ -15,7 +15,7 @@ const Principles = () => {
           {P.title}
         </Typography>
       </div>
-      <ol className="divide-y divide-dashed">
+      <ol className="divide-y">
         {P.items.map((item) => (
           <li
             key={item.title}
