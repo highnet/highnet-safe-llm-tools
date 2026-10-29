@@ -434,6 +434,7 @@ describe('site chrome and primitives', () => {
   });
 
   it('applies the stored or system theme before paint', () => {
+    delete document.documentElement.dataset.theme;
     document.documentElement.classList.remove('dark');
     localStorage.setItem('highnet-rag-theme', 'dark');
     new Function(themeScript)();
@@ -443,6 +444,30 @@ describe('site chrome and primitives', () => {
     new Function(themeScript)();
     expect(document.documentElement).toHaveClass('dark'); // matchMedia stub reports a match
     document.documentElement.classList.remove('dark');
+  });
+
+  it('puts the theme back when the page resets the class on <html>', async () => {
+    localStorage.removeItem('highnet-rag-theme');
+    document.documentElement.dataset.theme = 'dark';
+    new Function(themeScript)();
+    expect(document.documentElement).toHaveClass('dark');
+    // A root re-render rewrites className without the class the script added.
+    document.documentElement.className = 'font-recursive';
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.documentElement).toHaveClass('dark');
+    // A light choice is kept too, and storage that throws falls back to light.
+    document.documentElement.dataset.theme = 'light';
+    document.documentElement.classList.add('dark');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.documentElement).not.toHaveClass('dark');
+    delete document.documentElement.dataset.theme;
+    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    document.documentElement.classList.add('dark');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(document.documentElement).not.toHaveClass('dark');
+    getItem.mockRestore();
   });
 
   it('renders the root layout with the font and theme script', async () => {
