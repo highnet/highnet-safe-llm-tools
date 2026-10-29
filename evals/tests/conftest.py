@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 
 import pytest
+from settings_helper import fake_settings
 
-from highnet_rag.config import Settings
 from highnet_rag.ingest.build import build_corpus
 from highnet_rag.ingest.squad import load_squad
 from highnet_rag.providers import build_providers
@@ -107,8 +107,3 @@ def corpus_path(tmp_path_factory: pytest.TempPathFactory, squad_path: Path) -> P
         )
     )
     return out
-
-
-def fake_settings(**overrides: object) -> Settings:
-    base: dict[str, object] = {"fake_providers": True, "embed_dims": 64, "_env_file": None}
-    return Settings(**{**base, **overrides})  # pyright: ignore[reportArgumentType]

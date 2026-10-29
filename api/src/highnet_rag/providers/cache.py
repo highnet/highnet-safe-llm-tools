@@ -10,7 +10,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from highnet_rag.providers.base import (
+from highnet_core.providers.base import (
     AgentTurn,
     AnswerModel,
     Embedder,

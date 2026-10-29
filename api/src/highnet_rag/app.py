@@ -11,7 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from highnet_rag.budget import budget_state, hash_ip
+from highnet_core.budget import budget_state, hash_ip
+from highnet_core.trace import AnswerDelta, RunDone, TraceEvent
 from highnet_rag.config import Settings, get_settings
 from highnet_rag.pipeline.classic import new_run_id, run_classic
 from highnet_rag.pipeline.deps import DEFAULT_MODE, SUPPORTED_MODES, Deps, Mode, QueryParams
@@ -20,7 +21,6 @@ from highnet_rag.providers import Providers, build_providers
 from highnet_rag.recordings import RECORDED_KS, combo_key, replay
 from highnet_rag.storage.base import CorpusStore, RecordingStore
 from highnet_rag.storage.sqlite import SqliteCorpusStore, SqliteRecordingStore, SqliteStateStore
-from highnet_rag.trace import AnswerDelta, RunDone, TraceEvent
 
 SSE_HEADERS = {
     "Cache-Control": "no-cache, no-transform",

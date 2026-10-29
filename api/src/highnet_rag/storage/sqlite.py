@@ -1,17 +1,16 @@
-"""SQLite implementations: corpus (sqlite-vec + FTS5, read-only at runtime) and state (spend
-ledger, runs). Schema documented in docs/ARCHITECTURE.md section 6."""
+"""SQLite implementations: the corpus (sqlite-vec + FTS5, read-only at runtime) and the recorded
+runs. The shared state store (spend ledger, runs) is `highnet_core.storage.state`. Schema
+documented in docs/ARCHITECTURE.md section 6."""
 
 import json
 import sqlite3
 import zlib
-from collections.abc import Iterator
-from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import numpy as np
 import sqlite_vec
 
+from highnet_core.storage.state import SqliteStateStore
 from highnet_rag.storage.base import (
     Chunk,
     ChunkSet,
@@ -23,6 +22,8 @@ from highnet_rag.storage.base import (
     Recording,
     Span,
 )
+
+__all__ = ["SqliteCorpusStore", "SqliteRecordingStore", "SqliteStateStore"]
 
 CORPUS_SCHEMA = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -63,20 +64,6 @@ CREATE TABLE pca (
 );
 """
 
-STATE_SCHEMA = """
-CREATE TABLE IF NOT EXISTS runs (
-  run_id TEXT PRIMARY KEY, ts TEXT NOT NULL, ip_hash TEXT NOT NULL,
-  settings TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'running', ms INTEGER, cost_usd REAL
-);
-CREATE INDEX IF NOT EXISTS runs_ip_ts ON runs(ip_hash, ts);
-CREATE TABLE IF NOT EXISTS spend (
-  id INTEGER PRIMARY KEY, ts TEXT NOT NULL, run_id TEXT, provider TEXT NOT NULL,
-  model TEXT NOT NULL, stage TEXT NOT NULL, input_tokens INTEGER NOT NULL,
-  output_tokens INTEGER NOT NULL, cost_usd REAL NOT NULL
-);
-CREATE INDEX IF NOT EXISTS spend_ts ON spend(ts);
-"""
-
 RECORDINGS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS questions (
   id TEXT PRIMARY KEY, position INTEGER NOT NULL, question TEXT NOT NULL, compound INTEGER NOT NULL
@@ -104,10 +91,6 @@ def connect_corpus(path: Path, *, readonly: bool = True) -> sqlite3.Connection:
     conn.enable_load_extension(False)
     conn.row_factory = sqlite3.Row
     return conn
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 class SqliteCorpusStore:
@@ -238,74 +221,6 @@ class SqliteCorpusStore:
             ev = [float(v) for v in r["explained_variance"].strip("[]").split(",")]
             self._projections[chunk_set_id] = Projection(mean, components, (ev[0], ev[1]))
         return self._projections[chunk_set_id]
-
-
-class SqliteStateStore:
-    def __init__(self, path: Path) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self.path = path
-        with self._conn() as conn:
-            conn.executescript(STATE_SCHEMA)
-            cutoff = (datetime.now(UTC) - timedelta(days=30)).isoformat(timespec="seconds")
-            conn.execute("DELETE FROM runs WHERE ts < ?", (cutoff,))
-
-    @contextmanager
-    def _conn(self) -> Iterator[sqlite3.Connection]:
-        conn = sqlite3.connect(self.path, timeout=5)
-        try:
-            conn.execute("PRAGMA journal_mode=WAL")
-            yield conn
-            conn.commit()
-        finally:
-            conn.close()
-
-    def record_run(self, run_id: str, ip_hash: str, settings_json: str) -> None:
-        with self._conn() as conn:
-            conn.execute(
-                "INSERT INTO runs (run_id, ts, ip_hash, settings) VALUES (?, ?, ?, ?)",
-                (run_id, _now(), ip_hash, settings_json),
-            )
-
-    def finish_run(self, run_id: str, status: str, ms: int, cost_usd: float) -> None:
-        with self._conn() as conn:
-            conn.execute(
-                "UPDATE runs SET status = ?, ms = ?, cost_usd = ? WHERE run_id = ?",
-                (status, ms, cost_usd, run_id),
-            )
-
-    def record_spend(
-        self,
-        run_id: str | None,
-        provider: str,
-        model: str,
-        stage: str,
-        input_tokens: int,
-        output_tokens: int,
-        cost_usd: float,
-    ) -> None:
-        with self._conn() as conn:
-            conn.execute(
-                "INSERT INTO spend (ts, run_id, provider, model, stage, input_tokens, "
-                "output_tokens, cost_usd) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (_now(), run_id, provider, model, stage, input_tokens, output_tokens, cost_usd),
-            )
-
-    def month_spend(self) -> float:
-        start = datetime.now(UTC).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        with self._conn() as conn:
-            (total,) = conn.execute(
-                "SELECT COALESCE(SUM(cost_usd), 0) FROM spend WHERE ts >= ?",
-                (start.isoformat(timespec="seconds"),),
-            ).fetchone()
-        return float(total)
-
-    def runs_since(self, ip_hash: str, seconds: int) -> int:
-        since = (datetime.now(UTC) - timedelta(seconds=seconds)).isoformat(timespec="seconds")
-        with self._conn() as conn:
-            (n,) = conn.execute(
-                "SELECT COUNT(*) FROM runs WHERE ip_hash = ? AND ts >= ?", (ip_hash, since)
-            ).fetchone()
-        return int(n)
 
 
 class SqliteRecordingStore:

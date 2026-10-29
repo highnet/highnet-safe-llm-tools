@@ -5,10 +5,10 @@ from types import SimpleNamespace
 import pytest
 from pydantic import SecretStr
 
-from highnet_rag.config import Settings
-from highnet_rag.providers import claude as claude_module
-from highnet_rag.providers.base import FinalAnswer, ProviderNotConfiguredError
-from highnet_rag.providers.claude import ClaudeAnswerModel, ClaudeJudge
+from highnet_core.config import CoreSettings as Settings
+from highnet_core.providers import claude as claude_module
+from highnet_core.providers.base import FinalAnswer, ProviderNotConfiguredError
+from highnet_core.providers.claude import ClaudeAnswerModel, ClaudeJudge
 
 
 class FakeStream:

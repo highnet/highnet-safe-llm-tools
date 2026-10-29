@@ -3,11 +3,11 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from conftest import fake_settings
+from settings_helper import fake_settings
 
+from highnet_core.providers.base import Embeddings, FinalAnswer, InputType, ToolAnswer
 from highnet_rag.ingest.squad import load_squad
 from highnet_rag.providers import Providers, build_providers
-from highnet_rag.providers.base import Embeddings, FinalAnswer, InputType, ToolAnswer
 from highnet_rag.providers.cache import CachedEmbedder
 from highnet_rag.providers.fake import FakeAnswerModel
 from highnet_rag.storage.sqlite import SqliteCorpusStore

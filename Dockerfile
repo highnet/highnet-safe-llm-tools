@@ -12,10 +12,14 @@ WORKDIR /app
 
 # Dependencies first (cached), then the package itself.
 COPY pyproject.toml uv.lock .python-version ./
+COPY core/pyproject.toml core/pyproject.toml
 COPY api/pyproject.toml api/pyproject.toml
+COPY scope/pyproject.toml scope/pyproject.toml
 COPY evals/pyproject.toml evals/pyproject.toml
 RUN uv sync --frozen --no-dev --package highnet-rag --no-install-workspace
+COPY core/ core/
 COPY api/ api/
+COPY scope/ scope/
 RUN uv sync --frozen --no-dev --package highnet-rag
 
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

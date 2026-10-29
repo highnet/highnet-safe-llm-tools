@@ -5,9 +5,9 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
+from highnet_core.providers.base import AgentTurn, ToolCall
 from highnet_rag.app import create_app
 from highnet_rag.providers import build_providers
-from highnet_rag.providers.base import AgentTurn, ToolCall
 from highnet_rag.providers.fake import FakeAnswerModel
 from highnet_rag.storage.sqlite import SqliteCorpusStore, SqliteStateStore
 

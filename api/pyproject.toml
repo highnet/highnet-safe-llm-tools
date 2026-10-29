@@ -5,6 +5,8 @@ description = "Transparent RAG pipeline: FastAPI + SSE trace events, SQLite (sql
 requires-python = ">=3.12"
 license = "MIT"
 dependencies = [
+  "highnet-core",
+  "highnet-scope",
   "fastapi>=0.115",
   "uvicorn[standard]>=0.30",
   "pydantic>=2.8",
@@ -17,6 +19,10 @@ dependencies = [
 
 [project.scripts]
 highnet-rag = "highnet_rag.cli:main"
+
+[tool.uv.sources]
+highnet-core = { workspace = true }
+highnet-scope = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

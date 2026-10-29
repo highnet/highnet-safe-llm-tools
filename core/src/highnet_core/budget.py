@@ -4,8 +4,8 @@ import hashlib
 from dataclasses import dataclass
 from typing import Literal
 
-from highnet_rag.config import Settings
-from highnet_rag.storage.base import StateStore
+from highnet_core.config import CoreSettings
+from highnet_core.storage.base import StateStore
 
 Tier = Literal["normal", "degraded", "stopped"]
 
@@ -51,13 +51,13 @@ class RateState:
         }
 
 
-def hash_ip(ip: str, settings: Settings) -> str:
+def hash_ip(ip: str, settings: CoreSettings) -> str:
     salted = settings.ip_hash_salt.get_secret_value() + ip
     return hashlib.sha256(salted.encode()).hexdigest()[:16]
 
 
 # snippet: request | Budget tiers
-def budget_state(state: StateStore, settings: Settings) -> BudgetState:
+def budget_state(state: StateStore, settings: CoreSettings) -> BudgetState:
     spent = state.month_spend()
     cap = settings.budget_monthly_usd
     if spent >= cap:
@@ -72,7 +72,7 @@ def budget_state(state: StateStore, settings: Settings) -> BudgetState:
 # /snippet
 
 
-def rate_state(state: StateStore, ip_hash: str, settings: Settings) -> RateState:
+def rate_state(state: StateStore, ip_hash: str, settings: CoreSettings) -> RateState:
     return RateState(
         used_minute=state.runs_since(ip_hash, 60),
         used_day=state.runs_since(ip_hash, 86_400),

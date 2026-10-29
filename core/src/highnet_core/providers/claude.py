@@ -5,8 +5,8 @@ from typing import Any
 
 import anthropic
 
-from highnet_rag.config import Settings
-from highnet_rag.providers.base import (
+from highnet_core.config import CoreSettings
+from highnet_core.providers.base import (
     AgentTurn,
     AnswerBlock,
     Citation,
@@ -20,7 +20,7 @@ from highnet_rag.providers.base import (
 class _ClaudeClient:
     provider = "anthropic"
 
-    def __init__(self, settings: Settings, model: str) -> None:
+    def __init__(self, settings: CoreSettings, model: str) -> None:
         self._settings = settings
         self.model = model
         self._client: anthropic.AsyncAnthropic | None = None

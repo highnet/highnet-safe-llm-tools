@@ -1,48 +1,20 @@
-"""Every environment variable the app reads, validated once. Mirrors `.env.example`."""
+"""Every environment variable the RAG API reads, validated once. Mirrors `.env.example`; the
+fields both products share live in `highnet_core.config.CoreSettings`."""
 
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import BaseModel, Field, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from highnet_core.config import CoreSettings, ModelPrice
+
+__all__ = ["ModelPrice", "Settings", "get_settings"]
 
 
-class ModelPrice(BaseModel):
-    """USD per one million tokens."""
-
-    input: float
-    output: float = 0.0
-
-
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
-
-    # Providers. Keys are optional at startup; the first stage that needs one fails loudly.
-    anthropic_api_key: SecretStr | None = None
-    voyage_api_key: SecretStr | None = None
-    # Deterministic offline providers (hashed bag-of-words embeddings, extractive "LLM").
-    # For local development and tests only; every trace event says provider="fake".
-    fake_providers: bool = False
-
-    claude_model_default: str = "claude-haiku-4-5"
-    claude_model_demo: str = "claude-opus-5"
-    claude_model_judge: str = "claude-sonnet-5"
+class Settings(CoreSettings):
     demo_mode: bool = False
     max_answer_tokens: int = 1024
-    # The SDK's own retries on 429/5xx. Keep it low for live questions; eval runs raise it.
-    anthropic_max_retries: int = 2
-
-    voyage_base_url: str = "https://api.voyageai.com/v1"
-    voyage_embed_model: str = "voyage-3.5-lite"
-    voyage_rerank_model: str = "rerank-2.5-lite"
-    embed_dims: int = 1024
-    # Retries on 429/5xx. Keep them short for live questions; the corpus build raises both.
-    voyage_max_retries: int = 2
-    voyage_max_retry_wait_seconds: float = 10.0
 
     # Storage
     corpus_db_path: Path = Path("data/corpus.sqlite")
-    state_db_path: Path = Path("data/state.sqlite")
     static_dir: Path = Path("web/out")
     evals_results_path: Path = Path("evals/results/latest.json")
     # Visitors pick from pre-recorded questions and the page replays the recorded run (no model
@@ -51,15 +23,6 @@ class Settings(BaseSettings):
     recordings_db_path: Path = Path("data/recordings.sqlite")
     # 1 replays at the recorded pace (pauses capped); 2 twice as fast.
     replay_speed: float = 1.0
-    sse_keepalive_seconds: float = 15.0
-
-    # Budget and rate limits
-    budget_monthly_usd: float = 20.0
-    budget_degrade_at: float = 0.8
-    rate_limit_per_min: int = 20
-    rate_limit_per_day: int = 200
-    ip_hash_salt: SecretStr = SecretStr("dev-only-salt")
-    price_overrides: dict[str, ModelPrice] = Field(default_factory=dict)
 
     # Query limits
     max_query_chars: int = 500

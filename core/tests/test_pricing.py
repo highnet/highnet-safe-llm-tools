@@ -1,7 +1,7 @@
 import pytest
 
-from highnet_rag.config import Settings
-from highnet_rag.pricing import UnknownModelPriceError, cost_usd
+from highnet_core.config import CoreSettings as Settings
+from highnet_core.pricing import UnknownModelPriceError, cost_usd
 
 
 def test_cost_uses_per_million_prices() -> None:

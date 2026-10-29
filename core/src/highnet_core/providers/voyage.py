@@ -8,8 +8,8 @@ from typing import Any
 import httpx
 import numpy as np
 
-from highnet_rag.config import Settings
-from highnet_rag.providers.base import (
+from highnet_core.config import CoreSettings
+from highnet_core.providers.base import (
     Embeddings,
     InputType,
     ProviderNotConfiguredError,
@@ -26,7 +26,7 @@ class VoyageClient:
 
     def __init__(
         self,
-        settings: Settings,
+        settings: CoreSettings,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     ) -> None:
         self._settings = settings

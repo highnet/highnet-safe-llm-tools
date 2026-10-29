@@ -1,7 +1,7 @@
 """Price table (USD per 1M tokens). Verify against provider pricing pages when changing models;
 override without a deploy via PRICE_OVERRIDES='{"model": {"input": 1.0, "output": 5.0}}'."""
 
-from highnet_rag.config import ModelPrice, Settings
+from highnet_core.config import CoreSettings, ModelPrice
 
 DEFAULT_PRICES: dict[str, ModelPrice] = {
     "claude-haiku-4-5": ModelPrice(input=1.0, output=5.0),
@@ -24,7 +24,7 @@ class UnknownModelPriceError(KeyError):
     pass
 
 
-def price_for(model: str, settings: Settings) -> ModelPrice:
+def price_for(model: str, settings: CoreSettings) -> ModelPrice:
     if model in settings.price_overrides:
         return settings.price_overrides[model]
     if model.startswith(FAKE_PREFIX):
@@ -37,6 +37,8 @@ def price_for(model: str, settings: Settings) -> ModelPrice:
     return table[model]
 
 
-def cost_usd(model: str, settings: Settings, input_tokens: int, output_tokens: int = 0) -> float:
+def cost_usd(
+    model: str, settings: CoreSettings, input_tokens: int, output_tokens: int = 0
+) -> float:
     price = price_for(model, settings)
     return round((input_tokens * price.input + output_tokens * price.output) / 1_000_000, 6)

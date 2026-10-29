@@ -79,7 +79,8 @@ def cmd_record(args: argparse.Namespace) -> None:
 def cmd_schema(args: argparse.Namespace) -> None:
     from pydantic.json_schema import models_json_schema
 
-    from highnet_rag.trace import AnswerDelta, RunDone, TraceEvent
+    from highnet_core.trace import AnswerDelta, RunDone
+    from highnet_rag.trace import TraceEvent
 
     _, schema = models_json_schema(
         [(TraceEvent, "serialization"), (AnswerDelta, "serialization"), (RunDone, "serialization")],
