@@ -1,6 +1,8 @@
 # evals
 
-Offline evaluation of the highnet-rag pipeline. It runs the real pipeline stages in-process, over the golden sets, and publishes `results/latest.json`, which the site's `/evals` page renders. The site never shows a number that is not in that file.
+Offline evaluation of both products. The RAG section comes first; Scope's is at the end.
+
+Offline evaluation of the RAG pipeline. It runs the real pipeline stages in-process, over the golden sets, and publishes `results/latest.json`, which the site's `/evals` page renders. The site never shows a number that is not in that file.
 
 ## Golden sets (`golden/*.jsonl`)
 
@@ -37,3 +39,21 @@ uv run highnet-rag-evals schema                # regenerate the results JSON Sch
 A run writes `results/latest.json`, a dated copy and a dated `*.details.jsonl` with every question's answer and grade, and prints its cost. The real run normally goes through the **Evals** GitHub workflow (run by hand): it downloads the live corpus from Fly, runs a one-question smoke test, runs the full set (retrieval only unless its `full` input is ticked) and pushes the results to a new `evals/run-<id>` branch.
 
 Run the tests with `uv run pytest evals`.
+
+## Scope
+
+`highnet-scope-evals run` scores every labeled prompt in `golden/scope/<preset>.jsonl` (300 per preset; drafted by Claude, checked by script, labelled `in`, `adjacent`, `out` or `injection` through its topic) with four methods: the rule prefilter alone, the kNN vote (leave-one-out, so a prompt never votes for itself), the Claude Haiku judge, and the fused pipeline with the default weights and thresholds. Each method's action is scored against the label (answer = in, answer briefly = adjacent, redirect = out, block = injection):
+
+- per-class precision and recall and a confusion matrix;
+- **false refusal rate**: in-scope or adjacent prompts that were redirected or blocked;
+- **over-compliance rate**: off-scope or injection prompts that were answered;
+- injections missed, all of it per preset too;
+- a sweep of the redirect threshold, and median latency and mean cost per message from the run's own calls.
+
+```bash
+uv run highnet-scope-evals run --db recordings/scope/scope.sqlite   # about $0.78; reruns are free (cached)
+uv run highnet-scope-evals run --fake --db data/scope.sqlite        # offline; illustrative numbers
+uv run highnet-scope-evals schema                                   # regenerate the results JSON Schema
+```
+
+Results: `results/scope/latest.json`, a dated copy and a dated `*.details.jsonl` (every prompt's action under each method, and the judge's reason). The Evals workflow can run it by hand.

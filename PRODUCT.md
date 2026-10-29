@@ -12,8 +12,8 @@ Fixed by the owner (see `docs/PROJECT_BRIEF.md`): Next.js App Router + TypeScrip
 
 ## Users
 
-1. **Developers learning RAG** (primary). They know how to code and have heard of embeddings, but have not seen a real pipeline laid open. They arrive from a link or a portfolio, type a question, and want to see what actually happens between the question and the answer, and to change a setting and see how the result changes.
-2. **Recruiters and hiring managers.** They skim for a few minutes to judge whether the author understands RAG well enough to build and explain it. They need the pipeline to be legible without reading code.
+1. **Developers learning RAG and LLM safety** (primary). They know how to code and have heard of embeddings, but have not seen a real pipeline laid open. They arrive from a link or a portfolio, pick a question or a message, and want to see what actually happens between it and the answer (or the refusal), and to change a setting and see how the result changes.
+2. **Recruiters and hiring managers.** They skim for a few minutes to judge whether the author understands RAG and LLM guardrails well enough to build and explain them. They need the pipeline to be legible without reading code.
 3. **Non-technical visitors.** Curious about "how AI answers questions from documents". They follow the plain-language layer and the answer; the technical layer is optional for them.
 4. **The author** uses it as a personal lab for trying retrieval ideas; that is a side benefit, not a design driver.
 
@@ -21,19 +21,24 @@ Explanation depth targets an intermediate reader: basic programming and ML vocab
 
 ## Product Purpose
 
-highnet-rag answers questions about a small, fixed English corpus using Retrieval-Augmented Generation. Every stage of the pipeline is streamed to the page as it runs, and each one can be inspected: chunking, embedding, BM25 and vector search, fusion, reranking, the exact prompt, tokens and cost, the agent's steps, and the cited answer.
+Highnet Safe LLM Tools is one site with two tools. Both lay open a real LLM system one traced step at a time.
+
+**RAG** answers questions about a small, fixed English corpus using Retrieval-Augmented Generation. Every stage of the pipeline is streamed to the page as it runs, and each one can be inspected: chunking, embedding, BM25 and vector search, fusion, reranking, the exact prompt, tokens and cost, the agent's steps, and the cited answer.
 
 The one idea a visitor should leave with: **the answer is only as good as what was retrieved.** RAG is search plus a prompt, and the visitor can see exactly which chunks the model was given.
 
 Success means a developer can explain, after about five minutes, why a given answer was right or wrong by pointing at the retrieval stage. A recruiter can also see that the author understands the trade-offs.
 
+**Scope** shows a product agent guarding its scope. A message runs through eleven steps (request check, conversation context, a rule prefilter, an embedding on a map, a nearest-neighbour vote, an LLM judge with validated JSON, fusion, thresholds) and ends in answer, answer briefly, redirect or block, under four presets with editable scope definitions. The idea a visitor should leave with: **off scope and prompt injection are different problems, and refusing a good message is a failure too.** Filters alone fail against adaptive attackers; real safety comes from architecture. Success means a developer can say which signal decided a message and what a threshold change would cost in false refusals.
+
 ## Positioning
 
-Most RAG demos show only a chat box. highnet-rag treats the trace as the product: one trace event per stage, emitted as it happens, with real scores, token counts and cost for this exact query. The same query can be re-run with different settings (retrieval mode, top-k, reranker, chunk size, agentic mode), and the effect of each change shows up stage by stage.
+Most RAG and guardrail demos show only a chat box or a refusal. Highnet Safe LLM Tools treats the trace as the product: one trace event per stage, emitted as it happens, with real scores, token counts and cost for this exact query. The same query can be re-run with different settings (retrieval mode, top-k, reranker, chunk size, agentic mode), and the effect of each change shows up stage by stage.
 
 ## Operating Context
 
-- Visitors reach it on a phone or a laptop from a portfolio link, GitHub, or a shared URL. They usually stay a few minutes and ask 1–5 questions.
+- Visitors reach it on a phone or a laptop from a portfolio link, GitHub, or a shared URL. They usually stay a few minutes and try 1–5 questions or messages.
+- Both products replay runs recorded once with the real models; a visit calls no model. The per-IP rate limit is checked live.
 - The corpus is curated and read-only: the 35 Wikipedia articles of the SQuAD 2.0 dev set (CC BY-SA 4.0), indexed ahead of time at several chunk sizes. Visitors never upload content.
 - Live queries run against paid APIs under a monthly budget with a hard stop. When the budget or rate limit is hit, the page must say so plainly and still let visitors explore.
 - An offline evaluation run publishes retrieval and faithfulness metrics that the site displays.
@@ -48,7 +53,7 @@ Most RAG demos show only a chat box. highnet-rag treats the trace as the product
 
 ## Brand Commitments
 
-- Name: **highnet-rag** (lowercase, as written).
+- Name: **Highnet Safe LLM Tools** (title case), with two products, **RAG** and **Scope**. Product descriptions say "the RAG pipeline".
 - Voice: a precise lab partner. Plain and exact, in the first-person plural ("we embed the query…"), with no hype. It names trade-offs and says when a step failed or was weak. Numbers beat adjectives.
 - Visually independent of the author's portfolio (highnet.at); only a text link back.
 - The owner pinned the visual direction as a "calm lab notebook". DESIGN.md records it.
@@ -56,6 +61,7 @@ Most RAG demos show only a chat box. highnet-rag treats the trace as the product
 ## Evidence on Hand
 
 - Corpus: the SQuAD 2.0 dev set: 35 articles, ~1.2k paragraphs, gold answers, and deliberately unanswerable questions. CC BY-SA 4.0; attribution must appear in the app.
+- Scope's dataset: 1,200 labeled prompts drafted by Claude and checked by script; the site says so wherever it shows them.
 - No testimonials, users, benchmarks or metrics exist yet. Eval numbers may only be shown once `/evals` has produced them. Never invent scores, costs or latencies; every number on the page comes from a real trace or eval run.
 
 ## Product Principles
@@ -72,7 +78,7 @@ WCAG 2.2 AA:
 
 - The whole pipeline is keyboard-operable.
 - Streamed stage updates are announced through a polite live region, without flooding screen readers.
-- The 2D map has an equivalent table or list.
+- The 2D maps (RAG's corpus map, Scope's prompt map) have an equivalent table or list.
 - Charts and scores never rely on colour alone.
 - Motion respects `prefers-reduced-motion`.
 - Light and dark themes both meet AA contrast.

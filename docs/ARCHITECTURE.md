@@ -1,6 +1,6 @@
-# highnet-rag — Architecture
+# Highnet Safe LLM Tools — Architecture
 
-Decisions come from [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md). This document describes _how_ they are built. Rule zero: **if a stage runs, it emits a trace event.**
+Decisions come from [`PROJECT_BRIEF.md`](PROJECT_BRIEF.md). This document describes _how_ they are built, for both products: sections 1–12 describe the shared platform and the RAG pipeline, section 13 describes Scope. Rule zero, for both: **if a stage runs, it emits a trace event.**
 
 ## 1. Overview
 
@@ -50,25 +50,41 @@ flowchart LR
 
 ```
 /                     AGENTS.md, CLAUDE.md, PRODUCT.md, DESIGN.md, README.md, LICENCE.md
-                      pyproject.toml (uv workspace: api, evals), Dockerfile, fly.toml, .env.example
-/api                  FastAPI app + ingestion (Python package `highnet_rag`)
-  src/highnet_rag/
-    app.py            FastAPI factory, routes, static mount
-    config.py         Settings (pydantic-settings) – every env var, validated once
-    trace.py          TraceEvent model, Tracer (timing, sequencing, cost roll-up)
+                      pyproject.toml (uv workspace: core, api, scope, evals), Dockerfile, fly.toml,
+                      .env.example, conftest.py (strips provider keys from every test)
+/core                 shared package `highnet_core`, used by both products
+  src/highnet_core/
+    config.py         CoreSettings: providers, models, budget, rate limits, state DB
+    trace.py          TraceEvent (stage: str), Tracer (timing, sequencing, cost roll-up)
+    sse.py            server-sent events: one `event: trace` per stage, keep-alives
     pricing.py        price table per model (env-overridable), cost_usd()
-    budget.py         spend ledger, monthly caps, per-IP rate limiting
-    providers/        voyage.py, claude.py – lazily constructed clients
-    storage/          base.py (Protocols), sqlite.py (sqlite-vec + FTS5)
-    pipeline/         stages.py (one function per stage), classic.py, agentic.py
-    ingest/           squad.py (load), chunk.py, embed.py, pca.py, cli.py
+    budget.py         monthly caps and per-IP rate limiting, over one shared ledger
+    pca.py            two-component PCA fitted at ingest (the RAG map and the Scope map)
+    providers/        base.py (Protocols), voyage.py, claude.py (lazy clients), fake.py
+    storage/          base.py (StateStore, Projection), state.py (SqliteStateStore)
+/api                  the RAG API + ingestion (Python package `highnet_rag`); mounts Scope's routes
+  src/highnet_rag/
+    app.py            FastAPI factory, routes, static mount, Scope router
+    config.py         Settings(CoreSettings): RAG fields
+    trace.py          the RAG stage list (narrows TraceEvent.stage for the JSON Schema)
+    providers/        wiring, the RAG fake LLM, call caches
+    storage/          base.py (CorpusStore, RecordingStore), sqlite.py (sqlite-vec + FTS5)
+    pipeline/         classic.py, search.py, retrieve.py, agent.py, prompt.py
+    ingest/           squad.py (load), chunk.py, build.py
   tests/              pytest; fake providers, tiny fixture corpus
+/scope                Scope (Python package `highnet_scope`), section 13
+  src/highnet_scope/  presets/*.json, presets.py, text.py, rules.py, knn.py, judge.py, fusion.py,
+                      store.py, models.py, pipeline.py, ingest.py, recorder.py, api.py, cli.py
+  tests/              pytest; fake embedder and fake judge over the real labeled prompts
 /web                  Next.js App Router, static export
-  app/                page.tsx (pipeline explorer), evals/page.tsx, layout.tsx, globals.css
+  app/                page.tsx (landing), rag/** (RAG pages), scope/** (Scope pages), layout.tsx,
+                      globals.css, og.png routes (one share card per product)
   components/ui/      restyled shadcn primitives (PascalCase) + Button, Typography
   components/pipeline/ StepSheet, WhyThisStep, SettingsStrip, RankTable, CorpusMap, …
   lib/                trace.ts (generated types), useTraceStream.ts, utils.ts (cn)
-/evals                golden sets, runner, metrics; publishes results/latest.json
+/evals                golden sets, both eval runners (`highnet_rag_evals`, `highnet_scope_evals`);
+                      publishes results/latest.json and results/scope/latest.json
+/recordings           questions.json (RAG); scope/examples.json and scope/scope.sqlite (Scope)
 /docs                 PROJECT_BRIEF.md, ARCHITECTURE.md, MILESTONES.md
 /data                 (gitignored) raw SQuAD JSON, built corpus.sqlite
 ```
@@ -170,7 +186,9 @@ The Pydantic models are the source of truth. `uv run highnet-rag schema` exports
 | `GET /api/corpus/documents`      | JSON                | Every article (title, source, length) with its chunk count per chunk set, for the corpus page                                                                                                                                                                                                             |
 | `GET /api/corpus/documents/{id}` | JSON                | One article's text and its chunks' character offsets for a chunk set (`?chunk_set=`)                                                                                                                                                                                                                      |
 | `GET /api/evals`                 | JSON                | The latest published eval results, or 404 before the first run                                                                                                                                                                                                                                            |
-| `GET /api/health`                | JSON                | Liveness plus corpus build id; used by Fly health checks                                                                                                                                                                                                                                                  |
+| `GET /api/health`                | JSON                | Liveness plus the corpus build id, Scope's build id and latest recording (`scope`, `scope_recorded_at`); used by Fly health checks and the deploy job                                                                                                                                                  |
+| `GET /api/scope/config`          | JSON                | Scope's presets (full definitions), example messages, default weights and thresholds, models, when it was recorded, the build, the budget tier (section 13)                                                                                                                                           |
+| `GET /api/scope/run`             | `text/event-stream` | One message through Scope's 11 steps: `preset`, `example`, `context`, `rules`, `knn`, `judge`, `w_rules`, `w_knn`, `w_judge`, `t_block`, `t_answer`, `t_brief`, `k`, `edit=topic:class,…` (section 13)                                                                                                 |
 | `GET /*`                         | static              | `web/out`, with `index.html` fallbacks for the static routes                                                                                                                                                                                                                                              |
 
 ## 6. SQLite schema
@@ -269,8 +287,8 @@ Upload: `scripts/upload-corpus.sh` copies the file to `/data/corpus.sqlite.new` 
 
   Voyage `voyage-3.5-lite` and `rerank-2.5-lite` are priced per token (verify when building).
 
-- **Rate limits.** Per salted IP hash (from the `Fly-Client-IP` header): `RATE_LIMIT_PER_MIN=20`, `RATE_LIMIT_PER_DAY=200`. Enforced from `state.sqlite`, so the limits survive machine stops.
-- **Monthly cap.** `BUDGET_MONTHLY_USD=20`, measured over the UTC calendar month from the `spend` table:
+- **Rate limits.** Per salted IP hash (from the `Fly-Client-IP` header), counted across both products: `RATE_LIMIT_PER_MIN=20`, `RATE_LIMIT_PER_DAY=200`. Enforced from `state.sqlite`, so the limits survive machine stops.
+- **Monthly cap.** `BUDGET_MONTHLY_USD=20`, one cap for both products, measured over the UTC calendar month from the `spend` table (Scope's live calls, when `SCOPE_LIVE=true`, are recorded there too):
   - ≥ `BUDGET_DEGRADE_AT=0.8`: `degraded` tier. Agentic mode and the demo model are disabled; the UI shows a banner.
   - ≥ 1.0: `stopped` tier. `/api/query` emits only `request` (status `error`, reason `budget_exhausted`) and `done`.
 - **Worst-case guard.** Before any Claude call, the pipeline checks that the estimated cost of this call (from `count_tokens` plus `max_tokens`) fits in the remaining budget. If it doesn't, the pipeline refuses the call and says so in the trace.
@@ -334,7 +352,7 @@ The font is Recursive via `next/font/google` (self-hosted at build time, so the 
 ### API on Fly.io
 
 - **`fly.toml`:**
-  - app `highnet-rag`, `primary_region = "fra"`;
+  - app `highnet-safe-llm-tools` (renamed from `highnet-rag`, 2026-10-29), `primary_region = "fra"`;
   - `[http_service]`: `internal_port = 8080`, `force_https = true`, `auto_stop_machines = "stop"`, `auto_start_machines = true`, `min_machines_running = 0`, connection-based concurrency for SSE;
   - an HTTP check on `/api/health`;
   - `[[vm]]`: `size = "shared-cpu-1x"`, `memory = "512mb"`;
@@ -355,13 +373,15 @@ The font is Recursive via `next/font/google` (self-hosted at build time, so the 
 - A Vercel project with **Root Directory `web/`**, deploying through the GitHub integration: production on `main`, previews on every other branch and PR.
 - `web/vercel.json` pins the install and build commands and adds basic security headers.
 - `prebuild` regenerates the code excerpts from `api/src`; Vercel includes files outside the root directory by default. If those files are missing, the committed JSON is kept.
-- **Environment:** `NEXT_PUBLIC_API_BASE=https://highnet-rag.fly.dev` for Production and Preview.
+- **Environment:** `NEXT_PUBLIC_API_BASE=https://highnet-safe-llm-tools.fly.dev` for Production and Preview.
+- **Redirects (`web/vercel.json`).** A static export cannot use `next.config` redirects, so Vercel serves permanent (308) redirects: `/corpus/`, `/evals/` and `/coverage/` go to their `/rag/` pages, and `/` with a `q` query parameter (an old shared RAG run link such as `/?q=…&mode=hybrid`) goes to `/rag/` with the query string kept, so the link replays the same run.
 
 ### CI (`.github/workflows/ci.yml`)
 
 - **`api` job:** Ruff, pyright, pytest with 100% coverage, and the trace-schema drift check.
 - **`web` job:** ESLint, `tsc`, Vitest with 100% coverage, the snippet drift check, `next build`, and `impeccable detect`.
-- **`deploy-api` job:** `flyctl deploy --remote-only` on push to `main`, after both jobs pass.
+- **`deploy-api` job:** on push to `main`, after both jobs pass: provision (idempotent), `flyctl deploy --remote-only`, build the corpus only if the API has none, then `scripts/fly-ensure-scope.sh` uploads the committed `scope.sqlite` if the live build id or latest recording differs.
+- Drift checks also cover Scope: its trace and results schemas, `lib/generated/scope-evals-latest.json`, and the exported `public/scope/dataset.json` and `lib/generated/scope-verdicts.json`.
 
 Tests never call real APIs; providers are faked.
 
@@ -389,3 +409,58 @@ Owner decision: visitors only pick from recorded questions, so a visit costs not
 - **Recording:** `highnet-rag record` (the manual **Record demo questions** workflow) runs the real pipeline for every question at every setting a visitor can choose: search mode × top-k 3/5/10 × chunk size × reranker, and agentic mode for compound questions. It writes each run's SSE items with their time offsets to `data/recordings.sqlite` (zlib-compressed, via `RecordingStore`). A cache in front of the model reuses one call when two settings send the same prompt (same passages, or the agent's first turn); each recording still shows that call's own tokens and cost, and the recorder reports only what was actually paid. It resumes: settings already recorded are skipped, and the workflow uploads partial progress.
 - **Replay:** with `LIVE_QUERIES=false` (the default), `GET /api/query?question_id=…&mode=&k=&chunk_set=&rerank=&agentic=` looks up that recording and streams it under a fresh run id, at the recorded pace with pauses capped at 1.5 s (`REPLAY_SPEED` scales it). The `request` event is rebuilt live: rate limit and budget are checked now and shown, and `data.recording` says when the run was recorded. An unknown question or an unrecorded setting is a 404.
 - **Config:** `/api/config` adds `live`, `questions` and `recorded` (`ks`, `at`); the page shows the picker instead of the text box, limits top-k to the recorded values, enables the agent only for compound questions, and replays at once when a setting changes.
+
+## 13. Scope
+
+Scope shows a product agent guarding its scope. One message (with its earlier turns, if any) runs through eleven steps, one trace event each, and ends in one action: **answer** (in), **answer briefly** (adjacent), **redirect** (off scope) or **block** (injection or abuse).
+
+### Presets and the scope definition
+
+`scope/src/highnet_scope/presets/<id>.json`: the product, a description, the redirect and block messages, and a list of **topics**, each with a class (`in`, `adjacent`, `out`; `injection` is fixed) and a few keywords. Every labeled prompt carries one topic. A visitor's edit moves topics between classes: the prompts with that topic change label (so the kNN vote changes), the keyword rules change, and the judge's rubric changes, so the recorded judge call no longer applies and the step is skipped with the reason "rubric changed; this run was recorded with the original rubric". No edit needs a model call.
+
+### Built once (`highnet-scope ingest`)
+
+1. Load `evals/golden/scope/<preset>.jsonl` (300 per preset; each row validated: its label must be its topic's class) and `recordings/scope/examples.json`.
+2. Embed each prompt as it is read (with its earlier turns) with `voyage-3.5-lite`, `input_type="query"`, in batches.
+3. Fit a two-component PCA per preset (`highnet_core.pca`) and store prompts, vectors, x/y, the PCA and the examples in `scope.sqlite`.
+
+`highnet-scope record` then runs every example through the pipeline with the real models, with and without its context, and also records both answers (full and brief), so a visitor who changes the action by moving a threshold still sees a real answer. `highnet-scope export` writes the dataset for the web app (`web/public/scope/dataset.json`) and the default-settings verdict of every RAG-assistant example (`web/lib/generated/scope-verdicts.json`), which RAG's first step shows.
+
+### The eleven steps (`pipeline.py`)
+
+| #   | `stage`      | What it does | `data` (main fields) |
+| --- | ------------ | ------------ | -------------------- |
+| 1   | `request`    | preset and example exist; length ≤ `SCOPE_MAX_MESSAGE_CHARS`; a language guess; the per-IP rate limit (live on every replay); the budget (live mode) | `message`, `chars`, `max_chars`, `language`, `settings`, `models`, `recorded_at`, `rate_limit`, `budget`, `error` |
+| 2   | `context`    | joins up to `SCOPE_CONTEXT_TURNS` earlier turns before the message; skipped when there are none or context is off | `turns`, `dropped`, `reading` |
+| 3   | `rules`      | injection patterns in four views (raw, normalized, decoded, hidden), channel evidence (zero-width, hidden HTML, encoded, homoglyphs), topic keywords; P(injection) = 1 − ∏(1 − wᵢ); abstains when nothing fires | `hits` [{rule, kind, view, match, weight, label, topic}], `injection_score`, `topic_votes`, `distribution` |
+| 4   | `embed`      | the reading embedded (replayed by exact text) | `model`, `input`, `dims`, `vector_preview`, `norm`, `recorded_at`, `replayed` |
+| 5   | `map`        | projected with the preset's PCA | `x`, `y`, `explained_variance`, `neighbours_2d` |
+| 6   | `knn`        | cosine similarity against the preset's unit vectors; the top k vote, weighted by max(cos, 0); labels follow the definition in force | `k`, `neighbours` [{id, text, topic, label, relabelled, similarity}], `distribution`, `relabelled_topics` |
+| 7   | `judge`      | Claude Haiku with the rubric; the message inside `<message>` tags (imitation tags neutralised), the reply prefilled with `{` and validated by `JudgeVerdict` (extra keys forbidden, label one of four, confidence 0–1). Invalid reply: `error`, and the judge drops out | `system`, `messages`, `raw`, `verdict` or `error`, `distribution` |
+| 8   | `fuse`       | P(label) = Σ wᵢ·Pᵢ / Σ wᵢ over the signals that ran | `weights`, `used_weights`, `signals`, `contributions`, `distribution`, `label`, `confidence`, `tradeoff` (ms and $ per signal and cumulatively) |
+| 9   | `thresholds` | block if P(injection) ≥ `t_block`; else scope = (P(in) + ½P(adj)) / (P(in)+P(adj)+P(out)) against `t_answer` and `t_brief` | `thresholds`, `p_injection`, `scope_score`, `action` |
+| 10  | `respond`    | the preset's redirect or block message, or the recorded answer under hard caps (300 / 120 tokens, 1,500 / 500 characters); for the RAG assistant, a hand-off to the RAG pipeline | `action`, `text`, `max_tokens`, `max_chars`, `truncated`, `rag_question` |
+| 11  | `audit`      | the record a reviewer would see (shown, not stored): action, signals, rule hits, rubric hash, a SHA-256 of the message, and why it needs review (low confidence, disagreeing signals, any block) | `stored: false`, `record`, `review_reasons` |
+
+### Recorded and live models (`models.py`)
+
+`RecordedModels` (the default, `SCOPE_LIVE=false`) only looks calls up in `scope.sqlite`, keyed by exactly what was sent: an embedding by its text, a completion by kind, model, system prompt, messages and `max_tokens`. A call never recorded is a `NotRecordedError`, shown in the trace, never a guess. `LiveModels` calls Voyage and Claude, prices each call with `pricing.py`, records it, and (outside the recorder and the evals) writes the spend to the shared ledger. Model steps report their recorded time, tokens and cost; replays keep the recorded pace, pauses capped at 1.5 s.
+
+### `scope.sqlite`
+
+```sql
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);   -- build_id, built_at, embed model, tokens, cost
+CREATE TABLE prompts (id TEXT PRIMARY KEY, preset TEXT, ord INTEGER, label TEXT, topic TEXT, text TEXT,
+  context TEXT /* JSON */, tags TEXT /* JSON */, lang TEXT, x REAL, y REAL, embedding BLOB /* float32[1024] */);
+CREATE TABLE pca (preset TEXT PRIMARY KEY, mean BLOB, components BLOB, explained_variance TEXT);
+CREATE TABLE examples (id TEXT PRIMARY KEY, preset TEXT, ord INTEGER, text TEXT, context TEXT, note TEXT,
+  rag_question TEXT);
+CREATE TABLE calls (key TEXT PRIMARY KEY, kind TEXT, provider TEXT, model TEXT, request TEXT, response TEXT,
+  embedding BLOB, input_tokens INTEGER, output_tokens INTEGER, ms INTEGER, cost_usd REAL, recorded_at TEXT);
+```
+
+The file is committed (`recordings/scope/scope.sqlite`, about 6 MB) because it is the build: the dataset vectors and every paid call. CI uploads it to the volume as `/data/scope.sqlite`.
+
+### Evals (`highnet-scope-evals run`)
+
+Every labeled prompt through four methods: rules alone (silence means the middle band), kNN leave-one-out, the judge (real calls, cached in `data/scope-evals.sqlite` so a rerun is free) and the fused pipeline with the default weights and thresholds. The action is scored against the label (answer = in, answer briefly = adjacent, redirect = out, block = injection): per-class precision and recall, a confusion matrix, the false refusal rate (in or adjacent, redirected or blocked), the over-compliance rate (out or injection, answered), injections missed, per preset, a sweep of the redirect threshold, and median latency and mean cost per message from the run's own calls. Output: `evals/results/scope/latest.json`, a dated copy and a dated `*.details.jsonl`.

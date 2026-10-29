@@ -1,14 +1,19 @@
-# highnet-rag
+# Highnet Safe LLM Tools
 
-A transparent Retrieval-Augmented Generation (RAG) teaching tool. Ask a question about a small, fixed corpus and watch every step of the pipeline as it runs. Each step is written out like a line of a calculation, with its timing, tokens, cost, and a plain-language "Why this step?":
+Safe LLM systems, worked out step by step. Two small, open teaching tools that take one message through a real LLM system and write out every step it takes before it answers, each with its real timing, tokens and cost and a plain-language "Why this step?". Live at https://highnet-safe-llm-tools.vercel.app.
+
+**RAG** (`/rag/`): ask a question about a small, fixed corpus (35 Wikipedia articles) and watch the RAG pipeline:
 
 - embedding the question and placing it on a 2D map;
-- BM25 keyword search, vector search, and hybrid search that fuses the two (reciprocal rank fusion);
-- choosing the context;
-- the exact prompt;
-- the streamed answer and its citations.
+- BM25 keyword search, vector search, and hybrid search that fuses the two (reciprocal rank fusion), then reranking;
+- choosing the context and the exact prompt;
+- the streamed answer and its citations, or an agent that plans its own searches.
 
-> Status: milestone 5 (agentic retrieval). See [docs/MILESTONES.md](docs/MILESTONES.md) and the changelog below.
+**Scope** (`/scope/`): watch an AI agent decide whether a message is in scope, step by step. A message runs through eleven steps (request check, conversation context, a rule prefilter for injections and hidden text, an embedding placed on a map, a nearest-neighbour vote over 1,200 labeled prompts, an LLM judge whose JSON reply is validated, weighted fusion, thresholds) and ends in **answer**, **answer briefly**, **redirect** or **block**. Four presets (career agent, recipe assistant, bank support bot, RAG corpus assistant), each with an editable scope definition.
+
+Both replay runs recorded once with the real models: a visit calls no model and costs nothing, and every number on the page is the recorded one. Settings replay or recompute; nothing is simulated.
+
+> Status: Scope milestones S1–S4 (see [docs/MILESTONES.md](docs/MILESTONES.md) and the changelog below).
 
 ## Run it locally (no API keys needed)
 
@@ -17,19 +22,27 @@ Requirements: [uv](https://docs.astral.sh/uv/) and Node 22 (`.nvmrc`).
 ```bash
 uv sync
 uv run highnet-rag fetch-squad && uv run highnet-rag ingest --fake
+uv run highnet-scope ingest --fake && uv run highnet-scope record --fake
 (cd web && npm ci && npm run build)
-FAKE_PROVIDERS=true uv run highnet-rag serve        # → http://localhost:8000
+FAKE_PROVIDERS=true LIVE_QUERIES=true uv run highnet-rag serve     # → http://localhost:8000
 ```
 
-`--fake` and `FAKE_PROVIDERS=true` use deterministic offline stand-ins: hashed word vectors instead of Voyage embeddings, and an extractive "LLM" instead of Claude. The UI labels such runs as illustrative.
+`--fake` and `FAKE_PROVIDERS=true` use deterministic offline stand-ins: hashed word vectors instead of Voyage embeddings, an extractive "LLM" and a two-word "judge" instead of Claude. The UI labels such runs as illustrative.
+
+To see Scope with the real recordings instead (no keys needed, nothing is called), point it at the committed database: `SCOPE_DB_PATH=recordings/scope/scope.sqlite uv run highnet-rag serve`.
 
 ### With the real providers
 
 ```bash
 cp .env.example .env              # set ANTHROPIC_API_KEY and VOYAGE_API_KEY
-uv run highnet-rag ingest         # real Voyage embeddings; prints the cost (cents)
+uv run highnet-rag ingest         # RAG corpus: real Voyage embeddings; prints the cost (cents)
+uv run highnet-scope ingest       # Scope: embeds the 1,200 labeled prompts (about $0.0005)
+uv run highnet-scope record       # Scope: records the 80 example messages (about $0.17 from scratch)
+uv run highnet-scope export       # Scope: the dataset JSON and RAG verdicts for the web app
 uv run highnet-rag serve
 ```
+
+Scope's evals: `uv run highnet-scope-evals run --db recordings/scope/scope.sqlite` (about $0.78 for the judge over all 1,200 prompts; the calls are cached in `data/scope-evals.sqlite`, so a rerun is free). RAG's evals: see [evals/README.md](evals/README.md).
 
 To work on the frontend with hot reload, keep `CORS_ORIGINS=http://localhost:3000` in `.env`, run `uv run highnet-rag serve`, and run `NEXT_PUBLIC_API_BASE=http://localhost:8000 npm run dev` in `web/`.
 
@@ -41,11 +54,11 @@ cd web && npm run lint && npm run typecheck && npm test && npm run build
 .claude/skills/impeccable/scripts/impeccable detect web/app web/components web/content
 ```
 
-After changing `api/src/highnet_rag/trace.py`, regenerate the frontend types with `npm run gen:types` in `web/`.
+After changing a trace or eval-results model (`api/src/highnet_rag/trace.py`, `scope/src/highnet_scope/trace.py`, or the eval results), regenerate the frontend types with `npm run gen:types` in `web/`.
 
 ## Deploy
 
-The web app is on **Vercel**; the API is on **Fly.io** (`fra`, `shared-cpu-1x`, 512MB, scaled to zero).
+The web app is on **Vercel**; one API on **Fly.io** serves both products (`fra`, `shared-cpu-1x`, 512MB, scaled to zero).
 
 ### API (Fly.io), provisioned by CI
 
@@ -61,20 +74,35 @@ Optionally, set the **repository variable** `FLY_ORG` to your org slug; the defa
 
 On every push to `main`, the `deploy-api` job does three things:
 
-1. `scripts/fly-provision.sh` creates the `highnet-rag` app and the `rag_data` volume in `fra` if they are missing, and stages the secrets. It generates `IP_HASH_SALT` once.
+1. `scripts/fly-provision.sh` creates the `highnet-safe-llm-tools` app and the `rag_data` volume in `fra` if they are missing, and stages the secrets. It generates `IP_HASH_SALT` once.
 2. `flyctl deploy --remote-only`.
 3. `scripts/fly-ensure-corpus.sh`: if `/api/health` reports no corpus, it builds one with real Voyage embeddings (a few cents at most) and uploads it to the volume.
+4. `scripts/fly-ensure-scope.sh`: if the live Scope database differs from the committed `recordings/scope/scope.sqlite` (build id or latest recording), it uploads it to the volume as `/data/scope.sqlite`.
+
+Recording: the manual **Record demo questions** workflow records RAG (uploads `recordings.sqlite`) or Scope (records new examples into `recordings/scope/scope.sqlite`, uploads it, and pushes it to a branch for review). The **Evals** workflow runs either product's evals and pushes the results to a branch.
 
 To rebuild the corpus later, run the CI workflow manually on `main` with **rebuild_corpus** checked.
 
 ### Web (Vercel)
 
-The Vercel project `highnet-rag` (team "highnet's projects") is linked to this repository with Root Directory `web`, Node 22, and `NEXT_PUBLIC_API_BASE=https://highnet-rag.fly.dev` for Production and Preview. Pushes to `main` deploy to production; other branches get preview URLs. The API accepts the production domain and previews through `CORS_ORIGINS` / `CORS_ORIGIN_REGEX` in `fly.toml`.
+The Vercel project `highnet-safe-llm-tools` (team "highnet's projects") is linked to this repository with Root Directory `web`, Node 22, and `NEXT_PUBLIC_API_BASE=https://highnet-safe-llm-tools.fly.dev` for Production and Preview. Pushes to `main` deploy to production; other branches get preview URLs. The API accepts the production domain and previews through `CORS_ORIGINS` / `CORS_ORIGIN_REGEX` in `fly.toml`.
+
+**Redirects for the old addresses.** RAG moved from `/` to `/rag/`. A static export cannot use `next.config` redirects, so `web/vercel.json` declares them for Vercel: `/corpus/`, `/evals/` and `/coverage/` go permanently (308) to `/rag/corpus/`, `/rag/evals/` and `/rag/coverage/`, and `/` with a `q` query parameter, the shape of every shared RAG run link (`/?q=normandy&mode=hybrid`), goes to `/rag/` with the query string kept, so an old link still replays the same run. The plain `/` is the new landing page.
 
 ### CI and spend limits
 
 - Every push to `main` runs the tests (100% coverage) and then deploys the API (`.github/workflows/ci.yml`).
 - Set monthly spend limits in the Anthropic and Voyage consoles to match `BUDGET_MONTHLY_USD` ($20). The app enforces the same cap itself; the console limits are the backstop.
+
+## Names, and what a rename touches
+
+The site is **Highnet Safe LLM Tools**. In October 2026 the repository, the Vercel project and domain, and the Fly app were renamed from `highnet-rag` to `highnet-safe-llm-tools`; the Python packages (`highnet_rag`, `highnet_scope`, `highnet_core`) kept their names. A rename touches:
+
+- **Vercel domain:** add the new `<name>.vercel.app` domain to the project, and once the API accepts it, make the old domain a permanent redirect to the new one (Project → Settings → Domains). Old links keep working.
+- **`NEXT_PUBLIC_SITE_URL`** (Vercel env, defaulting to the new domain in `web/lib/site.ts`): canonical links, the sitemap and share cards use it.
+- **The API's CORS allow-list:** `CORS_ORIGINS` and `CORS_ORIGIN_REGEX` in `fly.toml` must include the new domain and its preview URLs before the web app points at it, or every API call fails.
+- **The GitHub repository:** renaming it in Settings → General keeps a redirect from the old URL (clones, links, the Vercel Git integration all follow it); update `git remote` locally and the links in the code (`web/lib/site.ts`, `web/lib/snippets.ts`).
+- **The Fly app:** an app cannot be renamed; create a new one (`scripts/fly-provision.sh` with `FLY_APP`), copy `/data` (`corpus.sqlite`, `recordings.sqlite`, `scope.sqlite`) to its volume with `scripts/upload-corpus.sh`, deploy, point `NEXT_PUBLIC_API_BASE` at it, then retire the old app.
 
 ## Docs
 
@@ -85,6 +113,8 @@ The Vercel project `highnet-rag` (team "highnet's projects") is linked to this r
 - [AGENTS.md](AGENTS.md): conventions for humans and coding agents
 
 ## Changelog
+
+- **Highnet Safe LLM Tools: Scope, and a second product on one site.** The site is now Highnet Safe LLM Tools. RAG moved to `/rag/`, with permanent redirects from the old addresses; `/` introduces both products. **Scope** shows an agent deciding whether a message is in scope, in eleven traced steps: a rule prefilter that reads base64, zero-width characters, look-alike letters and hidden HTML; a nearest-neighbour vote over 1,200 labeled, Claude-drafted prompts; a Claude Haiku judge whose JSON reply must pass a Pydantic schema; fusion, thresholds and one of four actions, under hard length caps. Every example message was recorded once with the real models; weights, thresholds, signals, context and edits to the scope definition recompute at no cost. `/scope/evals/` compares rules, kNN, the judge and the fused pipeline on false refusals and attacks that get through. RAG's first step now shows Scope's verdict for its question. Shared code moved into a `highnet-core` package.
 
 - **Hero, coverage page and SEO.** The pipeline page opens with a hero: a definition of RAG and the whole pipeline drawn beside it. A new `/coverage` page lists line and branch coverage for every file of the API, the eval runner and the website, taken from a real test run that CI re-checks on every change. The header stays in view on larger screens, the footer maps every page, and each page has its own title, description, canonical link and share card, with a sitemap and robots.txt.
 - **Pre-recorded questions only.** Visitors pick from 15 questions, each recorded once with the real models at every setting, and the page replays the recorded run: every number is real, and a visit calls no model and costs nothing. Changing a setting replays that setting's own run. `LIVE_QUERIES=true` brings free-text questions back.
