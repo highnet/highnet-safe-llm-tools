@@ -719,19 +719,19 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 220,
+    "tests": 226,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2098,
-            "total": 2098
+            "covered": 2161,
+            "total": 2161
           },
           "branches": {
-            "covered": 1678,
-            "total": 1678
+            "covered": 1710,
+            "total": 1710
           }
         },
         "empty_files": 2,
@@ -1540,6 +1540,17 @@
             }
           },
           {
+            "path": "components/scope/CompactPicker.tsx",
+            "lines": {
+              "covered": 14,
+              "total": 14
+            },
+            "branches": {
+              "covered": 12,
+              "total": 12
+            }
+          },
+          {
             "path": "components/scope/Disclosure.tsx",
             "lines": {
               "covered": 5,
@@ -1619,8 +1630,8 @@
           {
             "path": "components/scope/ScopeExplorer.tsx",
             "lines": {
-              "covered": 70,
-              "total": 70
+              "covered": 87,
+              "total": 87
             },
             "branches": {
               "covered": 67,
@@ -1645,8 +1656,8 @@
               "total": 2
             },
             "branches": {
-              "covered": 0,
-              "total": 0
+              "covered": 1,
+              "total": 1
             }
           },
           {
@@ -1689,8 +1700,8 @@
               "total": 34
             },
             "branches": {
-              "covered": 48,
-              "total": 48
+              "covered": 52,
+              "total": 52
             }
           },
           {
@@ -1925,6 +1936,17 @@
             }
           },
           {
+            "path": "components/site/ScopeViewToggle.tsx",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
             "path": "components/site/SiteFooter.tsx",
             "lines": {
               "covered": 7,
@@ -1942,8 +1964,8 @@
               "total": 8
             },
             "branches": {
-              "covered": 12,
-              "total": 12
+              "covered": 19,
+              "total": 19
             }
           },
           {
@@ -2114,8 +2136,8 @@
           {
             "path": "content/scope.ts",
             "lines": {
-              "covered": 81,
-              "total": 81
+              "covered": 82,
+              "total": 82
             },
             "branches": {
               "covered": 8,
@@ -2312,12 +2334,12 @@
           {
             "path": "lib/scope/url-state.ts",
             "lines": {
-              "covered": 63,
-              "total": 63
+              "covered": 71,
+              "total": 71
             },
             "branches": {
-              "covered": 55,
-              "total": 55
+              "covered": 59,
+              "total": 59
             }
           },
           {
@@ -2336,6 +2358,17 @@
             "lines": {
               "covered": 34,
               "total": 34
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "lib/scope/view-store.ts",
+            "lines": {
+              "covered": 18,
+              "total": 18
             },
             "branches": {
               "covered": 4,
