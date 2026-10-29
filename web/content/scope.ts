@@ -157,8 +157,8 @@ export const SCOPE = {
     intro:
       'This preset guards the RAG pipeline’s question box. Two different reasons a question may not get a full answer:',
     notInCorpus: {
-      title: 'In scope, but not in the corpus.',
-      body: 'An encyclopedia question about something outside the 35 articles is still the kind this assistant is for. Scope lets it through; then retrieval finds nothing relevant and RAG says so instead of making something up.',
+      title: 'Let through, but not in the corpus.',
+      body: 'An encyclopedia question about something outside the 35 articles is still the kind this assistant is for, so the guard should let it through; then retrieval finds nothing relevant and RAG says so instead of making something up.',
       link: 'See RAG abstain on it',
       verdict: (action: string, judge: string) =>
         `In the recorded run Scope chose “${action}”. The judge labelled it ${judge}; the rules and the neighbours carried it through.`,

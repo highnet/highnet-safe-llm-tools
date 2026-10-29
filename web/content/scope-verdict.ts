@@ -19,6 +19,6 @@ export const SCOPE_VERDICT = {
   judgeFailed: 'reply failed validation',
   link: 'See the full Scope breakdown',
   inScopeNotInCorpus:
-    'In scope does not mean answerable: Scope only decides whether the question is the kind this assistant serves. Whether the 35 articles hold the answer is retrieval’s job, below.',
+    'Getting past Scope does not mean answerable: Scope only decides whether the question is the kind this assistant serves. Whether the 35 articles hold the answer is retrieval’s job, below.',
   missing: 'Scope has no recorded verdict for this question.',
 };
