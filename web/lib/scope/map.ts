@@ -21,18 +21,20 @@ export const mapScale = (points: Point[]) => {
   };
 };
 
-// The class's marker shape centred on (x, y): circle, diamond, square, triangle.
+// The class's marker shape centred on (x, y). Each class wears the shape its ink already has on
+// the RAG pages, so an ink and shape pair means one thing site-wide: in = green triangle,
+// adjacent = blue circle, out = umber square, injection = violet diamond.
 export const markerPath = (label: Label, x: number, y: number, r: number): string => {
   const f = (n: number) => n.toFixed(2);
   switch (label) {
     case 'in':
-      return `M${f(x - r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z`;
+      return `M${f(x)} ${f(y - r * 1.15)}L${f(x + r * 1.1)} ${f(y + r * 0.85)}L${f(x - r * 1.1)} ${f(y + r * 0.85)}Z`;
     case 'adjacent':
-      return `M${f(x)} ${f(y - r * 1.25)}L${f(x + r * 1.25)} ${f(y)}L${f(x)} ${f(y + r * 1.25)}L${f(x - r * 1.25)} ${f(y)}Z`;
+      return `M${f(x - r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z`;
     case 'out':
       return `M${f(x - r * 0.9)} ${f(y - r * 0.9)}h${f(r * 1.8)}v${f(r * 1.8)}h${f(-r * 1.8)}Z`;
     default:
-      return `M${f(x)} ${f(y - r * 1.15)}L${f(x + r * 1.1)} ${f(y + r * 0.85)}L${f(x - r * 1.1)} ${f(y + r * 0.85)}Z`;
+      return `M${f(x)} ${f(y - r * 1.25)}L${f(x + r * 1.25)} ${f(y)}L${f(x)} ${f(y + r * 1.25)}L${f(x - r * 1.25)} ${f(y)}Z`;
   }
 };
 

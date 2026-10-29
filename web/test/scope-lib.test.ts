@@ -114,7 +114,7 @@ describe('scope map geometry', () => {
       markerPath(l, 10, 10, 1),
     );
     expect(new Set(paths).size).toBe(4);
-    expect(paths[0]).toContain('a1.00');
+    expect(paths[1]).toContain('a1.00');
   });
 
   it('relabels prompts by the edit and measures map distance', () => {

@@ -3,7 +3,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 // Scope's four classes (and the action each leads to) as a shape in its class ink, so a mark is
-// never colour alone: in = circle, adjacent = diamond, out = square, injection = triangle.
+// never colour alone. Each pair is the one its ink already has on the RAG pages, so an ink and
+// shape mean one thing site-wide: in = green triangle, adjacent = blue circle, out = umber
+// square, injection = violet diamond.
 const classMarkVariants = cva('inline-block shrink-0', {
   variants: {
     label: {
@@ -18,10 +20,10 @@ const classMarkVariants = cva('inline-block shrink-0', {
 });
 
 const SHAPES = {
-  in: <circle cx="6" cy="6" r="5" />,
-  adjacent: <path d="M6 0.5 11.5 6 6 11.5 0.5 6Z" />,
+  in: <path d="M6 0.8 11.4 11H0.6Z" />,
+  adjacent: <circle cx="6" cy="6" r="5" />,
   out: <rect x="1" y="1" width="10" height="10" />,
-  injection: <path d="M6 0.8 11.4 11H0.6Z" />,
+  injection: <path d="M6 0.5 11.5 6 6 11.5 0.5 6Z" />,
 } as const;
 
 export type ClassLabel = keyof typeof SHAPES;
