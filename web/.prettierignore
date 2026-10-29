@@ -6,3 +6,10 @@ lib/generated/evals.schema.json
 lib/generated/evals-latest.json
 # Written by scripts/coverage_report.py from the test runs; CI diffs it.
 lib/generated/coverage.json
+# Written by the Scope CLIs (Python) and copied from evals/results/scope/latest.json; CI diffs them.
+lib/generated/scope-trace.schema.json
+lib/generated/scope-evals.schema.json
+lib/generated/scope-evals-latest.json
+public/scope/dataset.json
+lib/generated/scope-verdicts.json
+test/fixtures/scope/config.json
