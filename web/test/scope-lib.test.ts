@@ -14,6 +14,7 @@ import {
 } from '@/lib/scope/map';
 import { scopeSnippets, scopeStatuses } from '@/lib/scope/steps';
 import { scopeSummary } from '@/lib/scope/summary';
+import { getScopeView, setScopeView, subscribeScopeView } from '@/lib/scope/view-store';
 import {
   cleanEdit,
   defaultScopeSettings,
@@ -21,6 +22,7 @@ import {
   ragHref,
   runQuery,
   scopeSearch,
+  writeScopeView,
 } from '@/lib/scope/url-state';
 import { SCOPE_STAGE_ORDER } from '@/content/scope-stages';
 import { SCOPE } from '@/content/scope';
@@ -73,6 +75,29 @@ describe('scope url state', () => {
     expect(scopeSearch(defaultScopeSettings(config, 'rag'), config)).toBe('?preset=rag');
     // An example from another preset is dropped.
     expect(parseScopeUrl('?preset=rag&example=career-fibonacci', config).example).toBeNull();
+  });
+
+  it('tells listeners only about a real change of view', () => {
+    window.history.replaceState(null, '', '/scope/?view=steps');
+    const listener = vi.fn();
+    const stop = subscribeScopeView(listener);
+    setScopeView('steps');
+    expect(listener).not.toHaveBeenCalled();
+    setScopeView('simple');
+    expect(listener).toHaveBeenCalledOnce();
+    stop();
+    expect(getScopeView()).toBe('simple');
+  });
+
+  it('writes only the view into the link, leaving the rest as it was', () => {
+    window.history.replaceState(null, '', '/scope/?view=steps#step-judge');
+    writeScopeView('simple');
+    expect(window.location.pathname + window.location.search + window.location.hash).toBe(
+      '/scope/#step-judge',
+    );
+    window.history.replaceState(null, '', '/scope/?preset=rag');
+    writeScopeView('steps');
+    expect(window.location.search).toBe('?preset=rag&view=steps');
   });
 
   it('keeps only real moves of editable topics', () => {

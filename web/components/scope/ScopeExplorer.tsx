@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Notice } from '@/components/site/Notice';
 import { Button } from '@/components/ui/Button';
-import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Typography } from '@/components/ui/Typography';
 import { COPY } from '@/content/copy';
 import { SCOPE } from '@/content/scope';
@@ -17,12 +16,19 @@ import {
   defaultScopeSettings,
   parseScopeUrl,
   type ScopeSettings,
-  type ScopeView,
   writeScopeUrl,
+  writeScopeView,
 } from '@/lib/scope/url-state';
 import { useScopeStream } from '@/lib/scope/use-scope-stream';
-
+import {
+  getScopeView as getView,
+  setScopeView,
+  subscribeScopeView,
+  useScopeView,
+} from '@/lib/scope/view-store';
 import { cn } from '@/lib/utils';
+
+import { CompactPicker } from './CompactPicker';
 import { ExamplePicker } from './ExamplePicker';
 import { Principles } from './Principles';
 import { RagBridge } from './RagBridge';
@@ -56,7 +62,27 @@ const ScopeExplorer = () => {
   const trace = useScopeStream();
   const { run } = trace;
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const working = useRef<HTMLElement>(null);
+  // Where to scroll once a switch of view has been drawn ("Show every step", "Change the settings").
+  const scrollTo = useRef<string | null>(null);
+  // The view is shared with the header's toggle (lib/scope/view-store.ts).
+  const view = useScopeView();
+  const simple = view === 'simple';
+
+  // This page owns the link: every change of view, from here or from the header, is written back.
+  useEffect(
+    () =>
+      subscribeScopeView(() => {
+        writeScopeView(getView());
+        const target = scrollTo.current;
+        scrollTo.current = null;
+        if (target) {
+          requestAnimationFrame(() =>
+            document.getElementById(target)?.scrollIntoView?.({ block: 'start' }),
+          );
+        }
+      }),
+    [],
+  );
 
   const replay = useCallback(
     (next: ScopeSettings) => {
@@ -103,27 +129,28 @@ const ScopeExplorer = () => {
 
   const apply = (next: ScopeSettings, delay: number) => {
     setSettings(next);
-    writeScopeUrl(next, config!);
+    writeScopeUrl({ ...next, view: getView() }, config!);
     clearTimeout(timer.current);
     if (delay === 0) replay(next);
     else timer.current = setTimeout(() => replay(next), delay);
   };
 
   // Switching the view changes only the layout and the link; nothing is replayed.
-  const setView = (view: ScopeView) => {
-    const next = { ...settings!, view };
-    setSettings(next);
-    writeScopeUrl(next, config!);
-  };
-  const showSteps = () => {
-    setView('steps');
-    working.current?.scrollIntoView?.({ block: 'start' });
+  const switchTo = (target: string) => {
+    scrollTo.current = target;
+    setScopeView('steps');
   };
 
   const pick = (example: Example) => apply({ ...settings!, example: example.id }, 0);
   const changePreset = (preset: string) => {
     trace.reset();
     apply({ ...settings!, preset, example: null, edit: {} }, 0);
+  };
+  // The Simple view never shows an empty sheet: a new product plays its first message.
+  const choosePreset = (preset: string) => {
+    trace.reset();
+    const first = config!.examples.find((e) => e.preset === preset);
+    apply({ ...settings!, preset, example: first?.id ?? null, edit: {} }, 0);
   };
 
   const byStage = useMemo(() => new Map(trace.events.map((e) => [e.stage, e])), [trace.events]);
@@ -135,7 +162,6 @@ const ScopeExplorer = () => {
   const preset = config && settings ? config.presets.find((p) => p.id === settings.preset)! : null;
   const example = config?.examples.find((e) => e.id === settings?.example);
   const ran = trace.input;
-  const simple = settings?.view === 'simple';
 
   const lastEvent = trace.events.at(-1);
   const announcement = lastEvent
@@ -147,21 +173,127 @@ const ScopeExplorer = () => {
       )
     : '';
 
+  const hero = (
+    <ScopeHero
+      headingAs={simple ? 'h2' : 'h1'}
+      diagram={
+        <ScopeDiagram
+          statusOf={statusOf}
+          action={decision?.action}
+          // The twelve-step diagram is every-step material: phones skip it in the Simple view.
+          className={cn('rounded-md border border-solid px-4 md:px-5', simple && 'max-lg:hidden')}
+        />
+      }
+    />
+  );
+
+  const configNotices = (
+    <>
+      {configState.status === 'loading' && <Notice tone="note">{SCOPE.starting}</Notice>}
+      {configState.status === 'error' && (
+        <Notice tone="error">
+          <p>
+            {SCOPE.offline} {configState.message}
+          </p>
+          <Button
+            variant="pencil"
+            size="inline"
+            className="mt-1"
+            onClick={() => {
+              setConfigState({ status: 'loading' });
+              requestConfig();
+            }}
+          >
+            {SCOPE.retry}
+          </Button>
+        </Notice>
+      )}
+    </>
+  );
+
+  const replayNotice = config && (
+    <Notice tone="note">
+      {config.illustrative
+        ? SCOPE.illustrative
+        : config.recorded_at
+          ? SCOPE.replayNotice(config.recorded_at.slice(0, 10))
+          : SCOPE.replayUndated}
+    </Notice>
+  );
+
+  const bridge = preset?.id === 'rag' && (
+    <RagBridge
+      examples={config!.examples.filter((e) => e.preset === 'rag')}
+      disabled={running}
+      onPick={pick}
+    />
+  );
+
+  const connectionError = trace.connectionError && (
+    <Notice tone="warning">{trace.connectionError}</Notice>
+  );
+
+  const announcer = (
+    <p aria-live="polite" className="sr-only">
+      {announcement}
+    </p>
+  );
+
+  // Simple: a plain question, the two selects, the result in plain words; the rest below it.
+  if (simple) {
+    return (
+      <div className="space-y-8 md:space-y-10">
+        <section aria-labelledby="sheet-title" className="space-y-4">
+          <div className="max-w-[68ch] space-y-2">
+            <Typography variant="sheetTitle" as="h1" id="sheet-title">
+              {SCOPE.intro.title}
+            </Typography>
+            <Typography color="muted">{SCOPE.intro.body}</Typography>
+          </div>
+          {configNotices}
+          {config && settings && (
+            <CompactPicker
+              presets={config.presets}
+              preset={settings.preset}
+              examples={config.examples}
+              selectedId={settings.example}
+              onPreset={choosePreset}
+              onPick={pick}
+            />
+          )}
+          {connectionError}
+        </section>
+
+        <section
+          id="scope-working"
+          aria-labelledby="working-title"
+          className="scroll-mt-6 space-y-3"
+        >
+          {/* The sheet's own labels lead; the section keeps its name for assistive tech. */}
+          <Typography variant="label" as="h2" id="working-title" className="sr-only">
+            {SCOPE.simple.title}
+          </Typography>
+          <ScopeSimple
+            events={trace.events}
+            runStatus={trace.status}
+            signals={ran?.signals ?? null}
+            onShowSteps={() => switchTo('scope-working')}
+            onSettings={() => switchTo('scope-settings')}
+          />
+        </section>
+
+        {replayNotice}
+        {bridge}
+        {hero}
+        <Principles />
+        {announcer}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 md:space-y-10">
-      <ScopeHero
-        diagram={
-          <ScopeDiagram
-            statusOf={statusOf}
-            action={decision?.action}
-            // The twelve-step diagram is every-step material: phones skip it in the Simple view.
-            className={cn(
-              'rounded-md border border-solid px-4 md:px-5',
-              settings?.view === 'simple' && 'max-lg:hidden',
-            )}
-          />
-        }
-      />
+      {hero}
 
       <section aria-labelledby="sheet-title" className="space-y-4 md:space-y-5">
         <Typography variant="sheetTitle" as="h2" id="sheet-title" className="break-words">
@@ -173,34 +305,8 @@ const ScopeExplorer = () => {
           </span>
         </Typography>
 
-        {configState.status === 'loading' && <Notice tone="note">{SCOPE.starting}</Notice>}
-        {configState.status === 'error' && (
-          <Notice tone="error">
-            <p>
-              {SCOPE.offline} {configState.message}
-            </p>
-            <Button
-              variant="pencil"
-              size="inline"
-              className="mt-1"
-              onClick={() => {
-                setConfigState({ status: 'loading' });
-                requestConfig();
-              }}
-            >
-              {SCOPE.retry}
-            </Button>
-          </Notice>
-        )}
-        {config && (
-          <Notice tone="note">
-            {config.illustrative
-              ? SCOPE.illustrative
-              : config.recorded_at
-                ? SCOPE.replayNotice(config.recorded_at.slice(0, 10))
-                : SCOPE.replayUndated}
-          </Notice>
-        )}
+        {configNotices}
+        {replayNotice}
 
         {config && settings && preset && (
           <>
@@ -214,122 +320,68 @@ const ScopeExplorer = () => {
               onPick={pick}
               onStop={trace.cancel}
             />
-            {preset.id === 'rag' && (
-              <RagBridge
-                examples={config.examples.filter((e) => e.preset === 'rag')}
-                disabled={running}
-                onPick={pick}
+            {bridge}
+            <div id="scope-settings" className="scroll-mt-6 space-y-4 md:space-y-5">
+              <ScopeSettingsStrip
+                settings={settings}
+                changed={tuned(settings, config)}
+                disabled={false}
+                onChange={(next) => apply(next, REPLAY_DELAY_MS)}
+                onReset={() =>
+                  apply(
+                    {
+                      ...defaultScopeSettings(config, settings.preset),
+                      example: settings.example,
+                      edit: settings.edit,
+                    },
+                    0,
+                  )
+                }
               />
-            )}
-            {simple ? (
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-y border-dashed py-2">
-                <Typography variant="small" color="muted" as="span">
-                  {SCOPE.simple.settingsNote}
-                </Typography>
-                <Button
-                  variant="pencil"
-                  size="inline"
-                  className="min-h-10 text-sm"
-                  onClick={() => setView('steps')}
-                >
-                  {SCOPE.simple.settings}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <ScopeSettingsStrip
-                  settings={settings}
-                  changed={tuned(settings, config)}
-                  disabled={false}
-                  onChange={(next) => apply(next, REPLAY_DELAY_MS)}
-                  onReset={() =>
-                    apply(
-                      {
-                        ...defaultScopeSettings(config, settings.preset),
-                        example: settings.example,
-                        edit: settings.edit,
-                      },
-                      0,
-                    )
-                  }
-                />
-                <ScopeEditor
-                  key={preset.id}
-                  preset={preset}
-                  edit={settings.edit}
-                  disabled={false}
-                  onChange={(edit) => apply({ ...settings, edit }, 0)}
-                />
-              </>
-            )}
+              <ScopeEditor
+                key={preset.id}
+                preset={preset}
+                edit={settings.edit}
+                disabled={false}
+                onChange={(edit) => apply({ ...settings, edit }, 0)}
+              />
+            </div>
           </>
         )}
-        {trace.connectionError && <Notice tone="warning">{trace.connectionError}</Notice>}
+        {connectionError}
       </section>
 
       <section
-        ref={working}
+        id="scope-working"
         aria-labelledby="working-title"
         className="scroll-mt-6 space-y-3 md:space-y-4"
       >
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b pb-2">
-          <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">
-            <Typography variant="label" as="h2" id="working-title">
-              {simple ? SCOPE.simple.title : SCOPE.workingLabel}
-            </Typography>
-            <Typography variant="small" color="muted" as="span">
-              {simple ? SCOPE.simple.intro : SCOPE.workingNote(SCOPE_STAGE_ORDER.length)}
-            </Typography>
-          </div>
-          {settings && (
-            <div className="flex items-center gap-2">
-              <span id="scope-view-label" className="text-sm text-muted-foreground">
-                {SCOPE.view.label}
-              </span>
-              <SegmentedControl
-                name="scope-view"
-                labelledBy="scope-view-label"
-                size="sm"
-                value={settings.view}
-                onChange={(value) => setView(value as ScopeView)}
-                options={[
-                  { value: 'simple', label: SCOPE.view.simple },
-                  { value: 'steps', label: SCOPE.view.steps },
-                ]}
-              />
-            </div>
-          )}
+        <div className="flex flex-wrap items-baseline gap-x-3 border-b pb-2">
+          <Typography variant="label" as="h2" id="working-title">
+            {SCOPE.workingLabel}
+          </Typography>
+          <Typography variant="small" color="muted" as="span">
+            {SCOPE.workingNote(SCOPE_STAGE_ORDER.length)}
+          </Typography>
         </div>
-        {simple ? (
-          <ScopeSimple
-            events={trace.events}
-            runStatus={trace.status}
-            signals={ran?.signals ?? null}
-            onShowSteps={showSteps}
-          />
-        ) : (
-          <ScopeStepList
-            events={trace.events}
-            runStatus={trace.status}
-            context={{
-              preset: ran?.preset ?? settings?.preset ?? '',
-              message: request?.message ?? '',
-              block: ran?.thresholds.block ?? 0.5,
-              edit: ran?.edit ?? {},
-            }}
-          />
-        )}
+        <ScopeStepList
+          events={trace.events}
+          runStatus={trace.status}
+          context={{
+            preset: ran?.preset ?? settings?.preset ?? '',
+            message: request?.message ?? '',
+            block: ran?.thresholds.block ?? 0.5,
+            edit: ran?.edit ?? {},
+          }}
+        />
       </section>
 
-      {decision && !simple && (
+      {decision && (
         <ScopeResult decision={decision} events={trace.events} done={trace.done !== null} />
       )}
 
       <Principles />
-
-      <p aria-live="polite" className="sr-only">
-        {announcement}
-      </p>
+      {announcer}
     </div>
   );
 };

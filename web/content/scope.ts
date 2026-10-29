@@ -191,16 +191,25 @@ export const SCOPE = {
 
   // The switch between the plain summary and the full working (?view=simple).
   view: {
-    label: 'Show',
+    label: 'Scope view',
     simple: 'Simple',
     steps: 'Every step',
+  },
+
+  // The Simple view's top: a plain heading and intro, then the product and message as two selects.
+  intro: {
+    title: 'Will the assistant answer this message?',
+    body: 'Before an AI assistant answers, a guard reads the message and decides what to do with it. Pick a product and a message to see its decision, in plain words.',
+  },
+  compact: {
+    message: 'Message',
+    withTurns: (text: string, turns: string) => `${text} (${turns})`,
   },
 
   // The Simple view: the same run in plain words, for readers who do not want the working.
   // No jargon here: no kNN, fusion or distribution; the advisors have everyday names.
   simple: {
     title: 'In short',
-    intro: 'The same run in plain words: what came in, who voted, and what the assistant does.',
     empty: 'Pick a message above to see what the assistant decides.',
     deciding: 'Working it out…',
     message: 'The message',
@@ -258,7 +267,6 @@ export const SCOPE = {
     noReply: 'There is no recorded reply for these settings.',
     every: 'Show every step',
     settings: 'Change the settings',
-    settingsNote: 'Settings and the scope definition live in the every-step view.',
     stopped: 'The run stopped before the assistant decided.',
   },
 

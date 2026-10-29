@@ -10,17 +10,19 @@ const H = SCOPE.hero;
 
 type ScopeHeroProps = {
   diagram: ReactNode;
+  // In the Simple view the hero sits below the result, under the page's own plain heading.
+  headingAs?: 'h1' | 'h2';
 };
 
 // What a scope guard is and what this page shows, beside the whole guard drawn as one figure.
-const ScopeHero = ({ diagram }: ScopeHeroProps) => {
+const ScopeHero = ({ diagram, headingAs = 'h1' }: ScopeHeroProps) => {
   return (
     <section
       aria-labelledby="hero-title"
       className="grid items-start gap-x-12 gap-y-8 pb-4 md:pb-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
     >
       <div className="space-y-5">
-        <Typography variant="display" id="hero-title">
+        <Typography variant="display" as={headingAs} id="hero-title">
           {H.title}
         </Typography>
         <dl className="max-w-[68ch]">

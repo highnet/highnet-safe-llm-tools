@@ -29,6 +29,10 @@ export type ScopeSettings = {
   edit: Record<string, TopicClass>;
 };
 
+// Simple unless the link asks for every step.
+export const parseScopeView = (search: string): ScopeView =>
+  new URLSearchParams(search).get('view') === 'steps' ? 'steps' : 'simple';
+
 export const DEFAULT_PRESET = 'career';
 export const K_MAX = 15;
 const THRESHOLD_KEYS: (keyof Thresholds)[] = ['block', 'answer', 'brief'];
@@ -86,7 +90,7 @@ export const parseScopeUrl = (search: string, config: ScopeConfig): ScopeSetting
       .map((part) => part.split(':') as [string, string]),
   );
   return {
-    view: params.get('view') === 'steps' ? 'steps' : 'simple',
+    view: parseScopeView(search),
     preset,
     example: config.examples.some((e) => e.id === example && e.preset === preset) ? example : null,
     context: params.get('context') !== '0',
@@ -131,6 +135,19 @@ export const scopeSearch = (settings: ScopeSettings, config: ScopeConfig): strin
   const edit = editParam(settings.edit);
   if (edit) params.set('edit', edit);
   return `?${params.toString()}`;
+};
+
+// Only the view changes: the rest of the link stays exactly as it was.
+export const writeScopeView = (view: ScopeView) => {
+  const params = new URLSearchParams(window.location.search);
+  if (view === 'steps') params.set('view', 'steps');
+  else params.delete('view');
+  const search = params.toString();
+  window.history.replaceState(
+    null,
+    '',
+    (search ? `?${search}` : window.location.pathname) + window.location.hash,
+  );
 };
 
 export const writeScopeUrl = (settings: ScopeSettings, config: ScopeConfig) => {

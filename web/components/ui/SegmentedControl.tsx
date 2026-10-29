@@ -4,15 +4,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const segmentedControlVariants = cva(
-  'inline-flex rounded-sm border border-input bg-card has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring',
+  'inline-flex has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring',
   {
     variants: {
+      variant: {
+        // A ruled control of its own on the paper.
+        default: 'rounded-sm border border-input bg-card',
+        // Segments set inside another ruled control (the header's Scope segment, on the wash): no
+        // box of their own; the checked one is a chip of raised paper with a hairline ring.
+        inset:
+          'items-center gap-0.5 pr-1 [&_[data-slot=segment]]:rounded-sm [&_[data-slot=segment]]:border-l-0 [&_[data-slot=segment]]:whitespace-nowrap [&_[data-slot=segment]:has(:checked)]:bg-card [&_[data-slot=segment]:has(:checked)]:ring-1 [&_[data-slot=segment]:has(:checked)]:ring-input',
+      },
       size: {
         default: '[&_[data-slot=segment]]:h-9.5 [&_[data-slot=segment]]:px-3',
         sm: '[&_[data-slot=segment]]:h-7.5 [&_[data-slot=segment]]:px-2.5',
+        inset:
+          '[&_[data-slot=segment]]:h-7 [&_[data-slot=segment]]:px-2 [&_[data-slot=segment]]:text-xs',
       },
     },
-    defaultVariants: { size: 'default' },
+    defaultVariants: { variant: 'default', size: 'default' },
   },
 );
 
@@ -39,6 +49,7 @@ const SegmentedControl = ({
   value,
   disabled,
   onChange,
+  variant,
   size,
   className,
 }: SegmentedControlProps) => {
@@ -48,7 +59,7 @@ const SegmentedControl = ({
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       data-slot="segmented-control"
-      className={cn(segmentedControlVariants({ size }), className)}
+      className={cn(segmentedControlVariants({ variant, size }), className)}
     >
       {options.map((option) => (
         <label

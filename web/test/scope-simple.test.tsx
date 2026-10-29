@@ -1,8 +1,14 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderToString } from 'react-dom/server';
+
+import ScopePage from '@/app/scope/page';
+import { CompactPicker } from '@/components/scope/CompactPicker';
 import { ScopeExplorer } from '@/components/scope/ScopeExplorer';
 import { ScopeSimple } from '@/components/scope/ScopeSimple';
+import { ScopeViewToggle } from '@/components/site/ScopeViewToggle';
+import { SiteHeader } from '@/components/site/SiteHeader';
 import { SCOPE } from '@/content/scope';
 import type { ScopeTraceEvent } from '@/lib/generated/scope-trace';
 import { clearDatasetCache } from '@/lib/scope/api';
@@ -10,7 +16,7 @@ import type { Signal } from '@/lib/scope/types';
 import type { RunStatus } from '@/lib/use-trace-stream';
 
 import { ControlledEventSource } from './helpers';
-import { recording, stage, stubScopeFetch } from './scope-fixtures';
+import { recording, scopeConfig, stage, stubScopeFetch } from './scope-fixtures';
 
 const S = SCOPE.simple;
 const ALL_ON: Record<Signal, boolean> = { rules: true, knn: true, judge: true, decide: true };
@@ -27,6 +33,7 @@ const simple = (
       runStatus={runStatus}
       signals={signals}
       onShowSteps={onShowSteps}
+      onSettings={() => {}}
     />,
   );
 
@@ -164,36 +171,92 @@ describe('the Simple view', () => {
 });
 
 describe('switching between Simple and every step', () => {
-  it('keeps the view in the link and switches without replaying', async () => {
-    window.history.replaceState(
-      null,
-      '',
-      '/scope/?preset=career&example=career-salary&view=simple',
-    );
+  const flushFrame = () =>
+    act(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+
+  it('shares the view between the header and the page, and keeps it in the link', async () => {
+    window.history.replaceState(null, '', '/scope/?preset=career&example=career-salary');
     stubScopeFetch();
-    render(<ScopeExplorer />);
-    await screen.findByRole('heading', { name: SCOPE.picker.title });
-    expect(screen.getByRole('radio', { name: SCOPE.view.simple })).toBeChecked();
+    render(<ScopePage />);
+    const toggle = screen.getByRole('radiogroup', { name: SCOPE.view.label });
+    expect(within(toggle).getByRole('radio', { name: SCOPE.view.simple })).toBeChecked();
+    expect(screen.getByRole('heading', { level: 1, name: SCOPE.intro.title })).toBeInTheDocument();
+    await screen.findByRole('combobox', { name: SCOPE.compact.message });
     expect(screen.queryByText(SCOPE.settings.weights)).not.toBeInTheDocument();
     const runs = ControlledEventSource.instances.length;
-    fireEvent.click(screen.getByRole('button', { name: S.settings }));
-    expect(window.location.search).toBe('?preset=career&view=steps&example=career-salary');
-    expect(screen.getByText(SCOPE.settings.weights)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('radio', { name: SCOPE.view.simple }));
-    expect(window.location.search).toBe('?preset=career&example=career-salary');
     const source = ControlledEventSource.last();
     act(() => recording('world-cup').events.forEach((e) => source.emit('trace', e)));
-    // Show every step, scrolling to the working where the browser can.
+
+    // "Change the settings" opens every step and scrolls to the settings once they are drawn.
     const scroll = vi.fn();
     Element.prototype.scrollIntoView = scroll;
-    fireEvent.click(screen.getByRole('button', { name: S.every }));
+    fireEvent.click(screen.getByRole('button', { name: S.settings }));
+    await flushFrame();
     expect(scroll).toHaveBeenCalledWith({ block: 'start' });
-    expect(screen.getByRole('radio', { name: SCOPE.view.steps })).toBeChecked();
+    expect(window.location.search).toBe('?preset=career&example=career-salary&view=steps');
+    expect(within(toggle).getByRole('radio', { name: SCOPE.view.steps })).toBeChecked();
+    expect(screen.getByText(SCOPE.settings.weights)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: SCOPE.hero.title })).toBeInTheDocument();
+
+    // The header's toggle switches the page back.
+    fireEvent.click(within(toggle).getByRole('radio', { name: SCOPE.view.simple }));
+    expect(window.location.search).toBe('?preset=career&example=career-salary');
+    expect(screen.getByRole('heading', { level: 2, name: SCOPE.hero.title })).toBeInTheDocument();
+
     // @ts-expect-error jsdom has no scrollIntoView; put it back the way it was.
     delete Element.prototype.scrollIntoView;
-    fireEvent.click(screen.getByRole('radio', { name: SCOPE.view.simple }));
     fireEvent.click(screen.getByRole('button', { name: S.every }));
-    expect(screen.getByRole('radio', { name: SCOPE.view.steps })).toBeChecked();
+    await flushFrame();
+    expect(within(toggle).getByRole('radio', { name: SCOPE.view.steps })).toBeChecked();
     expect(ControlledEventSource.instances.length).toBe(runs);
+  });
+
+  it('picks the product and the message from two selects', async () => {
+    const config = scopeConfig();
+    stubScopeFetch({ ...config, examples: config.examples.filter((e) => e.preset !== 'bank') });
+    render(<ScopeExplorer />);
+    const message = await screen.findByRole('combobox', { name: SCOPE.compact.message });
+    // The preset's first message is already playing; the link stays bare until a pick.
+    expect(ControlledEventSource.last().url).toContain('example=career-');
+    expect(window.location.search).toBe('');
+    fireEvent.change(message, { target: { value: 'career-lasagna' } });
+    expect(window.location.search).toBe('?preset=career&example=career-lasagna');
+    const product = screen.getByRole('combobox', { name: SCOPE.presets.label });
+    fireEvent.change(product, { target: { value: 'rag' } });
+    expect(window.location.search).toMatch(/^\?preset=rag&example=rag-/);
+    expect(within(message).getByRole('group', { name: SCOPE.picker.groups.rag })).toBeVisible();
+    // A product with no recorded messages leaves the message select empty and disabled.
+    fireEvent.change(product, { target: { value: 'bank' } });
+    expect(window.location.search).toBe('?preset=bank');
+    expect(message).toBeDisabled();
+    expect(within(message).getByRole('option', { name: SCOPE.picker.empty })).toBeInTheDocument();
+  });
+
+  it('asks for a message when none is chosen yet', () => {
+    const config = scopeConfig();
+    render(
+      <CompactPicker
+        presets={config.presets}
+        preset="career"
+        examples={config.examples}
+        selectedId={null}
+        onPreset={() => {}}
+        onPick={() => {}}
+      />,
+    );
+    expect(screen.getByRole('option', { name: SCOPE.picker.title })).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: /Write a Fibonacci function in Python \(after 2/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the plain product links on every other page', () => {
+    render(<SiteHeader product="scope" current="evals" />);
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Scope' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('renders the Simple view on the server, the default', () => {
+    expect(renderToString(<ScopeViewToggle />)).toContain('checked="" value="simple"');
   });
 });
