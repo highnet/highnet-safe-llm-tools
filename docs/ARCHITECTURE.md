@@ -188,7 +188,7 @@ The Pydantic models are the source of truth. `uv run highnet-rag schema` exports
 | `GET /api/evals`                 | JSON                | The latest published eval results, or 404 before the first run                                                                                                                                                                                                                                            |
 | `GET /api/health`                | JSON                | Liveness plus the corpus build id, Scope's build id and latest recording (`scope`, `scope_recorded_at`); used by Fly health checks and the deploy job                                                                                                                                                  |
 | `GET /api/scope/config`          | JSON                | Scope's presets (full definitions), example messages, default weights and thresholds, models, when it was recorded, the build, the budget tier (section 13)                                                                                                                                           |
-| `GET /api/scope/run`             | `text/event-stream` | One message through Scope's 11 steps: `preset`, `example`, `context`, `rules`, `knn`, `judge`, `w_rules`, `w_knn`, `w_judge`, `t_block`, `t_answer`, `t_brief`, `k`, `edit=topic:class,…` (section 13)                                                                                                 |
+| `GET /api/scope/run`             | `text/event-stream` | One message through Scope's 12 steps: `preset`, `example`, `context`, `rules`, `knn`, `judge`, `decide`, `w_rules`, `w_knn`, `w_judge`, `w_decide`, `t_block`, `t_answer`, `t_brief`, `k`, `edit=topic:class,…` (section 13)                                                                                                 |
 | `GET /*`                         | static              | `web/out`, with `index.html` fallbacks for the static routes                                                                                                                                                                                                                                              |
 
 ## 6. SQLite schema
@@ -412,7 +412,7 @@ Owner decision: visitors only pick from recorded questions, so a visit costs not
 
 ## 13. Scope
 
-Scope shows a product agent guarding its scope. One message (with its earlier turns, if any) runs through eleven steps, one trace event each, and ends in one action: **answer** (in), **answer briefly** (adjacent), **redirect** (off scope) or **block** (injection or abuse).
+Scope shows a product agent guarding its scope. One message (with its earlier turns, if any) runs through twelve steps, one trace event each, and ends in one action: **answer** (in), **answer briefly** (adjacent), **redirect** (off scope) or **block** (injection or abuse).
 
 ### Presets and the scope definition
 
@@ -426,7 +426,7 @@ Scope shows a product agent guarding its scope. One message (with its earlier tu
 
 `highnet-scope record` then runs every example through the pipeline with the real models, with and without its context, and also records both answers (full and brief), so a visitor who changes the action by moving a threshold still sees a real answer. `highnet-scope export` writes the dataset for the web app (`web/public/scope/dataset.json`) and the default-settings verdict of every RAG-assistant example (`web/lib/generated/scope-verdicts.json`), which RAG's first step shows.
 
-### The eleven steps (`pipeline.py`)
+### The twelve steps (`pipeline.py`)
 
 | #   | `stage`      | What it does | `data` (main fields) |
 | --- | ------------ | ------------ | -------------------- |
@@ -437,14 +437,15 @@ Scope shows a product agent guarding its scope. One message (with its earlier tu
 | 5   | `map`        | projected with the preset's PCA | `x`, `y`, `explained_variance`, `neighbours_2d` |
 | 6   | `knn`        | cosine similarity against the preset's unit vectors; the top k vote, weighted by max(cos, 0); labels follow the definition in force | `k`, `neighbours` [{id, text, topic, label, relabelled, similarity}], `distribution`, `relabelled_topics` |
 | 7   | `judge`      | Claude Haiku with the rubric; the message inside `<message>` tags (imitation tags neutralised), the reply prefilled with `{` and validated by `JudgeVerdict` (extra keys forbidden, label one of four, confidence 0–1). Invalid reply: `error`, and the judge drops out | `system`, `messages`, `raw`, `verdict` or `error`, `distribution` |
-| 8   | `fuse`       | P(label) = Σ wᵢ·Pᵢ / Σ wᵢ over the signals that ran | `weights`, `used_weights`, `signals`, `contributions`, `distribution`, `label`, `confidence`, `tradeoff` (ms and $ per signal and cumulatively) |
-| 9   | `thresholds` | block if P(injection) ≥ `t_block`; else scope = (P(in) + ½P(adj)) / (P(in)+P(adj)+P(out)) against `t_answer` and `t_brief` | `thresholds`, `p_injection`, `scope_score`, `action` |
-| 10  | `respond`    | the preset's redirect or block message, or the recorded answer under hard caps (300 / 120 tokens, 1,500 / 500 characters); for the RAG assistant, a hand-off to the RAG pipeline | `action`, `text`, `max_tokens`, `max_chars`, `truncated`, `rag_question` |
-| 11  | `audit`      | the record a reviewer would see (shown, not stored): action, signals, rule hits, rubric hash, a SHA-256 of the message, and why it needs review (low confidence, disagreeing signals, any block) | `stored: false`, `record`, `review_reasons` |
+| 8   | `decide`     | the second judge: a decision model (`typesafe-ai/jev` through Vercel AI Gateway, `POST /v1/evaluate`) answers one typed `choice` question whose criteria are the same scope definition, with the message (and earlier turns) as structured state. It returns a probability for every label, normalised and used as is: no reply to parse, no self-reported confidence. A reply without every label: `error`, and it drops out. Skipped like the judge when switched off, after an edit, or on budget | `state`, `questions`, `answers`, `distribution`, `choice`, `reported_cost_usd` (the gateway's own figure, beside ours) |
+| 9   | `fuse`       | P(label) = Σ wᵢ·Pᵢ / Σ wᵢ over the signals that ran (rules 0.25, kNN 0.35, judge 0.4, decision model 0.4 by default; the two judges count equally, and no weight was tuned on the evals) | `weights`, `used_weights`, `signals`, `contributions`, `distribution`, `label`, `confidence`, `tradeoff` (ms and $ per signal and cumulatively) |
+| 10  | `thresholds` | block if P(injection) ≥ `t_block`; else scope = (P(in) + ½P(adj)) / (P(in)+P(adj)+P(out)) against `t_answer` and `t_brief` | `thresholds`, `p_injection`, `scope_score`, `action` |
+| 11  | `respond`    | the preset's redirect or block message, or the recorded answer under hard caps (300 / 120 tokens, 1,500 / 500 characters); for the RAG assistant, a hand-off to the RAG pipeline | `action`, `text`, `max_tokens`, `max_chars`, `truncated`, `rag_question` |
+| 12  | `audit`      | the record a reviewer would see (shown, not stored): action, signals, rule hits, rubric hash, a SHA-256 of the message, and why it needs review (low confidence, disagreeing signals, any block) | `stored: false`, `record`, `review_reasons` |
 
 ### Recorded and live models (`models.py`)
 
-`RecordedModels` (the default, `SCOPE_LIVE=false`) only looks calls up in `scope.sqlite`, keyed by exactly what was sent: an embedding by its text, a completion by kind, model, system prompt, messages and `max_tokens`. A call never recorded is a `NotRecordedError`, shown in the trace, never a guess. `LiveModels` calls Voyage and Claude, prices each call with `pricing.py`, records it, and (outside the recorder and the evals) writes the spend to the shared ledger. Model steps report their recorded time, tokens and cost; replays keep the recorded pace, pauses capped at 1.5 s.
+`RecordedModels` (the default, `SCOPE_LIVE=false`) only looks calls up in `scope.sqlite`, keyed by exactly what was sent: an embedding by its text, a completion by kind, model, system prompt, messages and `max_tokens`, a decision by model, state and questions. A call never recorded is a `NotRecordedError`, shown in the trace, never a guess. `LiveModels` calls Voyage, Claude and the decision model, prices each call with `pricing.py`, records it, and (outside the recorder and the evals) writes the spend to the shared ledger. Model steps report their recorded time, tokens and cost; replays keep the recorded pace, pauses capped at 1.5 s.
 
 ### `scope.sqlite`
 
@@ -463,4 +464,4 @@ The file is committed (`recordings/scope/scope.sqlite`, about 6 MB) because it i
 
 ### Evals (`highnet-scope-evals run`)
 
-Every labeled prompt through four methods: rules alone (silence means the middle band), kNN leave-one-out, the judge (real calls, cached in `data/scope-evals.sqlite` so a rerun is free) and the fused pipeline with the default weights and thresholds. The action is scored against the label (answer = in, answer briefly = adjacent, redirect = out, block = injection): per-class precision and recall, a confusion matrix, the false refusal rate (in or adjacent, redirected or blocked), the over-compliance rate (out or injection, answered), injections missed, per preset, a sweep of the redirect threshold, and median latency and mean cost per message from the run's own calls. Output: `evals/results/scope/latest.json`, a dated copy and a dated `*.details.jsonl`.
+Every labeled prompt through five methods: rules alone (silence means the middle band), kNN leave-one-out, the judge and the decision model (real calls, cached in `data/scope-evals.sqlite` so a rerun is free) and the fused pipeline with the default weights and thresholds. The action is scored against the label (answer = in, answer briefly = adjacent, redirect = out, block = injection): per-class precision and recall, a confusion matrix, the false refusal rate (in or adjacent, redirected or blocked), the over-compliance rate (out or injection, answered), injections missed, per preset, a sweep of the redirect threshold, and median latency and mean cost per message from the run's own calls. Output: `evals/results/scope/latest.json`, a dated copy and a dated `*.details.jsonl`.

@@ -139,3 +139,14 @@ Acceptance criteria:
 
 - [x] `highnet-scope-evals run` scores rules, kNN (leave-one-out), the judge and the fused pipeline: per-class precision and recall, confusion matrices, false refusal and over-compliance rates, a threshold sweep, cost and latency per method; results in `evals/results/scope/`.
 - [ ] Decide whether to change the fusion defaults (open owner item: the judge alone beat the fused default in the first run); measure any change on a held-out split.
+
+## S5 · Scope: a second judge (decision model)
+
+Owner decision (2026-10-29): add `typesafe-ai/jev`, a decision model through Vercel AI Gateway, as a second judge beside Claude Haiku.
+
+Acceptance criteria:
+
+- [x] A traced `decide` step (08) answers one typed `choice` question built from the scope definition and returns a probability per label; a reply without every label fails the step and drops it from the fusion. Skipped, with the reason, when switched off, after an edit, or on budget.
+- [x] Fusion takes four signals (default weight 0.4 for the decision model, equal to the judge, untuned); the evals score it as its own method and in the fused pipeline.
+- [ ] Every example recorded with the decision model (replayed on visits; no call per visit); evals rerun with the judge's cached calls, so only the decision model's calls are paid (cap $0.50).
+- [ ] The step sheet, settings (toggle and weight), fusion, diagram, evals page, RAG's verdict note and the landing page show the second judge; 100% coverage; `impeccable detect` reports zero findings.

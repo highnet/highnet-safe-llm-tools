@@ -70,6 +70,7 @@ Changing any of this needs the owner's approval.
   - stronger model for demos: default `claude-opus-5`;
   - judge model for evals: default `claude-sonnet-5`.
 - **Embeddings:** API only (Voyage). The 2D map uses PCA in numpy, fitted at ingest time.
+- **Decision model (Scope's second judge; owner decision 2026-10-29):** `typesafe-ai/jev` through Vercel AI Gateway's HTTP API (`AI_GATEWAY_API_KEY`), called directly with httpx, no SDK. Like every model call it is recorded once and replayed on visits.
 - **Storage:** SQLite on a Fly volume, with sqlite-vec for vectors and FTS5 for BM25, behind a storage interface.
 - **Streaming:** SSE with one trace event per pipeline stage.
 - **Hosting (changed by the owner, 2026-09-28):**
