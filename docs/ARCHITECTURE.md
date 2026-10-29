@@ -374,7 +374,7 @@ The font is Recursive via `next/font/google` (self-hosted at build time, so the 
 - `web/vercel.json` pins the install and build commands and adds basic security headers.
 - `prebuild` regenerates the code excerpts from `api/src`; Vercel includes files outside the root directory by default. If those files are missing, the committed JSON is kept.
 - **Environment:** `NEXT_PUBLIC_API_BASE=https://highnet-safe-llm-tools.fly.dev` for Production and Preview.
-- **Redirects (`web/vercel.json`).** A static export cannot use `next.config` redirects, so Vercel serves permanent (308) redirects: `/corpus/`, `/evals/` and `/coverage/` go to their `/rag/` pages, and `/` with a `q` query parameter (an old shared RAG run link such as `/?q=…&mode=hybrid`) goes to `/rag/` with the query string kept, so the link replays the same run.
+- **Redirects (`web/vercel.json`).** A static export cannot use `next.config` redirects, so Vercel serves permanent (308) redirects: `/corpus/`, `/evals/` and `/coverage/` go to their `/rag/` pages, and `/` with a `q` query parameter (an old shared RAG run link such as `/?q=…&mode=hybrid`) goes to `/rag/` with the query string kept, so the link replays the same run. Before any of these, every request to the old domain `highnet-rag.vercel.app` (a `has: host` condition) goes to the same path on `highnet-safe-llm-tools.vercel.app`, so old links reach the new domain and then the rules above.
 
 ### CI (`.github/workflows/ci.yml`)
 

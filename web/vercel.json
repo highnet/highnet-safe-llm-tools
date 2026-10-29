@@ -24,6 +24,17 @@
   ],
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "highnet-rag.vercel.app"
+        }
+      ],
+      "destination": "https://highnet-safe-llm-tools.vercel.app/:path*",
+      "permanent": true
+    },
+    {
       "source": "/corpus",
       "destination": "/rag/corpus/",
       "permanent": true
