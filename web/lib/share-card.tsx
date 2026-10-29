@@ -63,9 +63,7 @@ export const shareCard = ({ name, headline, steps, result, compact }: ShareCardO
         fontFamily: 'Recursive',
       }}
     >
-      <div style={{ display: 'flex', fontFamily: MONO, fontWeight: 700, fontSize: 30 }}>
-        {name}
-      </div>
+      <div style={{ display: 'flex', fontFamily: MONO, fontWeight: 700, fontSize: 30 }}>{name}</div>
       <div
         style={{ display: 'flex', fontSize: 62, fontWeight: 700, lineHeight: 1.06, maxWidth: 1056 }}
       >

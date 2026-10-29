@@ -1,11 +1,12 @@
 import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import HomePage from '@/app/page';
 import { ClassMark } from '@/components/ui/ClassMark';
 import { LANDING } from '@/content/landing';
 import { SITE } from '@/content/site';
 import verdicts from '@/lib/generated/scope-verdicts.json';
+import * as verdictLib from '@/lib/scope-verdicts';
 import { scopeRunHref, verdictForExample, verdictForQuestion } from '@/lib/scope-verdicts';
 import { questionHref } from '@/lib/url-state';
 
@@ -47,6 +48,15 @@ describe('landing page', () => {
     expect(bare(href(/See RAG abstain/)!)).toBe(
       bare(questionHref(LANDING.connect.worldCup.question)),
     );
+  });
+});
+
+describe('landing page without recorded verdicts', () => {
+  it('leaves the verdict line out rather than inventing one', () => {
+    const spy = vi.spyOn(verdictLib, 'verdictForExample').mockReturnValue(undefined);
+    render(<HomePage />);
+    expect(screen.queryByText(/Recorded Scope verdict/)).toBeNull();
+    spy.mockRestore();
   });
 });
 

@@ -1,34 +1,23 @@
 {
   "python": {
     "runner": "pytest + coverage.py",
-    "tests": 117,
+    "tests": 248,
     "packages": [
       {
-        "name": "api",
-        "root": "api/src/highnet_rag",
+        "name": "core",
+        "root": "core/src/highnet_core",
         "totals": {
           "lines": {
-            "covered": 1681,
-            "total": 1681
+            "covered": 467,
+            "total": 467
           },
           "branches": {
-            "covered": 280,
-            "total": 280
+            "covered": 40,
+            "total": 40
           }
         },
-        "empty_files": 4,
+        "empty_files": 3,
         "files": [
-          {
-            "path": "app.py",
-            "lines": {
-              "covered": 147,
-              "total": 147
-            },
-            "branches": {
-              "covered": 38,
-              "total": 38
-            }
-          },
           {
             "path": "budget.py",
             "lines": {
@@ -41,10 +30,159 @@
             }
           },
           {
+            "path": "config.py",
+            "lines": {
+              "covered": 29,
+              "total": 29
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "pca.py",
+            "lines": {
+              "covered": 11,
+              "total": 11
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "pricing.py",
+            "lines": {
+              "covered": 18,
+              "total": 18
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "providers/base.py",
+            "lines": {
+              "covered": 79,
+              "total": 79
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "providers/claude.py",
+            "lines": {
+              "covered": 53,
+              "total": 53
+            },
+            "branches": {
+              "covered": 12,
+              "total": 12
+            }
+          },
+          {
+            "path": "providers/fake.py",
+            "lines": {
+              "covered": 34,
+              "total": 34
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
+            }
+          },
+          {
+            "path": "providers/voyage.py",
+            "lines": {
+              "covered": 54,
+              "total": 54
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "sse.py",
+            "lines": {
+              "covered": 36,
+              "total": 36
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "storage/base.py",
+            "lines": {
+              "covered": 12,
+              "total": 12
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "storage/state.py",
+            "lines": {
+              "covered": 43,
+              "total": 43
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "trace.py",
+            "lines": {
+              "covered": 56,
+              "total": 56
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
+            }
+          }
+        ]
+      },
+      {
+        "name": "api",
+        "root": "api/src/highnet_rag",
+        "totals": {
+          "lines": {
+            "covered": 1260,
+            "total": 1260
+          },
+          "branches": {
+            "covered": 240,
+            "total": 240
+          }
+        },
+        "empty_files": 4,
+        "files": [
+          {
+            "path": "app.py",
+            "lines": {
+              "covered": 121,
+              "total": 121
+            },
+            "branches": {
+              "covered": 30,
+              "total": 30
+            }
+          },
+          {
             "path": "cli.py",
             "lines": {
-              "covered": 94,
-              "total": 94
+              "covered": 95,
+              "total": 95
             },
             "branches": {
               "covered": 12,
@@ -54,8 +192,8 @@
           {
             "path": "config.py",
             "lines": {
-              "covered": 55,
-              "total": 55
+              "covered": 30,
+              "total": 30
             },
             "branches": {
               "covered": 0,
@@ -82,17 +220,6 @@
             "branches": {
               "covered": 14,
               "total": 14
-            }
-          },
-          {
-            "path": "ingest/pca.py",
-            "lines": {
-              "covered": 11,
-              "total": 11
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
             }
           },
           {
@@ -164,23 +291,12 @@
           {
             "path": "pipeline/search.py",
             "lines": {
-              "covered": 132,
-              "total": 132
+              "covered": 133,
+              "total": 133
             },
             "branches": {
               "covered": 20,
               "total": 20
-            }
-          },
-          {
-            "path": "pricing.py",
-            "lines": {
-              "covered": 18,
-              "total": 18
-            },
-            "branches": {
-              "covered": 6,
-              "total": 6
             }
           },
           {
@@ -195,17 +311,6 @@
             }
           },
           {
-            "path": "providers/base.py",
-            "lines": {
-              "covered": 70,
-              "total": 70
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
-            }
-          },
-          {
             "path": "providers/cache.py",
             "lines": {
               "covered": 58,
@@ -217,36 +322,14 @@
             }
           },
           {
-            "path": "providers/claude.py",
-            "lines": {
-              "covered": 49,
-              "total": 49
-            },
-            "branches": {
-              "covered": 12,
-              "total": 12
-            }
-          },
-          {
             "path": "providers/fake.py",
-            "lines": {
-              "covered": 84,
-              "total": 84
-            },
-            "branches": {
-              "covered": 18,
-              "total": 18
-            }
-          },
-          {
-            "path": "providers/voyage.py",
             "lines": {
               "covered": 54,
               "total": 54
             },
             "branches": {
-              "covered": 6,
-              "total": 6
+              "covered": 16,
+              "total": 16
             }
           },
           {
@@ -263,8 +346,8 @@
           {
             "path": "storage/base.py",
             "lines": {
-              "covered": 68,
-              "total": 68
+              "covered": 61,
+              "total": 61
             },
             "branches": {
               "covered": 0,
@@ -274,8 +357,8 @@
           {
             "path": "storage/sqlite.py",
             "lines": {
-              "covered": 138,
-              "total": 138
+              "covered": 99,
+              "total": 99
             },
             "branches": {
               "covered": 12,
@@ -285,12 +368,194 @@
           {
             "path": "trace.py",
             "lines": {
-              "covered": 57,
-              "total": 57
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "scope",
+        "root": "scope/src/highnet_scope",
+        "totals": {
+          "lines": {
+            "covered": 1049,
+            "total": 1049
+          },
+          "branches": {
+            "covered": 176,
+            "total": 176
+          }
+        },
+        "empty_files": 1,
+        "files": [
+          {
+            "path": "api.py",
+            "lines": {
+              "covered": 62,
+              "total": 62
+            },
+            "branches": {
+              "covered": 14,
+              "total": 14
+            }
+          },
+          {
+            "path": "cli.py",
+            "lines": {
+              "covered": 118,
+              "total": 118
+            },
+            "branches": {
+              "covered": 20,
+              "total": 20
+            }
+          },
+          {
+            "path": "config.py",
+            "lines": {
+              "covered": 19,
+              "total": 19
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "fusion.py",
+            "lines": {
+              "covered": 49,
+              "total": 49
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "ingest.py",
+            "lines": {
+              "covered": 79,
+              "total": 79
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "judge.py",
+            "lines": {
+              "covered": 35,
+              "total": 35
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "knn.py",
+            "lines": {
+              "covered": 28,
+              "total": 28
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "models.py",
+            "lines": {
+              "covered": 76,
+              "total": 76
+            },
+            "branches": {
+              "covered": 10,
+              "total": 10
+            }
+          },
+          {
+            "path": "pipeline.py",
+            "lines": {
+              "covered": 234,
+              "total": 234
+            },
+            "branches": {
+              "covered": 44,
+              "total": 44
+            }
+          },
+          {
+            "path": "presets.py",
+            "lines": {
+              "covered": 43,
+              "total": 43
             },
             "branches": {
               "covered": 2,
               "total": 2
+            }
+          },
+          {
+            "path": "recorder.py",
+            "lines": {
+              "covered": 50,
+              "total": 50
+            },
+            "branches": {
+              "covered": 14,
+              "total": 14
+            }
+          },
+          {
+            "path": "rules.py",
+            "lines": {
+              "covered": 59,
+              "total": 59
+            },
+            "branches": {
+              "covered": 24,
+              "total": 24
+            }
+          },
+          {
+            "path": "store.py",
+            "lines": {
+              "covered": 125,
+              "total": 125
+            },
+            "branches": {
+              "covered": 16,
+              "total": 16
+            }
+          },
+          {
+            "path": "text.py",
+            "lines": {
+              "covered": 66,
+              "total": 66
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "trace.py",
+            "lines": {
+              "covered": 6,
+              "total": 6
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
             }
           }
         ]
@@ -377,61 +642,78 @@
             }
           }
         ]
+      },
+      {
+        "name": "scope-evals",
+        "root": "evals/src/highnet_scope_evals",
+        "totals": {
+          "lines": {
+            "covered": 307,
+            "total": 307
+          },
+          "branches": {
+            "covered": 26,
+            "total": 26
+          }
+        },
+        "empty_files": 1,
+        "files": [
+          {
+            "path": "cli.py",
+            "lines": {
+              "covered": 67,
+              "total": 67
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "results.py",
+            "lines": {
+              "covered": 82,
+              "total": 82
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "runner.py",
+            "lines": {
+              "covered": 158,
+              "total": 158
+            },
+            "branches": {
+              "covered": 20,
+              "total": 20
+            }
+          }
+        ]
       }
     ]
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 133,
+    "tests": 202,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 1169,
-            "total": 1169
+            "covered": 2002,
+            "total": 2002
           },
           "branches": {
-            "covered": 1005,
-            "total": 1005
+            "covered": 1556,
+            "total": 1556
           }
         },
         "empty_files": 2,
         "files": [
-          {
-            "path": "app/corpus/page.tsx",
-            "lines": {
-              "covered": 3,
-              "total": 3
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
-            }
-          },
-          {
-            "path": "app/coverage/page.tsx",
-            "lines": {
-              "covered": 3,
-              "total": 3
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
-            }
-          },
-          {
-            "path": "app/evals/page.tsx",
-            "lines": {
-              "covered": 3,
-              "total": 3
-            },
-            "branches": {
-              "covered": 0,
-              "total": 0
-            }
-          },
           {
             "path": "app/layout.tsx",
             "lines": {
@@ -446,12 +728,12 @@
           {
             "path": "app/og.png/route.tsx",
             "lines": {
-              "covered": 15,
-              "total": 15
+              "covered": 3,
+              "total": 3
             },
             "branches": {
-              "covered": 2,
-              "total": 2
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -466,10 +748,120 @@
             }
           },
           {
+            "path": "app/rag/corpus/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/rag/coverage/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/rag/evals/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/rag/og.png/route.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/rag/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
             "path": "app/robots.ts",
             "lines": {
               "covered": 2,
               "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/scope/coverage/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/scope/dataset/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/scope/evals/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/scope/og.png/route.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "app/scope/page.tsx",
+            "lines": {
+              "covered": 3,
+              "total": 3
             },
             "branches": {
               "covered": 0,
@@ -626,8 +1018,19 @@
               "total": 21
             },
             "branches": {
-              "covered": 14,
-              "total": 14
+              "covered": 16,
+              "total": 16
+            }
+          },
+          {
+            "path": "components/landing/Landing.tsx",
+            "lines": {
+              "covered": 19,
+              "total": 19
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
             }
           },
           {
@@ -1055,8 +1458,8 @@
               "total": 3
             },
             "branches": {
-              "covered": 4,
-              "total": 4
+              "covered": 7,
+              "total": 7
             }
           },
           {
@@ -1068,6 +1471,17 @@
             "branches": {
               "covered": 30,
               "total": 30
+            }
+          },
+          {
+            "path": "components/pipeline/stages/ScopeVerdictNote.tsx",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 7,
+              "total": 7
             }
           },
           {
@@ -1090,6 +1504,347 @@
             "branches": {
               "covered": 2,
               "total": 2
+            }
+          },
+          {
+            "path": "components/scope/ClassTag.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 5,
+              "total": 5
+            }
+          },
+          {
+            "path": "components/scope/Disclosure.tsx",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "components/scope/DistributionBar.tsx",
+            "lines": {
+              "covered": 6,
+              "total": 6
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "components/scope/ExamplePicker.tsx",
+            "lines": {
+              "covered": 24,
+              "total": 24
+            },
+            "branches": {
+              "covered": 22,
+              "total": 22
+            }
+          },
+          {
+            "path": "components/scope/Principles.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
+            }
+          },
+          {
+            "path": "components/scope/RagBridge.tsx",
+            "lines": {
+              "covered": 18,
+              "total": 18
+            },
+            "branches": {
+              "covered": 16,
+              "total": 16
+            }
+          },
+          {
+            "path": "components/scope/ScopeDiagram.tsx",
+            "lines": {
+              "covered": 10,
+              "total": 10
+            },
+            "branches": {
+              "covered": 17,
+              "total": 17
+            }
+          },
+          {
+            "path": "components/scope/ScopeEditor.tsx",
+            "lines": {
+              "covered": 16,
+              "total": 16
+            },
+            "branches": {
+              "covered": 10,
+              "total": 10
+            }
+          },
+          {
+            "path": "components/scope/ScopeExplorer.tsx",
+            "lines": {
+              "covered": 57,
+              "total": 57
+            },
+            "branches": {
+              "covered": 48,
+              "total": 48
+            }
+          },
+          {
+            "path": "components/scope/ScopeFormulas.tsx",
+            "lines": {
+              "covered": 7,
+              "total": 7
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "components/scope/ScopeHero.tsx",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "components/scope/ScopeMap.tsx",
+            "lines": {
+              "covered": 20,
+              "total": 20
+            },
+            "branches": {
+              "covered": 37,
+              "total": 37
+            }
+          },
+          {
+            "path": "components/scope/ScopeResult.tsx",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
+            }
+          },
+          {
+            "path": "components/scope/ScopeSettings.tsx",
+            "lines": {
+              "covered": 18,
+              "total": 18
+            },
+            "branches": {
+              "covered": 18,
+              "total": 18
+            }
+          },
+          {
+            "path": "components/scope/ScopeStageBody.tsx",
+            "lines": {
+              "covered": 21,
+              "total": 21
+            },
+            "branches": {
+              "covered": 19,
+              "total": 19
+            }
+          },
+          {
+            "path": "components/scope/ScopeStepList.tsx",
+            "lines": {
+              "covered": 6,
+              "total": 6
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "components/scope/coverage/ScopeCoverage.tsx",
+            "lines": {
+              "covered": 25,
+              "total": 25
+            },
+            "branches": {
+              "covered": 24,
+              "total": 24
+            }
+          },
+          {
+            "path": "components/scope/dataset/DatasetBrowser.tsx",
+            "lines": {
+              "covered": 51,
+              "total": 51
+            },
+            "branches": {
+              "covered": 44,
+              "total": 44
+            }
+          },
+          {
+            "path": "components/scope/evals/ScopeEvalsReport.tsx",
+            "lines": {
+              "covered": 47,
+              "total": 47
+            },
+            "branches": {
+              "covered": 22,
+              "total": 22
+            }
+          },
+          {
+            "path": "components/scope/evals/SweepChart.tsx",
+            "lines": {
+              "covered": 10,
+              "total": 10
+            },
+            "branches": {
+              "covered": 2,
+              "total": 2
+            }
+          },
+          {
+            "path": "components/scope/steps/AuditView.tsx",
+            "lines": {
+              "covered": 8,
+              "total": 8
+            },
+            "branches": {
+              "covered": 10,
+              "total": 10
+            }
+          },
+          {
+            "path": "components/scope/steps/ContextView.tsx",
+            "lines": {
+              "covered": 10,
+              "total": 10
+            },
+            "branches": {
+              "covered": 9,
+              "total": 9
+            }
+          },
+          {
+            "path": "components/scope/steps/EmbedView.tsx",
+            "lines": {
+              "covered": 7,
+              "total": 7
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "components/scope/steps/FuseView.tsx",
+            "lines": {
+              "covered": 11,
+              "total": 11
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "components/scope/steps/JudgeView.tsx",
+            "lines": {
+              "covered": 9,
+              "total": 9
+            },
+            "branches": {
+              "covered": 18,
+              "total": 18
+            }
+          },
+          {
+            "path": "components/scope/steps/KnnView.tsx",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "components/scope/steps/MapView.tsx",
+            "lines": {
+              "covered": 18,
+              "total": 18
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "components/scope/steps/RequestView.tsx",
+            "lines": {
+              "covered": 8,
+              "total": 8
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "components/scope/steps/RespondView.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 14,
+              "total": 14
+            }
+          },
+          {
+            "path": "components/scope/steps/RulesView.tsx",
+            "lines": {
+              "covered": 8,
+              "total": 8
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "components/scope/steps/ThresholdsView.tsx",
+            "lines": {
+              "covered": 9,
+              "total": 9
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
             }
           },
           {
@@ -1117,8 +1872,8 @@
           {
             "path": "components/site/SiteFooter.tsx",
             "lines": {
-              "covered": 6,
-              "total": 6
+              "covered": 7,
+              "total": 7
             },
             "branches": {
               "covered": 0,
@@ -1128,12 +1883,12 @@
           {
             "path": "components/site/SiteHeader.tsx",
             "lines": {
-              "covered": 3,
-              "total": 3
+              "covered": 8,
+              "total": 8
             },
             "branches": {
-              "covered": 6,
-              "total": 6
+              "covered": 15,
+              "total": 15
             }
           },
           {
@@ -1156,6 +1911,17 @@
             "branches": {
               "covered": 2,
               "total": 2
+            }
+          },
+          {
+            "path": "components/ui/ClassMark.tsx",
+            "lines": {
+              "covered": 4,
+              "total": 4
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
             }
           },
           {
@@ -1258,6 +2024,61 @@
             }
           },
           {
+            "path": "content/landing.ts",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "content/scope-stages.ts",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "content/scope-verdict.ts",
+            "lines": {
+              "covered": 2,
+              "total": 2
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "content/scope.ts",
+            "lines": {
+              "covered": 68,
+              "total": 68
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "content/site.ts",
+            "lines": {
+              "covered": 5,
+              "total": 5
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
             "path": "content/stages.ts",
             "lines": {
               "covered": 3,
@@ -1341,8 +2162,8 @@
               "total": 8
             },
             "branches": {
-              "covered": 12,
-              "total": 12
+              "covered": 13,
+              "total": 13
             }
           },
           {
@@ -1357,14 +2178,135 @@
             }
           },
           {
-            "path": "lib/site.ts",
+            "path": "lib/scope-verdicts.ts",
             "lines": {
               "covered": 7,
               "total": 7
             },
             "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "lib/scope/api.ts",
+            "lines": {
+              "covered": 16,
+              "total": 16
+            },
+            "branches": {
               "covered": 6,
               "total": 6
+            }
+          },
+          {
+            "path": "lib/scope/evals.ts",
+            "lines": {
+              "covered": 7,
+              "total": 7
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "lib/scope/map.ts",
+            "lines": {
+              "covered": 58,
+              "total": 58
+            },
+            "branches": {
+              "covered": 18,
+              "total": 18
+            }
+          },
+          {
+            "path": "lib/scope/steps.ts",
+            "lines": {
+              "covered": 9,
+              "total": 9
+            },
+            "branches": {
+              "covered": 8,
+              "total": 8
+            }
+          },
+          {
+            "path": "lib/scope/summary.ts",
+            "lines": {
+              "covered": 25,
+              "total": 25
+            },
+            "branches": {
+              "covered": 21,
+              "total": 21
+            }
+          },
+          {
+            "path": "lib/scope/types.ts",
+            "lines": {
+              "covered": 3,
+              "total": 3
+            },
+            "branches": {
+              "covered": 0,
+              "total": 0
+            }
+          },
+          {
+            "path": "lib/scope/url-state.ts",
+            "lines": {
+              "covered": 62,
+              "total": 62
+            },
+            "branches": {
+              "covered": 51,
+              "total": 51
+            }
+          },
+          {
+            "path": "lib/scope/use-dataset.ts",
+            "lines": {
+              "covered": 16,
+              "total": 16
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "lib/scope/use-scope-stream.ts",
+            "lines": {
+              "covered": 34,
+              "total": 34
+            },
+            "branches": {
+              "covered": 4,
+              "total": 4
+            }
+          },
+          {
+            "path": "lib/share-card.tsx",
+            "lines": {
+              "covered": 14,
+              "total": 14
+            },
+            "branches": {
+              "covered": 6,
+              "total": 6
+            }
+          },
+          {
+            "path": "lib/site.ts",
+            "lines": {
+              "covered": 11,
+              "total": 11
+            },
+            "branches": {
+              "covered": 10,
+              "total": 10
             }
           },
           {
@@ -1403,8 +2345,8 @@
           {
             "path": "lib/url-state.ts",
             "lines": {
-              "covered": 24,
-              "total": 24
+              "covered": 25,
+              "total": 25
             },
             "branches": {
               "covered": 24,

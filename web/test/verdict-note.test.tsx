@@ -24,9 +24,9 @@ describe('the Scope verdict in RAG’s first step', () => {
     expect(screen.getByRole('heading', { name: SCOPE_VERDICT.title })).toBeInTheDocument();
     expect(screen.getByText(verdict.confidence.toFixed(2))).toBeInTheDocument();
     expect(screen.getByText(SCOPE_VERDICT.inScopeNotInCorpus)).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: SCOPE_VERDICT.link }).getAttribute('href'),
-    ).toContain('example=rag-normandy');
+    expect(screen.getByRole('link', { name: SCOPE_VERDICT.link }).getAttribute('href')).toContain(
+      'example=rag-normandy',
+    );
   });
 
   it('says when the judge’s reply failed validation, and when there is no verdict', () => {

@@ -454,7 +454,9 @@ describe('site chrome and primitives', () => {
     );
     expect(html).toContain('font-recursive');
     expect(html).toContain('highnet-rag-theme');
-    expect(metadata.title).toMatchObject({ default: expect.stringContaining('Highnet Safe LLM Tools') });
+    expect(metadata.title).toMatchObject({
+      default: expect.stringContaining('Highnet Safe LLM Tools'),
+    });
     // Canonical and share-card addresses resolve against the public site address.
     expect(String(metadata.metadataBase)).toBe(`${SITE_URL}/`);
     expect(viewport.themeColor).toHaveLength(2);

@@ -21,7 +21,9 @@ export const shareImage = (product?: ProductKey) => ({
   url: product ? `/${product}/og.png` : '/og.png',
   width: 1200,
   height: 630,
-  alt: product ? `${SITE.name}: ${SITE.products[product].tagline}` : `${SITE.name}: ${SITE.tagline}`,
+  alt: product
+    ? `${SITE.name}: ${SITE.products[product].tagline}`
+    : `${SITE.name}: ${SITE.tagline}`,
 });
 
 // Metadata for one page: its title and description, its canonical address, and the same words

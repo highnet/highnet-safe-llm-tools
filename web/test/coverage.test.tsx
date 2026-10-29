@@ -86,7 +86,9 @@ describe('coverage page', () => {
   it('renders the committed report as a page', () => {
     render(<CoveragePage />);
     expect(
-      within(screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) })).getByRole('link', {
+      within(
+        screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) }),
+      ).getByRole('link', {
         name: 'Coverage',
       }),
     ).toHaveAttribute('aria-current', 'page');

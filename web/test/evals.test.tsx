@@ -8,7 +8,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import EvalsPage from '@/app/rag/evals/page';
 import { EvalsReport } from '@/components/evals/EvalsReport';
 import { AnswerResult } from '@/components/pipeline/AnswerResult';
-import { COPY } from '@/content/copy';
 import { SITE } from '@/content/site';
 import { EVALS } from '@/content/evals';
 import {
@@ -115,7 +114,9 @@ describe('evals page', () => {
     render(<EvalsPage />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(EVALS.title);
     expect(
-      within(screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) })).getByRole('link', {
+      within(
+        screen.getByRole('navigation', { name: SITE.navLabel(SITE.products.rag.name) }),
+      ).getByRole('link', {
         name: 'Evals',
       }),
     ).toHaveAttribute('aria-current', 'page');
