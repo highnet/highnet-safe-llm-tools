@@ -730,8 +730,8 @@
             "total": 2098
           },
           "branches": {
-            "covered": 1676,
-            "total": 1676
+            "covered": 1678,
+            "total": 1678
           }
         },
         "empty_files": 2,
@@ -1619,12 +1619,12 @@
           {
             "path": "components/scope/ScopeExplorer.tsx",
             "lines": {
-              "covered": 68,
-              "total": 68
+              "covered": 70,
+              "total": 70
             },
             "branches": {
-              "covered": 61,
-              "total": 61
+              "covered": 67,
+              "total": 67
             }
           },
           {
@@ -2312,12 +2312,12 @@
           {
             "path": "lib/scope/url-state.ts",
             "lines": {
-              "covered": 65,
-              "total": 65
+              "covered": 63,
+              "total": 63
             },
             "branches": {
-              "covered": 59,
-              "total": 59
+              "covered": 55,
+              "total": 55
             }
           },
           {
