@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata(
 const RagPage = () => {
   return (
     <>
-      <SiteHeader product="rag" current="pipeline" hideTagline />
+      <SiteHeader product="rag" current="pipeline" />
       <main className="mx-auto w-full max-w-6xl px-4 pt-4 md:px-8 md:pt-12">
         <PipelineExplorer />
       </main>

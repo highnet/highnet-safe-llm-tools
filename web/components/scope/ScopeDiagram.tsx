@@ -104,7 +104,7 @@ const ScopeDiagram = ({ statusOf, action, className }: ScopeDiagramProps) => {
                   action={a}
                   size="sm"
                   className={cn(
-                    action && a !== action && 'text-muted-foreground opacity-60',
+                    action && a !== action && 'text-muted-foreground',
                     a === action && 'font-semibold',
                   )}
                 />
