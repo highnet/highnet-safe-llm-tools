@@ -19,6 +19,7 @@ export type Stage =
   | 'map'
   | 'knn'
   | 'judge'
+  | 'decide'
   | 'fuse'
   | 'thresholds'
   | 'respond'

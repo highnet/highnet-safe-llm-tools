@@ -4,13 +4,15 @@
   middle band: a brief answer);
 - knn: the nearest-neighbour vote, leave-one-out (a prompt never votes for itself);
 - judge: Claude Haiku with each preset's rubric, the real calls (cached, so a rerun is free);
-- fused: the three combined with the default weights and thresholds, as on the pipeline page.
+- decide: the second judge, a decision model (Jev) with the same definition (cached likewise);
+- fused: the four combined with the default weights and thresholds, as on the pipeline page.
 
 The action each method chooses is scored against the label: answer = in, answer briefly =
 adjacent, redirect = out, block = injection. Cost and latency come from this run's own calls.
 """
 
 import asyncio
+import json
 import random
 import statistics
 import time
@@ -19,6 +21,12 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
+from highnet_scope.decider import (
+    InvalidDecisionError,
+    decision_distribution,
+    decision_questions,
+    decision_state,
+)
 from highnet_scope.fusion import ACTION_LABEL, Fused, Signal, Thresholds, Weights, decide, fuse
 from highnet_scope.judge import (
     JUDGE_MAX_TOKENS,
@@ -45,7 +53,7 @@ from highnet_scope_evals.results import (
     SweepPoint,
 )
 
-METHODS: tuple[str, ...] = ("rules", "knn", "judge", "fused")
+METHODS: tuple[str, ...] = ("rules", "knn", "judge", "decide", "fused")
 SWEEP = [round(i * 0.05, 2) for i in range(21)]
 LATENCY_SAMPLE = 24
 Dist = dict[Label, float]
@@ -60,6 +68,9 @@ class RowSignals:
     judge: Dist | None = None
     judge_failed: bool = False
     judge_reason: str = ""
+    decide: Dist | None = None
+    decide_failed: bool = False
+    decide_reason: str = ""
     rules_ms: float = 0.0
 
 
@@ -68,6 +79,8 @@ class Collected:
     rows: list[RowSignals] = field(default_factory=list)
     judge_ms: list[int] = field(default_factory=list)
     judge_usd: list[float] = field(default_factory=list)
+    decide_ms: list[int] = field(default_factory=list)
+    decide_usd: list[float] = field(default_factory=list)
     embed_ms: list[int] = field(default_factory=list)
     embed_usd_per_message: float = 0.0
     knn_ms: list[float] = field(default_factory=list)
@@ -79,6 +92,7 @@ def method_signals(method: str, row: RowSignals) -> dict[Signal, Dist | None]:
         "rules": row.rules if method in ("rules", "fused") else None,
         "knn": row.knn if method in ("knn", "fused") else None,
         "judge": row.judge if method in ("judge", "fused") else None,
+        "decide": row.decide if method in ("decide", "fused") else None,
     }
 
 
@@ -156,6 +170,7 @@ class ScopeEvaluator:
             matrix, prompts = self.store.prompts(preset_id)
             labels: list[Label] = [p.label for p in prompts]
             system = judge_system(preset)
+            questions = decision_questions(preset)
             rows = [RowSignals(p) for p in prompts][: limit or None]
             for i, row in enumerate(rows):
                 started = time.perf_counter()
@@ -187,7 +202,23 @@ class ScopeEvaluator:
                     row.judge = verdict_distribution(verdict)
                     row.judge_reason = verdict.reason
 
-            await asyncio.gather(*(judge(r) for r in rows))
+            async def second(row: RowSignals, questions: dict[str, Any] = questions) -> None:
+                async with semaphore:
+                    state = decision_state(row.prompt.text, row.prompt.context)
+                    try:
+                        call = await self.models.decide(state, questions)
+                    except Exception as exc:  # a failed call drops the second judge for this row
+                        row.decide_failed, row.decide_reason = True, f"call failed: {exc}"
+                        return
+                    out.calls.append(call)
+                    out.decide_ms.append(call.ms)
+                    out.decide_usd.append(call.cost_usd)
+                    try:
+                        row.decide = decision_distribution(json.loads(call.response)["answers"])
+                    except InvalidDecisionError as exc:
+                        row.decide_failed, row.decide_reason = True, f"invalid: {exc}"[:200]
+
+            await asyncio.gather(*(judge(r) for r in rows), *(second(r) for r in rows))
             out.rows += rows
             self.log(f"{preset_id}: {len(rows)} prompts")
         # Embedding latency for one message: single calls on a fixed sample of prompts.
@@ -203,6 +234,8 @@ class ScopeEvaluator:
         misclassified: list[Misclassified] = []
         judge_ms = statistics.median(c.judge_ms) if c.judge_ms else 0.0
         judge_usd = statistics.mean(c.judge_usd) if c.judge_usd else 0.0
+        decide_ms = statistics.median(c.decide_ms) if c.decide_ms else 0.0
+        decide_usd = statistics.mean(c.decide_usd) if c.decide_usd else 0.0
         embed_ms = statistics.median(c.embed_ms) if c.embed_ms else 0.0
         rules_ms = statistics.median(r.rules_ms for r in c.rows)
         knn_ms = statistics.median(c.knn_ms) if c.knn_ms else 0.0
@@ -222,11 +255,17 @@ class ScopeEvaluator:
                 calls=len(c.judge_ms),
                 note="one Claude Haiku call",
             ),
+            "decide": Cost(
+                ms_median=round(decide_ms, 1),
+                usd_mean=round(decide_usd, 8),
+                calls=len(c.decide_ms),
+                note="one decision model call (Jev)",
+            ),
             "fused": Cost(
-                ms_median=round(rules_ms + embed_ms + knn_ms + judge_ms, 1),
-                usd_mean=round(c.embed_usd_per_message + judge_usd, 6),
-                calls=len(c.judge_ms) + len(c.embed_ms),
-                note="all three, one after another",
+                ms_median=round(rules_ms + embed_ms + knn_ms + judge_ms + decide_ms, 1),
+                usd_mean=round(c.embed_usd_per_message + judge_usd + decide_usd, 6),
+                calls=len(c.judge_ms) + len(c.decide_ms) + len(c.embed_ms),
+                note="all four, one after another",
             ),
         }
         for method in METHODS:
@@ -279,7 +318,13 @@ class ScopeEvaluator:
                         for row in c.rows
                         if all(v is None for v in method_signals(method, row).values())
                     ),
-                    failed=sum(row.judge_failed for row in c.rows) if method == "judge" else 0,
+                    failed=(
+                        sum(row.judge_failed for row in c.rows)
+                        if method == "judge"
+                        else sum(row.decide_failed for row in c.rows)
+                        if method == "decide"
+                        else 0
+                    ),
                 )
             )
         self.details = [
@@ -289,6 +334,7 @@ class ScopeEvaluator:
                 "label": row.prompt.label,
                 **{m: predict(m, row, self.weights, self.thresholds) for m in METHODS},
                 "judge_reason": row.judge_reason,
+                "decide_reason": row.decide_reason,
             }
             for row in c.rows
         ]
@@ -327,6 +373,7 @@ class ScopeEvaluator:
                 build_id=meta["build_id"],
                 embed_model=meta["embed_model"],
                 judge_model=self.models.text_model,
+                decide_model=self.models.decide_model,
                 prompts=len(collected.rows),
                 k=self.k,
                 weights=self.weights.model_dump(),
