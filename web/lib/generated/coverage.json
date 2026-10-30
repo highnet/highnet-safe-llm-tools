@@ -719,19 +719,19 @@
   },
   "web": {
     "runner": "Vitest + V8",
-    "tests": 238,
+    "tests": 241,
     "packages": [
       {
         "name": "web",
         "root": "web",
         "totals": {
           "lines": {
-            "covered": 2414,
-            "total": 2414
+            "covered": 2476,
+            "total": 2476
           },
           "branches": {
-            "covered": 1881,
-            "total": 1881
+            "covered": 1934,
+            "total": 1934
           }
         },
         "empty_files": 2,
@@ -1696,12 +1696,12 @@
           {
             "path": "components/scope/ScopeStageBody.tsx",
             "lines": {
-              "covered": 32,
-              "total": 32
+              "covered": 33,
+              "total": 33
             },
             "branches": {
-              "covered": 32,
-              "total": 32
+              "covered": 33,
+              "total": 33
             }
           },
           {
@@ -1861,12 +1861,12 @@
           {
             "path": "components/scope/steps/RespondView.tsx",
             "lines": {
-              "covered": 4,
-              "total": 4
+              "covered": 7,
+              "total": 7
             },
             "branches": {
-              "covered": 14,
-              "total": 14
+              "covered": 16,
+              "total": 16
             }
           },
           {
@@ -2032,6 +2032,17 @@
             "branches": {
               "covered": 1,
               "total": 1
+            }
+          },
+          {
+            "path": "components/ui/Markdown.tsx",
+            "lines": {
+              "covered": 16,
+              "total": 16
+            },
+            "branches": {
+              "covered": 14,
+              "total": 14
             }
           },
           {
@@ -2263,6 +2274,17 @@
             "branches": {
               "covered": 25,
               "total": 25
+            }
+          },
+          {
+            "path": "lib/markdown.ts",
+            "lines": {
+              "covered": 42,
+              "total": 42
+            },
+            "branches": {
+              "covered": 36,
+              "total": 36
             }
           },
           {

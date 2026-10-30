@@ -35,7 +35,7 @@ const ScopeSimple = ({ events, runStatus, onShowSteps }: ScopeSimpleProps) => {
 
   return (
     <div className="space-y-2">
-      <div className="min-w-0 space-y-3 rounded-md border border-foreground/70 bg-card px-4 py-4 md:px-6 md:py-5">
+      <div className="max-w-3xl min-w-0 space-y-3 rounded-md border border-foreground/70 bg-card px-4 py-4 md:px-6 md:py-5">
         <div className="space-y-0.5">
           <Typography className="line-clamp-2 break-words">
             <span className="sr-only">{S.message}: </span>

@@ -24,7 +24,7 @@ import { JudgeView } from './steps/JudgeView';
 import { KnnFigure, KnnView } from './steps/KnnView';
 import { MapFigure, MapView } from './steps/MapView';
 import { RequestView } from './steps/RequestView';
-import { RespondView } from './steps/RespondView';
+import { RespondFigure, RespondView } from './steps/RespondView';
 import { RulesFigure, RulesView } from './steps/RulesView';
 import { ThresholdsFigure, ThresholdsView } from './steps/ThresholdsView';
 
@@ -60,6 +60,8 @@ const ScopeStageFigure = ({ event, context }: ScopeStageBodyProps) => {
       return <FuseFigure data={data as FuseData} />;
     case 'thresholds':
       return <ThresholdsFigure data={data as ThresholdsData} />;
+    case 'respond':
+      return <RespondFigure data={data as RespondData} message={context.message} />;
     default:
       return null;
   }
@@ -108,7 +110,7 @@ const ScopeStageBody = ({ event, context }: ScopeStageBodyProps) => {
     case 'thresholds':
       return <ThresholdsView data={data as ThresholdsData} />;
     case 'respond':
-      return <RespondView data={data as RespondData} message={context.message} />;
+      return <RespondView data={data as RespondData} />;
     default:
       return <AuditView data={data as AuditData} />;
   }
